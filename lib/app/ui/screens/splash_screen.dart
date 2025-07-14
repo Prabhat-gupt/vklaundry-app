@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (isLoggedIn) {
       Get.offAllNamed(AppRoutes.HOME);
     } else {
-      Get.offAllNamed(AppRoutes.LOGIN);
+      Get.offAllNamed(AppRoutes.GETSTARTED);
     }
   }
 
