@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laundry_app/app/ui/screens/category.dart';
 import 'package:laundry_app/app/ui/screens/home.dart';
+import 'package:laundry_app/app/ui/screens/setting_screen.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
@@ -19,7 +20,7 @@ class _RootPageState extends State<RootPage> {
     HomeScreen(),
     CategoryScreen(),
     HomeScreen(),
-    HomeScreen(),
+    SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -49,7 +50,7 @@ class _RootPageState extends State<RootPage> {
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home',backgroundColor: Colors.white),
             BottomNavigationBarItem(icon: Icon(Icons.category_outlined), label: 'Category',backgroundColor: Colors.white),
             BottomNavigationBarItem(icon: Icon(Icons.school), label: 'School',backgroundColor: Colors.white),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Person',backgroundColor: Colors.white),
+            BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Setting',backgroundColor: Colors.white),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Color.fromRGBO(35, 42, 69, 1),

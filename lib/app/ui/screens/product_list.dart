@@ -135,8 +135,7 @@ class ProductListScreen extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       Text("All shirts (eg. cotton, denim)",
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.grey)),
+                          style: TextStyle(fontSize: 12, color: Colors.grey)),
                       const SizedBox(height: 4),
                       Row(
                         children: [
@@ -147,8 +146,7 @@ class ProductListScreen extends StatelessWidget {
                                   fontSize: 12)),
                           const SizedBox(width: 6),
                           Text("\$${item['price']}",
-                              style:
-                                  TextStyle(fontWeight: FontWeight.bold)),
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
                       Text(item['discount'],
@@ -201,20 +199,23 @@ class ProductListScreen extends StatelessWidget {
           color: Colors.indigo,
           borderRadius: BorderRadius.circular(32),
         ),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.shopping_cart, color: Colors.white),
-              SizedBox(width: 8),
-              Text("View Cart", style: TextStyle(color: Colors.white)),
-              SizedBox(width: 8),
-              CircleAvatar(
-                radius: 10,
-                backgroundColor: Colors.white,
-                child: Text("4", style: TextStyle(fontSize: 12)),
-              ),
-            ],
+        child: InkWell(
+          onTap: () => Navigator.pushNamed(context, '/checkout_page'),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shopping_cart, color: Colors.white),
+                SizedBox(width: 8),
+                Text("View Cart", style: TextStyle(color: Colors.white)),
+                SizedBox(width: 8),
+                CircleAvatar(
+                  radius: 10,
+                  backgroundColor: Colors.white,
+                  child: Text("4", style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
           ),
         ),
       ),

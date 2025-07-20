@@ -9,8 +9,14 @@ abstract class AppRoutes {
   static const ROOT = '/root';
   static const HOME = '/home';
   static const CATEGORY = '/category_screen';
-  static const PROFILE = '/profile';
-  static const ORDERS = '/orders';
+  static const CHECKOUTPAGE = '/checkout_page';
+  static const PROFILE = '/profile_screen';
+  static const SETTING = '/setting_screen';
+  static const ORDERS = '/order_screen';
+  static const ORDERDETAILS = '/order_details';
+  static const ADDRESS = '/address_screen';
+  static const ADDADDRESS = '/add_address';
+  static const SUCCESS = '/success_screen';
   static const SERVICES = '/services';
   static const NOTIFICATIONS = '/notifications';
   static const TRACKING = '/tracking';

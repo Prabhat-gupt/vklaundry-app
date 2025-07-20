@@ -1,12 +1,19 @@
 // app_pages.dart
 import 'package:get/get.dart';
+import 'package:laundry_app/app/ui/screens/add_address.dart';
+import 'package:laundry_app/app/ui/screens/address_screen.dart';
 import 'package:laundry_app/app/ui/screens/category.dart';
+import 'package:laundry_app/app/ui/screens/checkout.dart';
 import 'package:laundry_app/app/ui/screens/get_started.dart';
 import 'package:laundry_app/app/ui/screens/home.dart';
 import 'package:laundry_app/app/ui/screens/login.dart';
-import 'package:laundry_app/app/ui/screens/order.dart';
+import 'package:laundry_app/app/ui/screens/order_details.dart';
+import 'package:laundry_app/app/ui/screens/order_screen.dart';
+import 'package:laundry_app/app/ui/screens/order_success.dart';
 import 'package:laundry_app/app/ui/screens/otp_screen.dart';
+import 'package:laundry_app/app/ui/screens/profile_screen.dart';
 import 'package:laundry_app/app/ui/screens/root.dart';
+import 'package:laundry_app/app/ui/screens/setting_screen.dart';
 import 'package:laundry_app/app/ui/screens/splash_screen.dart';
 
 part 'app_routes.dart';
@@ -24,12 +31,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.HOME,
       page: () => const HomeScreen(),
-      // binding: HomeBinding(),
-    ),
-
-    GetPage(
-      name: AppRoutes.ORDERS,
-      page: () => const OrderScreen(),
       // binding: HomeBinding(),
     ),
     GetPage(
@@ -55,6 +56,46 @@ class AppPages {
     GetPage(
       name: AppRoutes.CATEGORY,
       page: () => const CategoryScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.CHECKOUTPAGE,
+      page: () => const CheckoutPage(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SETTING,
+      page: () => const SettingsScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PROFILE,
+      page: () => const ProfileScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ORDERS,
+      page: () => const OrdersScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ORDERDETAILS,
+      page: () => const OrderDetailsPage(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADDRESS,
+      page: () => const AddressScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADDADDRESS,
+      page: () => const AddAddressScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SUCCESS,
+      page: () => const OrderSuccessPage(),
       // binding: HomeBinding(),
     ),
     // Add more pages here
