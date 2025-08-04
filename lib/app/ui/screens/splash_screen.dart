@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,11 +21,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkLoginStatus() async {
     await Future.delayed(const Duration(seconds: 2)); // simulate splash delay
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    if (isLoggedIn) {
-      Get.offAllNamed(AppRoutes.HOME);
+
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session != null && session.user != null) {
+      // User is already logged in
+      Get.offAllNamed(AppRoutes.ROOT);
     } else {
+      // No user session
       Get.offAllNamed(AppRoutes.GETSTARTED);
     }
   }

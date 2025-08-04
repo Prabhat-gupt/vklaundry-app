@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
+import 'package:laundry_app/app/controllers/profile_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  ProfileScreen({super.key});
+
+  final controller = Get.find<ProfileController>();
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController nameController =
-        TextEditingController(text: "John Wick");
-    final TextEditingController phoneController =
-        TextEditingController(text: "9893403043");
-    final TextEditingController emailController = TextEditingController();
+    final nameController = TextEditingController(text: controller.name.value);
+    final phoneController = TextEditingController(text: controller.phone.value);
+    final emailController = TextEditingController(text: controller.email.value);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.white,
-        shadowColor: Color.fromARGB(255, 158, 158, 158),
+        shadowColor: const Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -36,8 +38,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const CircleAvatar(
                   radius: 55,
-                  backgroundImage: AssetImage(
-                      "assets/icons/profile_pic.png"),
+                  backgroundImage: AssetImage("assets/icons/profile_pic.png"),
                 ),
                 Positioned(
                   right: 0,
@@ -73,8 +74,12 @@ class ProfileScreen extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  // Submit logic
+                onPressed: () async {
+                  // await controller.updateProfile(
+                  //   nameController.text.trim(),
+                  //   emailController.text.trim(),
+                  //   phoneController.text.trim(),
+                  // );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
@@ -95,7 +100,10 @@ class ProfileScreen extends StatelessWidget {
             const Align(
               alignment: Alignment.centerLeft,
               child: Text("Delete Account",
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold,fontSize: 20)),
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20)),
             ),
             const SizedBox(height: 4),
             const Align(

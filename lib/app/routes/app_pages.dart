@@ -14,6 +14,7 @@ import 'package:laundry_app/app/ui/screens/otp_screen.dart';
 import 'package:laundry_app/app/ui/screens/profile_screen.dart';
 import 'package:laundry_app/app/ui/screens/root.dart';
 import 'package:laundry_app/app/ui/screens/setting_screen.dart';
+import 'package:laundry_app/app/ui/screens/setup_page.dart';
 import 'package:laundry_app/app/ui/screens/splash_screen.dart';
 
 part 'app_routes.dart';
@@ -30,7 +31,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.HOME,
-      page: () => const HomeScreen(),
+      page: () => HomeScreen(),
       // binding: HomeBinding(),
     ),
     GetPage(
@@ -49,6 +50,11 @@ class AppPages {
       // binding: HomeBinding(),
     ),
     GetPage(
+      name: AppRoutes.SETUPSCREEN,
+      page: () => const SetupScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
       name: AppRoutes.ROOT,
       page: () => const RootPage(),
       // binding: HomeBinding(),
@@ -60,7 +66,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.CHECKOUTPAGE,
-      page: () => const CheckoutPage(),
+      page: () =>  CheckoutPage(),
       // binding: HomeBinding(),
     ),
     GetPage(
@@ -70,7 +76,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.PROFILE,
-      page: () => const ProfileScreen(),
+      page: () => ProfileScreen(),
       // binding: HomeBinding(),
     ),
     GetPage(

@@ -6,6 +6,7 @@ abstract class AppRoutes {
   static const GETSTARTED = '/get_started';
   static const LOGIN = '/login';
   static const OTPSCREEN = '/otp_screen';
+  static const SETUPSCREEN = '/setup_screen';
   static const ROOT = '/root';
   static const HOME = '/home';
   static const CATEGORY = '/category_screen';

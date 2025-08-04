@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:laundry_app/app/routes/app_pages.dart'; // Make sure this import has your root route
 
 class OrderSuccessPage extends StatelessWidget {
   const OrderSuccessPage({super.key});
@@ -37,8 +38,7 @@ class OrderSuccessPage extends StatelessWidget {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.back();
-                    Get.back();
+                    Get.offAllNamed(AppRoutes.ROOT);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1B1C39),
