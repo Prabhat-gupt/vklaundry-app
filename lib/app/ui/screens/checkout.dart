@@ -83,7 +83,7 @@ class CheckoutPage extends StatelessWidget {
                           Text(item['product']['name'] ?? '',
                               style:
                                   const TextStyle(fontWeight: FontWeight.w600)),
-                          Text("Service: ${item['service']}",
+                          Text("Service: ${item['service_name']}",
                               style: const TextStyle(
                                   fontSize: 12, color: Colors.grey)),
                         ],
@@ -112,8 +112,7 @@ class CheckoutPage extends StatelessWidget {
                           Text("${item['quantity'] ?? ''}",
                               style: const TextStyle(color: Colors.white)),
                           const SizedBox(width: 8),
-                          const Icon(Icons.add,
-                              size: 16, color: Colors.white),
+                          const Icon(Icons.add, size: 16, color: Colors.white),
                         ],
                       ),
                     ),
@@ -249,15 +248,20 @@ class CheckoutPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    await orderController.placeOrder(
-                      selectedItems: controller.getSelectedCartItems(),
-                      totalAmount: grandTotal,
-                      paymentMethod: 'Google Pay UPI',
-                      paymentStatus: 'paid',
-                      userId: userId,
-                      addressId: 1,
+                    // final orderId = await orderController.placeOrder(
+                    //   selectedItems: controller.getSelectedCartItems(),
+                    //   totalAmount: grandTotal,
+                    //   paymentMethod: 'Google Pay UPI',
+                    //   paymentStatus: 'paid',
+                    //   userId: userId,
+                    //   addressId: 1,
+                    // );
+                    Get.toNamed(
+                      AppRoutes.SUCCESS,
+                      arguments: {
+                        'order_id': 58,
+                      },
                     );
-                    Get.toNamed(AppRoutes.SUCCESS);
                   } catch (e) {
                     Get.snackbar("Error", "Failed to place order: $e",
                         backgroundColor: Colors.red, colorText: Colors.white);

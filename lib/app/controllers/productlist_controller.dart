@@ -1,5 +1,3 @@
-/// MODIFIED CONTROLLER (ProductListController)
-
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -12,11 +10,13 @@ class ProductListController extends GetxController {
   var selectedCategoryId = RxnInt();
   var cartQuantities = <String, int>{}.obs; // key = "service_productId"
   var categories = <Map<String, dynamic>>[].obs;
+  var serviceNamesCache = <String, String>{}.obs; // Caching service names
 
   @override
   void onInit() {
     super.onInit();
     loadCategoriesFromSupabase();
+    preloadServiceNames();
   }
 
   void setService(String service) {
@@ -66,10 +66,11 @@ class ProductListController extends GetxController {
           'rating': item['rating'] ?? 0.0,
           'reviews': item['reviews'] ?? 0,
           'category_id': item['category_id'],
+          'service_id': serviceId,
         };
       }).toList();
 
-      products.value = enrichedProducts;
+      products.addAll(enrichedProducts);
       filteredProducts.value = enrichedProducts;
     } catch (e) {
       print('Error loading products for service $serviceId: $e');
@@ -86,18 +87,16 @@ class ProductListController extends GetxController {
         : originalList.where((product) => product['category_id'] == categoryId).toList();
   }
 
-  void addToCart(int index) {
-    final product = filteredProducts[index];
-    final service = currentService.value;
+  void addToCart(Map<String, dynamic> product) {
+    final service = product['service_id'].toString();
     final productId = product['id'];
     final key = '${service}_$productId';
 
     cartQuantities[key] = (cartQuantities[key] ?? 0) + 1;
   }
 
-  void removeFromCart(int index) {
-    final product = filteredProducts[index];
-    final service = currentService.value;
+  void removeFromCart(Map<String, dynamic> product) {
+    final service = product['service_id'].toString();
     final productId = product['id'];
     final key = '${service}_$productId';
 
@@ -111,24 +110,36 @@ class ProductListController extends GetxController {
 
   List<Map<String, dynamic>> getSelectedCartItems() {
     final List<Map<String, dynamic>> items = [];
-
     cartQuantities.forEach((key, quantity) {
       final parts = key.split('_');
       if (parts.length < 2) return;
       final service = parts[0];
       final productId = int.tryParse(parts[1]);
 
-      final product = products.firstWhereOrNull((item) => item['id'] == productId);
+      final product = products.firstWhereOrNull(
+          (item) => item['id'] == productId && item['service_id'].toString() == service);
       if (product != null) {
+        final serviceName = serviceNamesCache[service] ?? 'Loading...';
         items.add({
           'product': product,
           'quantity': quantity,
           'service': service,
+          'service_name': serviceName
         });
       }
     });
-
     return items;
+  }
+
+  Future<void> preloadServiceNames() async {
+    try {
+      final response = await supabase.from('services').select('id, name');
+      for (final row in response) {
+        serviceNamesCache[row['id'].toString()] = row['name'] ?? 'Unknown';
+      }
+    } catch (e) {
+      print('Error preloading service names: $e');
+    }
   }
 
   int getTotalCartItems() => cartQuantities.values.fold(0, (a, b) => a + b);

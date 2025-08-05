@@ -133,9 +133,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     ),
                     itemBuilder: (context, index) {
                       final item = controller.filteredProducts[index];
-                      final service = controller.currentService.value;
+                      final serviceId = item['service_id'] ?? controller.currentService.value;
                       final productId = item['id'];
-                      final key = '${service}_$productId';
+                      final key = '${serviceId}_$productId';
                       return LayoutBuilder(
                         builder: (context, constraints) {
                           return Container(
@@ -238,7 +238,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                             children: [
                                               InkWell(
                                                 onTap: () =>
-                                                    controller.removeFromCart(index),
+                                                    controller.removeFromCart(item),
                                                 child: const Icon(Icons.remove,
                                                     size: 16),
                                               ),
@@ -247,7 +247,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                               const SizedBox(width: 18),
                                               InkWell(
                                                 onTap: () =>
-                                                    controller.addToCart(index),
+                                                    controller.addToCart(item),
                                                 child: const Icon(Icons.add,
                                                     size: 16),
                                               ),
@@ -256,7 +256,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                         )
                                       : ElevatedButton(
                                           onPressed: () =>
-                                              controller.addToCart(index),
+                                              controller.addToCart(item),
                                           child: const Text('Add'),
                                         );
                                 })

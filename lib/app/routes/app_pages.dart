@@ -10,6 +10,7 @@ import 'package:laundry_app/app/ui/screens/login.dart';
 import 'package:laundry_app/app/ui/screens/order_details.dart';
 import 'package:laundry_app/app/ui/screens/order_screen.dart';
 import 'package:laundry_app/app/ui/screens/order_success.dart';
+import 'package:laundry_app/app/ui/screens/order_track.dart';
 import 'package:laundry_app/app/ui/screens/otp_screen.dart';
 import 'package:laundry_app/app/ui/screens/profile_screen.dart';
 import 'package:laundry_app/app/ui/screens/root.dart';
@@ -87,6 +88,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.ORDERDETAILS,
       page: () => const OrderDetailsPage(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.TRACKING,
+      page: () => TrackOrderPage(),
       // binding: HomeBinding(),
     ),
     GetPage(

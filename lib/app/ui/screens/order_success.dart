@@ -5,8 +5,11 @@ import 'package:laundry_app/app/routes/app_pages.dart'; // Make sure this import
 class OrderSuccessPage extends StatelessWidget {
   const OrderSuccessPage({super.key});
 
+  
+
   @override
   Widget build(BuildContext context) {
+    final orderId = Get.arguments['order_id'];
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -53,6 +56,7 @@ class OrderSuccessPage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   // Navigate to Order Details/Tracking
+                  Get.offNamed(AppRoutes.TRACKING, arguments: {'order_id': orderId}); // Replace with actual order ID
                 },
                 child: const Text("Track Order", style: TextStyle(color: Color(0xFF1B1C39))),
               ),

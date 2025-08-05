@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class OrderController extends GetxController {
   final supabase = Supabase.instance.client;
 
-  Future<void> placeOrder({
+  Future<int?> placeOrder({
     required List<Map<String, dynamic>> selectedItems,
     required double totalAmount,
     required String paymentMethod,
@@ -12,38 +12,44 @@ class OrderController extends GetxController {
     required int userId,
     required int addressId,
   }) async {
-    print("This is the selected services $selectedItems");
+    print("Selected items: $selectedItems");
+
     try {
-      // 1. Insert into orders table
-      final orderResponse = await supabase.from('orders').insert({
-        'status': 1,
-        'amount': totalAmount,
-        'payment_method': 1,
-        'payment_status': 1,
-        'user_id': userId,
-        'address_id': addressId,
-      }).select().single();
+      // Step 1: Insert into 'orders' table
+      final orderResponse = await supabase
+          .from('orders')
+          .insert({
+            'status': 1, // Assuming 1 = pending
+            'amount': totalAmount,
+            'payment_method': 1,
+            'payment_status': 1,
+            'user_id': userId,
+            'address_id': addressId,
+          })
+          .select()
+          .single();
 
       final orderId = orderResponse['id'];
 
-      // 2. Insert items into order_items
+      // Step 2: Prepare 'order_items' data
       final List<Map<String, dynamic>> orderItems = selectedItems.map((item) {
         return {
           'order_id': orderId,
           'item_id': item['product']['id'],
-          'service_id': 5, // Ensure this key exists in your cart items
+          'service_id': item['service'],
           'quantity': item['quantity'],
           'price': item['product']['price'],
           'amount': item['quantity'] * item['product']['price'],
         };
       }).toList();
 
+      // Step 3: Insert into 'order_items' table
       await supabase.from('order_items').insert(orderItems);
-
       print('Order placed successfully');
+      return orderId; // Return order ID on success
     } catch (e) {
       print('Error placing order: $e');
-      rethrow;
+      return null; // Return null on error
     }
   }
 }
