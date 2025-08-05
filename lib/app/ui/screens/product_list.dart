@@ -54,22 +54,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    serviceName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
+                // Container(
+                //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                //   decoration: BoxDecoration(
+                //     color: AppTheme.primaryColor,
+                //     borderRadius: BorderRadius.circular(8),
+                //   ),
+                //   child: Text(
+                //     serviceName,
+                //     style: const TextStyle(
+                //       fontSize: 16,
+                //       fontWeight: FontWeight.w500,
+                //       color: Colors.white,
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(width: 16),
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,

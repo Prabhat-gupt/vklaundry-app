@@ -2,7 +2,7 @@
 import 'package:get/get.dart';
 import 'package:laundry_app/app/ui/screens/add_address.dart';
 import 'package:laundry_app/app/ui/screens/address_screen.dart';
-import 'package:laundry_app/app/ui/screens/category.dart';
+import 'package:laundry_app/app/ui/screens/services.dart';
 import 'package:laundry_app/app/ui/screens/checkout.dart';
 import 'package:laundry_app/app/ui/screens/get_started.dart';
 import 'package:laundry_app/app/ui/screens/home.dart';
@@ -62,7 +62,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.CATEGORY,
-      page: () => const CategoryScreen(),
+      page: () => const ServiceScreen(),
       // binding: HomeBinding(),
     ),
     GetPage(

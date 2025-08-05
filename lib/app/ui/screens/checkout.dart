@@ -1,17 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/orders_controller.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
 
-class CheckoutPage extends StatelessWidget {
-  CheckoutPage({super.key});
+class CheckoutPage extends StatefulWidget {
+  const CheckoutPage({super.key});
 
+  @override
+  State<CheckoutPage> createState() => _CheckoutPageState();
+}
+
+class _CheckoutPageState extends State<CheckoutPage> {
   final ProductListController controller = Get.find<ProductListController>();
+
   final OrderController orderController = Get.put(OrderController());
+
   final ProfileController profileController = Get.find<ProfileController>();
+
+  DateTime? selectedPickupDate;
+
+  String? selectedPickupSlot;
+
+  final List<String> pickupSlots = ["7AM to 10AM", "5PM to 8PM"];
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +49,10 @@ class CheckoutPage extends StatelessWidget {
         child: Column(
           children: [
             _buildUnifiedServiceCard(selectedItems),
+            const SizedBox(height: 10),
+            _buildPickupSlotSelector(context),
+            if (selectedPickupDate != null && selectedPickupSlot != null)
+              _buildDeliveryDateDisplay(),
             const SizedBox(height: 20),
             _buildBillDetails(
                 itemsTotal, deliveryCharge, handlingCharge, grandTotal),
@@ -175,13 +193,13 @@ class CheckoutPage extends StatelessWidget {
           const Text("Bill details",
               style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          _billRow("\uD83E\uDFAA Items total",
+          _billRow("Items total",
               "\u20B9${itemsTotal.toStringAsFixed(2)}"),
           const SizedBox(height: 8),
-          _billRow("\uD83D\uDE9A Delivery charge",
+          _billRow("Delivery charge",
               "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
           const SizedBox(height: 8),
-          _billRow("\u2699\uFE0F Handling charge",
+          _billRow("Handling charge",
               "\u20B9${handlingCharge.toStringAsFixed(2)}"),
           const Divider(height: 24),
           _billRow("Grand Total", "\u20B9${grandTotal.toStringAsFixed(2)}",
@@ -204,6 +222,119 @@ class CheckoutPage extends StatelessWidget {
       ],
     );
   }
+
+  Widget _buildPickupSlotSelector(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Select Pickup Date & Slot",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: List.generate(7, (index) {
+              DateTime date = DateTime.now().add(Duration(days: index));
+              bool isSelected = selectedPickupDate != null &&
+                  DateUtils.isSameDay(selectedPickupDate, date);
+              return GestureDetector(
+                onTap: () {
+                  setState(() => selectedPickupDate = date);
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppTheme.primaryColor : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.primaryColor),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(DateFormat.E().format(date),
+                          style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black)),
+                      const SizedBox(height: 4),
+                      Text(date.day.toString(),
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? Colors.white : Colors.black)),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text("Select Time Slot",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 10,
+          children: pickupSlots.map((slot) {
+            bool isSelected = slot == selectedPickupSlot;
+            return ChoiceChip(
+              label: Text(slot),
+              selected: isSelected,
+              onSelected: (_) {
+                setState(() => selectedPickupSlot = slot);
+              },
+              checkmarkColor: Colors.white,
+              selectedColor: AppTheme.primaryColor,
+              labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w500),
+              backgroundColor: Colors.grey.shade200,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryDateDisplay() {
+  if (selectedPickupDate == null) {
+    return const SizedBox();
+  }
+
+  final deliveryDate = selectedPickupDate!.add(const Duration(hours: 72));
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 16),
+      const Text(
+        "Expected Delivery",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.local_shipping, color: Colors.blueGrey),
+            const SizedBox(width: 10),
+            Text(
+              DateFormat('EEEE, MMM d, yyyy  |  hh:mm a').format(deliveryDate),
+              style: const TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
 
   Widget _buildBottomBar(BuildContext context, double grandTotal) {
     final userId = profileController.dbUserId.value;

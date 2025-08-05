@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,11 +11,19 @@ class TrackOrderController extends GetxController {
   final order = {}.obs;
 
   final supabase = Supabase.instance.client;
+  RealtimeChannel? _orderChannel;
 
   @override
   void onInit() {
     super.onInit();
     fetchOrderDetails();
+    _subscribeToOrderChanges();
+  }
+
+  @override
+  void onClose() {
+    _unsubscribeFromOrderChanges();
+    super.onClose();
   }
 
   Future<void> fetchOrderDetails() async {
@@ -22,8 +32,7 @@ class TrackOrderController extends GetxController {
 
       final response = await supabase
           .from('orders')
-          .select(
-              '*, order_items(*, product:item_id(*))') // aliasing item_id to product
+          .select('*, order_items(*, product:item_id(*))')
           .eq('id', orderId)
           .maybeSingle();
 
@@ -33,9 +42,8 @@ class TrackOrderController extends GetxController {
 
       final statusCode = response['status'];
       response['status_text'] = _getStatusText(statusCode);
-
       response['items'] = response['order_items'] ?? [];
-      print("Response from the order track: $response");
+
       order.value = response;
     } catch (e) {
       print("Error fetching order: $e");
@@ -44,16 +52,44 @@ class TrackOrderController extends GetxController {
     }
   }
 
+  void _subscribeToOrderChanges() {
+    _orderChannel = supabase.channel('order_updates_$orderId')
+      ..onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'orders',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'id',
+          value: orderId,
+        ),
+        callback: (payload) {
+          print("Order updated: ${payload.toString()}");
+          fetchOrderDetails();
+        },
+      )
+      ..subscribe();
+  }
+
+  void _unsubscribeFromOrderChanges() {
+    if (_orderChannel != null) {
+      supabase.removeChannel(_orderChannel!);
+      _orderChannel = null;
+    }
+  }
+
   String _getStatusText(int? statusCode) {
     switch (statusCode) {
-      case 1:
+      case 0:
         return 'Pending';
-      case 2:
+      case 1:
         return 'Accepted';
+      case 2:
+        return 'Rejected';
       case 3:
         return 'Processing';
       case 4:
-        return 'Delivered';
+        return 'Completed';
       default:
         return 'Pending';
     }
