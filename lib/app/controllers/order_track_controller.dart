@@ -4,11 +4,9 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TrackOrderController extends GetxController {
-  final int orderId;
-  TrackOrderController({required this.orderId});
-
   final isLoading = true.obs;
   final order = {}.obs;
+  final serviceNames = <int, String>{}.obs;
 
   final supabase = Supabase.instance.client;
   RealtimeChannel? _orderChannel;
@@ -16,8 +14,7 @@ class TrackOrderController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchOrderDetails();
-    _subscribeToOrderChanges();
+    fetchAllServices();
   }
 
   @override
@@ -26,33 +23,66 @@ class TrackOrderController extends GetxController {
     super.onClose();
   }
 
-  Future<void> fetchOrderDetails() async {
+  Future<void> fetchAllServices() async {
     try {
-      isLoading.value = true;
+      print("Supabase service, start");
+      final servicesResponse =
+          await supabase.from('services').select('id, name');
 
-      final response = await supabase
-          .from('orders')
-          .select('*, order_items(*, product:item_id(*))')
-          .eq('id', orderId)
-          .maybeSingle();
-
-      if (response == null) {
-        throw Exception("Order not found");
+      for (var service in servicesResponse) {
+        serviceNames[service['id']] = service['name'] ?? '';
       }
-
-      final statusCode = response['status'];
-      response['status_text'] = _getStatusText(statusCode);
-      response['items'] = response['order_items'] ?? [];
-
-      order.value = response;
+      print("Supabase service, $servicesResponse");
     } catch (e) {
-      print("Error fetching order: $e");
-    } finally {
-      isLoading.value = false;
+      print("Error fetching services: $e");
     }
   }
 
-  void _subscribeToOrderChanges() {
+ Future<void> fetchOrderDetails(int userID) async {
+  try {
+    isLoading.value = true;
+
+    final response = await supabase
+        .from('orders')
+        .select('*, order_items(*, product:item_id(*))')
+        .eq('user_id', userID);
+
+    if (response == null || response.isEmpty) {
+      throw Exception("No orders found for this user");
+    }
+
+    print("Service name list , $serviceNames");
+
+    final processedOrders = response.map((orderData) {
+      final statusCode = orderData['status'] as int?;
+      orderData['status_text'] = _getStatusText(statusCode);
+
+      // Ensure order_items exists
+      if (orderData['order_items'] != null) {
+        orderData['order_items'] = (orderData['order_items'] as List).map((item) {
+          final serviceId = item['service_id'] as int?;
+          return {
+            ...item,
+            'service_name': serviceId != null ? (serviceNames[serviceId] ?? '') : ''
+          };
+        }).toList();
+      }
+
+      orderData['items'] = orderData['order_items'] ?? [];
+      return orderData;
+    }).toList();
+
+    order.value = {"orders": processedOrders};
+    print("Order value, $order");
+  } catch (e) {
+    print("Error fetching orders: $e");
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+ 
+ void _subscribeToOrderChanges(int orderId) {
     _orderChannel = supabase.channel('order_updates_$orderId')
       ..onPostgresChanges(
         event: PostgresChangeEvent.all,
@@ -65,7 +95,7 @@ class TrackOrderController extends GetxController {
         ),
         callback: (payload) {
           print("Order updated: ${payload.toString()}");
-          fetchOrderDetails();
+          fetchOrderDetails(orderId);
         },
       )
       ..subscribe();

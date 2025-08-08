@@ -124,18 +124,43 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           horizontal: 8, vertical: 4),
                       child: Row(
                         children: [
-                          const Icon(Icons.remove,
-                              size: 16, color: Colors.white),
+                          GestureDetector(
+                            onTap: () {
+                              controller.removeFromCart(item['product']);
+                              controller.update();
+                            },
+                            child: const Icon(Icons.remove,
+                                size: 16, color: Colors.white),
+                          ),
                           const SizedBox(width: 8),
-                          Text("${item['quantity'] ?? ''}",
-                              style: const TextStyle(color: Colors.white)),
+                          Obx(() {
+                            final quantity = controller.cartQuantities[
+                                    '${item['service']}_${item['product']['id']}'] ??
+                                0;
+                            return Text("$quantity",
+                                style: const TextStyle(color: Colors.white));
+                          }),
                           const SizedBox(width: 8),
-                          const Icon(Icons.add, size: 16, color: Colors.white),
+                          GestureDetector(
+                            onTap: () {
+                              controller.addToCart(item['product']);
+                              controller.update();
+                            },
+                            child: const Icon(Icons.add,
+                                size: 16, color: Colors.white),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text("\u20B9${item['product']['price'] ?? ''}")
+                    Obx(() {
+                      final quantity = controller.cartQuantities[
+                              '${item['service']}_${item['product']['id']}'] ??
+                          0;
+                      final totalPrice = quantity * item['product']['price'];
+                      return Text("\u20B9$totalPrice");
+                    }),
+                    // Text("\u20B9${item['product']['price'] ?? ''}")
                   ],
                 ),
               )),
@@ -193,14 +218,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
           const Text("Bill details",
               style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          _billRow("Items total",
-              "\u20B9${itemsTotal.toStringAsFixed(2)}"),
+          _billRow("Items total", "\u20B9${itemsTotal.toStringAsFixed(2)}"),
           const SizedBox(height: 8),
-          _billRow("Delivery charge",
-              "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
+          _billRow(
+              "Delivery charge", "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
           const SizedBox(height: 8),
-          _billRow("Handling charge",
-              "\u20B9${handlingCharge.toStringAsFixed(2)}"),
+          _billRow(
+              "Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
           const Divider(height: 24),
           _billRow("Grand Total", "\u20B9${grandTotal.toStringAsFixed(2)}",
               isBold: true),
@@ -296,45 +320,45 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildDeliveryDateDisplay() {
-  if (selectedPickupDate == null) {
-    return const SizedBox();
+    if (selectedPickupDate == null) {
+      return const SizedBox();
+    }
+
+    final deliveryDate = selectedPickupDate!.add(const Duration(hours: 72));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        const Text(
+          "Expected Delivery",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.local_shipping, color: Colors.blueGrey),
+              const SizedBox(width: 10),
+              Text(
+                DateFormat('EEEE, MMM d, yyyy  |  hh:mm a')
+                    .format(deliveryDate),
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
-
-  final deliveryDate = selectedPickupDate!.add(const Duration(hours: 72));
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const SizedBox(height: 16),
-      const Text(
-        "Expected Delivery",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-      const SizedBox(height: 8),
-      Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.local_shipping, color: Colors.blueGrey),
-            const SizedBox(width: 10),
-            Text(
-              DateFormat('EEEE, MMM d, yyyy  |  hh:mm a').format(deliveryDate),
-              style: const TextStyle(fontSize: 14),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
 
   Widget _buildBottomBar(BuildContext context, double grandTotal) {
     final userId = profileController.dbUserId.value;
@@ -377,27 +401,31 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () async {
-                  try {
-                    // final orderId = await orderController.placeOrder(
-                    //   selectedItems: controller.getSelectedCartItems(),
-                    //   totalAmount: grandTotal,
-                    //   paymentMethod: 'Google Pay UPI',
-                    //   paymentStatus: 'paid',
-                    //   userId: userId,
-                    //   addressId: 1,
-                    // );
-                    Get.toNamed(
-                      AppRoutes.SUCCESS,
-                      arguments: {
-                        'order_id': 58,
-                      },
-                    );
-                  } catch (e) {
-                    Get.snackbar("Error", "Failed to place order: $e",
-                        backgroundColor: Colors.red, colorText: Colors.white);
-                  }
-                },
+                onPressed:
+                    (selectedPickupDate != null && selectedPickupSlot != null)
+                        ? () async {
+                            try {
+                              // final orderId = await orderController.placeOrder(
+                              //   selectedItems: controller.getSelectedCartItems(),
+                              //   totalAmount: grandTotal,
+                              //   paymentMethod: 'Google Pay UPI',
+                              //   paymentStatus: 'paid',
+                              //   userId: userId,
+                              //   addressId: 1,
+                              // );
+                              Get.toNamed(
+                                AppRoutes.SUCCESS,
+                                arguments: {
+                                  'order_id': 58,
+                                },
+                              );
+                            } catch (e) {
+                              Get.snackbar("Error", "Failed to place order: $e",
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white);
+                            }
+                          }
+                        : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(

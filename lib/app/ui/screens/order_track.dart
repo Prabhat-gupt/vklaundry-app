@@ -1,149 +1,198 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:laundry_app/app/controllers/order_track_controller.dart';
+import 'package:timelines/timelines.dart';
 
 class TrackOrderPage extends StatelessWidget {
   const TrackOrderPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(TrackOrderController(orderId: Get.arguments['order_id']));
-
-    final List<String> statusSteps = [
-      "Pending",
-      "Accepted",
-      "Processing",
-      "Delivered",
-    ];
-
-    int getCurrentStep(String? status) {
-      return status != null ? statusSteps.indexOf(status) : 0;
-    }
-
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Obx(() => Text("Track Order #${controller.order.value['id'] ?? ''}")),
-        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {},
+        ),
+        title: const Text('Track Order',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        centerTitle: false,
       ),
-      body: StreamBuilder(
-        stream: controller.order.stream, // Use the Rx stream for realtime updates
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final orderDetails = snapshot.data as Map<String, dynamic>;
-          final currentStep = getCurrentStep(orderDetails['status_text']);
-          final items = orderDetails['order_items'] as List<dynamic>? ?? [];
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Order Summary
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Order Summary", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Order ID:"),
-                            Text("#${orderDetails['id'] ?? '-'}")
-                          ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Order Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.05), blurRadius: 5)
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Order #123456',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          SizedBox(height: 4),
+                          Text('Placed on Dec 15, 2024',
+                              style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow[700],
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Amount:"),
-                            Text("₹${orderDetails['amount'] ?? 0}")
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Payment Status:"),
-                            Text(orderDetails['payment_status'] == 1 ? "Paid" : "Unpaid")
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Placed On:"),
-                            Text(orderDetails['created_at']?.toString().split('T').first ?? '-')
-                          ],
-                        ),
-                      ],
-                    ),
+                        child: const Text('Quality Check',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
+                      )
+                    ],
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Order Status Timeline
-                const Text("Order Status", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Stepper(
-                  physics: const NeverScrollableScrollPhysics(),
-                  currentStep: currentStep,
-                  controlsBuilder: (context, details) => const SizedBox(),
-                  steps: statusSteps.map((step) {
-                    int index = statusSteps.indexOf(step);
-                    return Step(
-                      title: Text(step),
-                      content: const SizedBox.shrink(),
-                      isActive: index <= currentStep,
-                      state: index < currentStep
-                          ? StepState.complete
-                          : index == currentStep
-                              ? StepState.editing
-                              : StepState.indexed,
-                    );
-                  }).toList(),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Ordered Items
-                const Text("Ordered Items", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ...items.map((item) {
-                  final product = item['product'] ?? {};
-                  final price = item['price'] ?? 0;
-                  final quantity = item['quantity'] ?? 0;
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          product['image'] ?? '',
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.image),
-                        ),
+                  const SizedBox(height: 16),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Estimated Delivery',
+                              style: TextStyle(color: Colors.grey)),
+                          Text('Dec 18, 2024 · 2:00 PM',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ],
                       ),
-                      title: Text(product['name'] ?? 'Unknown Product'),
-                      subtitle: Text("Quantity: $quantity"),
-                      trailing: Text(
-                        "₹${price * quantity}",
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ],
+                      Icon(Icons.local_shipping, color: Colors.blue),
+                      SizedBox(width: 8),
+                    ],
+                  )
+                ],
+              ),
             ),
-          );
-        },
+            const SizedBox(height: 16),
+            // Timeline Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.05), blurRadius: 5)
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _buildTimelineSteps(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  List<Widget> _buildTimelineSteps() {
+    final steps = [
+      {
+        'title': 'Order Confirmed',
+        'date': 'Dec 15, 2024 · 10:30 AM',
+        'desc': 'Your order has been confirmed and is being prepared.',
+        'status': 'completed'
+      },
+      {
+        'title': 'Picked Up',
+        'date': 'Dec 15, 2024 · 3:45 PM',
+        'desc': 'Items collected from your location successfully.',
+        'status': 'completed'
+      },
+      {
+        'title': 'In Process',
+        'date': 'Dec 16, 2024 · 9:00 AM',
+        'desc': 'Your items are being processed at our facility.',
+        'status': 'current'
+      },
+      {
+        'title': 'Quality Check',
+        'date': 'Pending',
+        'desc': 'Items will undergo quality inspection.',
+        'status': 'pending'
+      },
+      {
+        'title': 'Out for Delivery',
+        'date': 'Pending',
+        'desc': 'Items will be delivered to your location.',
+        'status': 'pending'
+      },
+    ];
+
+    return [
+      FixedTimeline.tileBuilder(
+        builder: TimelineTileBuilder.connected(
+          connectionDirection: ConnectionDirection.before,
+          itemCount: steps.length,
+          nodePositionBuilder: (context, index) => 0.1,
+          indicatorPositionBuilder: (context, index) => 0,
+          indicatorBuilder: (context, index) {
+            final step = steps[index];
+            if (step['status'] == 'completed') {
+              return const DotIndicator(
+                  size: 28,
+                  color: Colors.green,
+                  child: Icon(Icons.check, color: Colors.white, size: 18));
+            } else if (step['status'] == 'current') {
+              return const DotIndicator(
+                size: 28,
+                  color: Colors.blue,
+                  child: Icon(Icons.radio_button_checked,
+                      color: Colors.white, size: 18));
+            } else {
+              return const DotIndicator(
+                size: 28,
+                  color: Colors.grey,
+                  child: Icon(Icons.radio_button_unchecked,
+                      color: Colors.white, size: 18));
+            }
+          },
+          connectorBuilder: (_, index, __) =>
+              const SolidLineConnector(color: Colors.grey),
+          contentsBuilder: (context, index) {
+            final step = steps[index];
+            return Padding(
+              padding: const EdgeInsets.only(left: 18.0, bottom: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(step['title']!,
+                      style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
+                  const SizedBox(height: 2),
+                  Text(step['date']!,
+                      style: const TextStyle(color: Colors.grey)),
+                  const SizedBox(height: 4),
+                  Text(step['desc']!,
+                      style: const TextStyle(color: Colors.grey)),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    ];
   }
 }

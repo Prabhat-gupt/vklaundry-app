@@ -153,6 +153,21 @@ class ProductListController extends GetxController {
       categories.value = [];
     }
   }
+
+  void incrementQuantity(int productId) {
+    print("this is incrementQuantity");
+    final item = getSelectedCartItems().firstWhereOrNull((e) => e['product']['id'] == productId);
+    if (item != null) item['quantity'] = (item['quantity'] ?? 1) + 1;
+    update();
+    print("this is incrementQuantity ${item?['quantity']}"); // or refresh your RxList if using Rx
+  }
+
+  void decrementQuantity(int productId) {
+    final item = getSelectedCartItems().firstWhereOrNull((e) => e['product']['id'] == productId);
+    if (item != null && item['quantity'] > 1) item['quantity'] = item['quantity'] - 1;
+    update(); // or refresh your RxList if using Rx
+    print("this is decrement ${item?['quantity']}");
+  }
 }
 
 extension ProductListControllerExtensions on ProductListController {

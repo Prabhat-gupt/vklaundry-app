@@ -25,29 +25,32 @@ class HomePageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // fetchUserAddress();
+    fetchUserDetails();
     fetchServices();
     // fetchSpecialItems();
   }
 
-  // void fetchUserAddress() async {
-  //   try {
-  //     isLoading.value = true;
-  //     final userId = supabase.auth.currentUser?.id;
-  //     final response = await supabase
-  //         .from('profiles')
-  //         .select('address, location')
-  //         .eq('id', userId!)
-  //         .single();
-
-  //     userAddress.value = response['address'] ?? '';
-  //     userLocationDetails.value = response['location'] ?? '';
-  //   } catch (e) {
-  //     Get.snackbar('Error', 'Failed to load address');
-  //   } finally {
-  //     isLoading.value = false;
-  //   }
-  // }
+  Future<int> fetchUserDetails() async {
+    try {
+      isLoading.value = true;
+      final userId = supabase.auth.currentUser?.id;
+      final response = await supabase
+          .from('users')
+          .select('*')
+          .eq('uuid', userId!)
+          .single();
+      print("User Details: $response");
+      if (response != null && response['id'] != null) {
+        return response['id'] as int;
+      }
+      throw Exception('User ID not found');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load address');
+      throw Exception('Failed to load address');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void fetchServices() async {
     try {
