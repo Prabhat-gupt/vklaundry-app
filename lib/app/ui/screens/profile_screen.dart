@@ -3,17 +3,63 @@ import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   final controller = Get.find<ProfileController>();
+
+  late TextEditingController nameController;
+  late TextEditingController phoneController;
+  late TextEditingController emailController;
+
+  bool isButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    nameController = TextEditingController(text: controller.name.value);
+    phoneController = TextEditingController(text: controller.phone.value);
+    emailController = TextEditingController(text: controller.email.value);
+
+    nameController.addListener(_onFieldChanged);
+    phoneController.addListener(_onFieldChanged);
+    emailController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    final phone = phoneController.text.trim();
+    final email = emailController.text.trim();
+
+    // Check if any value has changed
+    final isChanged = nameController.text.trim() != controller.name.value ||
+        phone != controller.phone.value ||
+        email != controller.email.value;
+
+    // Validation
+    final isPhoneValid = RegExp(r'^\d{12}$').hasMatch(phone);
+    final isEmailValid = email.contains(".com");
+
+    setState(() {
+      isButtonEnabled = isChanged && isPhoneValid && isEmailValid;
+    });
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController(text: controller.name.value);
-    final phoneController = TextEditingController(text: controller.phone.value);
-    final emailController = TextEditingController(text: controller.email.value);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -32,57 +78,69 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Profile Photo
-            Stack(
+            const Stack(
               alignment: Alignment.bottomRight,
               children: [
-                const CircleAvatar(
-                  radius: 55,
-                  backgroundImage: AssetImage("assets/icons/profile_pic.png"),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: const Icon(Icons.edit, size: 18),
-                  ),
+                CircleAvatar(
+                  radius: 45,
+                  backgroundImage:
+                      AssetImage("assets/icons/setting_profile.png"),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-
-            // Name Field
             _buildTextField("Name*", nameController),
-
-            // Phone Field
             _buildTextField("Mobile Number*", phoneController,
                 keyboardType: TextInputType.phone),
-
-            // Email Field
             _buildTextField("Email Address*", emailController,
-                hint: "Enter your email", keyboardType: TextInputType.emailAddress),
-
+                hint: "Enter your email",
+                keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 24),
-
-            // Submit Button
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () async {
-                  // await controller.updateProfile(
-                  //   nameController.text.trim(),
-                  //   emailController.text.trim(),
-                  //   phoneController.text.trim(),
-                  // );
-                },
+                onPressed: isButtonEnabled
+                    ? () async {
+                        final phoneNumber =
+                            int.tryParse(phoneController.text.trim());
+                        if (phoneNumber == null) {
+                          Get.snackbar(
+                            'Invalid number',
+                            'Please enter a valid numeric phone number.',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+
+                        FocusScope.of(context).unfocus();
+
+                        await controller.updateProfile(
+                          nameController.text.trim(),
+                          emailController.text.trim(),
+                          phoneNumber,
+                        );
+
+                        // Show success message
+                        Get.snackbar(
+                          'Success',
+                          'Profile Updated',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor:
+                              const Color.fromARGB(147, 76, 175, 79),
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                        );
+
+                        // Disable button again
+                        setState(() {
+                          isButtonEnabled = false;
+                        });
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
+                  disabledBackgroundColor: Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -92,25 +150,32 @@ class ProfileScreen extends StatelessWidget {
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
-
             const SizedBox(height: 40),
-
-            // Delete Account Section
             const Divider(height: 24),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Delete Account",
-                  style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20)),
-            ),
-            const SizedBox(height: 4),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Deleting account will remove all your orders",
-                style: TextStyle(color: Colors.black54, fontSize: 16),
+            GestureDetector(
+              onTap: () {
+                Get.snackbar("Delete Account", "Please contact support to delete your account.",
+                    snackPosition: SnackPosition.BOTTOM);
+              },
+              child: Column(
+                children: [
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Delete Account",
+                        style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20)),
+                  ),
+                  const SizedBox(height: 4),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Deleting account will remove all your orders",
+                      style: TextStyle(color: Colors.black54, fontSize: 16),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

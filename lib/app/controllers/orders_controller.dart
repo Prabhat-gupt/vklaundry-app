@@ -11,6 +11,8 @@ class OrderController extends GetxController {
     required String paymentStatus,
     required int userId,
     required int addressId,
+    required String deliveryDateTime,
+    required String pickupDateTime
   }) async {
     print("Selected items: $selectedItems");
 
@@ -19,10 +21,12 @@ class OrderController extends GetxController {
       final orderResponse = await supabase
           .from('orders')
           .insert({
-            'status': 1, // Assuming 1 = pending
+            'status': 0, // Assuming 1 = pending
             'amount': totalAmount,
             'payment_method': 1,
             'payment_status': 1,
+            'pickup_datetime': pickupDateTime,
+            'delivery_datetime': deliveryDateTime,
             'user_id': userId,
             'address_id': addressId,
           })
@@ -45,6 +49,13 @@ class OrderController extends GetxController {
 
       // Step 3: Insert into 'order_items' table
       await supabase.from('order_items').insert(orderItems);
+
+      await supabase.from('notifications').insert({
+        'type': 4,
+        'title': 'Order Placed',
+        'message': 'Your order has been placed successfully. Order ID: $orderId',
+        'user_id': userId,
+      });
       print('Order placed successfully');
       return orderId; // Return order ID on success
     } catch (e) {

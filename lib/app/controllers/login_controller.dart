@@ -22,6 +22,7 @@ class LoginController extends GetxController {
       Get.toNamed('/otp_screen', arguments: {'phone': phone});
     } catch (e) {
       print('Error sending OTP: $e');
+      Get.snackbar('Error', 'Failed to send OTP. Please try again.');
     } finally {
       isLoading.value = false;
     }
@@ -56,10 +57,14 @@ class LoginController extends GetxController {
             'phone': phoneNumber,
             // add more fields as needed
           });
-        }
 
+          Get.offAllNamed(AppRoutes.SETUPSCREEN);
+        }else{
+          // User already exists, navigate to home or another screen
+          Get.offAllNamed(AppRoutes.ROOT);
+        }
         print('User mapped with uuid: $uuid');
-        Get.offAllNamed(AppRoutes.SETUPSCREEN);
+        
       } else {
         print('OTP verification failed');
       }
@@ -69,4 +74,7 @@ class LoginController extends GetxController {
       isLoading.value = false;
     }
   }
+
+
+
 }

@@ -6,13 +6,13 @@ import 'package:laundry_app/app/routes/app_pages.dart';
 
 class OrderCard extends StatelessWidget {
   final List<Map<String, dynamic>> orders;
-
-  const OrderCard({super.key, required this.orders});
+  var numbersOrders;
+  OrderCard({super.key, required this.orders, required this.numbersOrders});
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(orders.length, (index) {
+      children: List.generate(numbersOrders, (index) {
         final order = orders[index];
         return GestureDetector(
           onTap: () => _showOrderDetail(context, order),
@@ -38,7 +38,8 @@ class OrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '#${order['id']?.toString() ?? ''}',
+                      // '#${order['id']?.toString() ?? ''}',
+                      'Booking Details',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -46,7 +47,7 @@ class OrderCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatDate(order['created_at']),
+                      order['pickup_datetime'] ?? '',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -158,7 +159,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                           size: 16, color: Colors.grey),
                       const SizedBox(width: 6),
                       Text(
-                        _formatDate(order['created_at']),
+                        order['pickup_datetime'] ?? '',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -179,21 +180,10 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Delivery Date',
+                            const Text('Delivery Date&Time',
                                 style: TextStyle(color: Colors.grey)),
                             const SizedBox(height: 4),
-                            Text(order['delivery_date']?.toString() ?? '',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text('Time',
-                                style: TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            Text(order['delivery_time']?.toString() ?? '',
+                            Text(order['delivery_datetime']?.toString() ?? '',
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold)),
                           ],
@@ -245,9 +235,9 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                   Divider(color: Colors.grey.shade300),
                   const SizedBox(height: 8),
                   _priceRow(
-                      'Subtotal', '₹${order['subtotal']?.toString() ?? '0'}'),
+                      'Subtotal', '₹${(order['amount'] - 2)?.toString() ?? '0'}'),
                   _priceRow('Delivery Fee',
-                      '₹${order['delivery_fee']?.toString() ?? '0'}'),
+                      '₹2'),
                   const SizedBox(height: 4),
                   _priceRow('Total', '₹${order['amount']?.toString() ?? '0'}',
                       isBold: true, isTotal: true),
@@ -265,7 +255,9 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                       label: const Text('Track Order',
                           style: TextStyle(color: Colors.white)),
                       onPressed: () {
-                        Get.toNamed(AppRoutes.TRACKING);
+                        Get.toNamed(AppRoutes.TRACKING, arguments: {
+                          'order': order,
+                        });
                       },
                     ),
                   ),

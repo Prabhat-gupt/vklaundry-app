@@ -44,4 +44,28 @@ class ProfileController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> updateProfile(
+      String newName, String newEmail, int newNumber) async {
+    try {
+      isLoading.value = true;
+      final user = supabase.auth.currentUser;
+      if (user != null && dbUserId.value > 0) {
+        await supabase.from('users').update({
+          'name': newName,
+          'email': newEmail,
+          'phone': newNumber,
+        }).eq('id', dbUserId.value);
+
+        name.value = newName;
+        email.value = newEmail;
+        phone.value = newNumber.toString();
+      }
+    } catch (e) {
+      print('Error updating profile: $e');
+      Get.snackbar('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

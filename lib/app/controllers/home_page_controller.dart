@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class HomePageController extends GetxController {
   final supabase = Supabase.instance.client;
 
-  var userAddress = ''.obs;
+  var userAddress = <Map<String, dynamic>>[].obs;
   var userLocationDetails = ''.obs;
 
   var services = [].obs;
@@ -27,6 +27,7 @@ class HomePageController extends GetxController {
     super.onInit();
     fetchUserDetails();
     fetchServices();
+    fetchUserAddress();
     // fetchSpecialItems();
   }
 
@@ -56,6 +57,17 @@ class HomePageController extends GetxController {
     try {
       final response = await supabase.from('services').select('*');
       services.value = response;
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load services');
+    }
+  }
+
+  void fetchUserAddress() async {
+    try {
+      int userId = await fetchUserDetails();
+      final response = await supabase.from('addresses').select('*').eq('id', userId).limit(1);
+      userAddress.value = response;
+      print(  "User Address: $userAddress");
     } catch (e) {
       Get.snackbar('Error', 'Failed to load services');
     }

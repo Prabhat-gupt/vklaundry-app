@@ -19,6 +19,9 @@ abstract class AppRoutes {
   static const ADDADDRESS = '/add_address';
   static const SUCCESS = '/success_screen';
   static const SERVICES = '/services';
-  static const NOTIFICATIONS = '/notifications';
   static const TRACKING = '/tracking';
+  static const PAYMENTSELECT = '/payment_select';
+  static const ALLORDERS = '/all_orders';
+  static const NOTIFICATION = '/notification_screen';
+  static const SUPPORT = '/support_screen';
 }

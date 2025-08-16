@@ -2,21 +2,25 @@
 import 'package:get/get.dart';
 import 'package:laundry_app/app/ui/screens/add_address.dart';
 import 'package:laundry_app/app/ui/screens/address_screen.dart';
-import 'package:laundry_app/app/ui/screens/services.dart';
+import 'package:laundry_app/app/ui/screens/all_orders.dart';
 import 'package:laundry_app/app/ui/screens/checkout.dart';
 import 'package:laundry_app/app/ui/screens/get_started.dart';
 import 'package:laundry_app/app/ui/screens/home.dart';
 import 'package:laundry_app/app/ui/screens/login.dart';
+import 'package:laundry_app/app/ui/screens/notification.dart';
 import 'package:laundry_app/app/ui/screens/order_details.dart';
 import 'package:laundry_app/app/ui/screens/order_screen.dart';
 import 'package:laundry_app/app/ui/screens/order_success.dart';
 import 'package:laundry_app/app/ui/screens/order_track.dart';
 import 'package:laundry_app/app/ui/screens/otp_screen.dart';
+import 'package:laundry_app/app/ui/screens/payment_select.dart';
 import 'package:laundry_app/app/ui/screens/profile_screen.dart';
 import 'package:laundry_app/app/ui/screens/root.dart';
+import 'package:laundry_app/app/ui/screens/services.dart';
 import 'package:laundry_app/app/ui/screens/setting_screen.dart';
 import 'package:laundry_app/app/ui/screens/setup_page.dart';
 import 'package:laundry_app/app/ui/screens/splash_screen.dart';
+import 'package:laundry_app/app/ui/screens/support.dart';
 
 part 'app_routes.dart';
 
@@ -110,6 +114,25 @@ class AppPages {
       page: () => const OrderSuccessPage(),
       // binding: HomeBinding(),
     ),
-    // Add more pages here
+    GetPage(
+      name: AppRoutes.PAYMENTSELECT,
+      page: () => PaymentSelectPage(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ALLORDERS,
+      page: () => AllOrdersPage(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.NOTIFICATION,
+      page: () => NotificationScreen(),
+      // binding: HomeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SUPPORT,
+      page: () => SupportPage(),
+      // binding: HomeBinding(),
+    ),
   ];
 }

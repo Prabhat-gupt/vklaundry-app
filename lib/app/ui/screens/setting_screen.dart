@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,7 +16,8 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: const Text("Settings", style: TextStyle(color: Colors.black)),
+        title: Text("Settings", style: TextStyle(fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,)),
         centerTitle: true,
       ),
       body: Obx(
@@ -70,11 +72,11 @@ class SettingsScreen extends StatelessWidget {
                             fontSize: 16)),
                     const SizedBox(height: 8),
                     _buildInfoCard([
-                      _buildListTile(Icons.shopping_bag_outlined, "Your Orders",
-                          onTap: () {
-                        Get.toNamed('/order_screen');
-                      }),
-                      const _DashedDivider(),
+                      // _buildListTile(Icons.shopping_bag_outlined, "Your Orders",
+                      //     onTap: () {
+                      //   Get.toNamed('/order_screen');
+                      // }),
+                      // const _DashedDivider(),
                       _buildListTile(
                           Icons.location_on_outlined, "Saved Address",
                           onTap: () {
@@ -93,14 +95,14 @@ class SettingsScreen extends StatelessWidget {
                             fontSize: 16)),
                     const SizedBox(height: 8),
                     _buildInfoCard([
-                      _buildListTile(Icons.notifications_none, "Notifications",
-                          onTap: () {
-                        Get.toNamed('/profile_screen');
-                      }),
+                      // _buildListTile(Icons.notifications_none, "Notifications",
+                      //     onTap: () {
+                      //   Get.toNamed('/notification_screen');
+                      // }),
                       const _DashedDivider(),
-                      _buildListTile(Icons.info_outline, "General Info",
+                      _buildListTile(Icons.info_outline, "Support",
                           onTap: () {
-                        Get.toNamed('/profile_screen');
+                        Get.toNamed('/support_screen');
                       }),
                     ]),
                     const SizedBox(height: 24),

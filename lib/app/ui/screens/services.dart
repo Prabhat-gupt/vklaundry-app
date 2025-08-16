@@ -15,15 +15,16 @@ class ServiceScreen extends StatelessWidget {
     final List<String> serviceImages = [
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZGOWHxy5gcPkGjr4AxlsSgRIVVTCaQ0sJDw&s', // Washing
       'https://static.vecteezy.com/system/resources/thumbnails/038/949/666/small/ai-generated-stack-of-clean-clothes-on-ironing-board-at-home-closeup-photo.jpg', // Dry cleaning
-      'https://wiproappliances.com/cdn/shop/articles/steam-iron_2.jpg?v=1713851875', // Ironing
+      'https://5.imimg.com/data5/QT/OS/GLADMIN-59689206/normal-ironing-and-steam-ironing.png', // Ironing
       'https://media.istockphoto.com/id/542303516/photo/worker-laundry-ironed-clothes-iron-dry.jpg?s=612x612&w=0&k=20&c=lcI-9Caxcqd-ZI9vwAPmHAl76cB_T205hB8tFr2Iclg=', // Shoe cleaning
       'https://media.istockphoto.com/id/1279912899/photo/beautiful-woman-in-winter-thick-warm-robe-is-sitting-and-neatly-folding-bed-linens-and-bath.jpg?s=612x612&w=0&k=20&c=RBNfJQyLxVhe0weOIzjfm287LBXRClUhDuOvHMozLjY=',
       'https://media.istockphoto.com/id/688398000/photo/dresses-hanged-in-a-clothing-store.jpg?s=612x612&w=0&k=20&c=tfmN4c9k3yx9Us3E8N1g9Mesd96HxyNFmGhJKQ5hShs='
     ];
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F2F5),
       appBar: AppBar(
-        elevation: 1,
+        elevation: 0,
         shadowColor: Colors.grey,
         backgroundColor: Colors.white,
         title: Text(
@@ -31,19 +32,18 @@ class ServiceScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppTheme.primaryColor,
-            fontSize: 18,
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.search,
-              color: AppTheme.primaryColor,
-            ),
-            onPressed: () {},
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.search,
+        //       color: AppTheme.primaryColor,
+        //     ),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: Obx(() {
         final services = controller.services;

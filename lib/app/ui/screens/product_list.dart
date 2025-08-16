@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -16,12 +17,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
   late int serviceId;
   late String serviceName;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   final args = Get.arguments;
+  //   serviceId = args['service_id'];
+  //   serviceName = args['serviceName'];
+  //   controller.setService(serviceName);
+  //   Future.microtask(() => controller.loadProductsFromSupabase(serviceId));
+  // }
   @override
   void initState() {
     super.initState();
     final args = Get.arguments;
     serviceId = args['service_id'];
     serviceName = args['serviceName'];
+    controller.selectedCategoryId.value = null;
     controller.setService(serviceName);
     Future.microtask(() => controller.loadProductsFromSupabase(serviceId));
   }
@@ -52,220 +63,60 @@ class _ProductListScreenState extends State<ProductListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                // Container(
-                //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                //   decoration: BoxDecoration(
-                //     color: AppTheme.primaryColor,
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: Text(
-                //     serviceName,
-                //     style: const TextStyle(
-                //       fontSize: 16,
-                //       fontWeight: FontWeight.w500,
-                //       color: Colors.white,
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(width: 16),
-                Expanded(
+            Obx(() => Skeletonizer(
+                  enabled: controller.isLoading.value,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Obx(
-                      () => Row(
-                        children: controller.categories.map((category) {
-                          final categoryId = category['id'];
-                          final isSelected =
-                              controller.selectedCategoryId.value == categoryId;
-
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: GestureDetector(
-                              onTap: () {
+                    child: Row(
+                      children: controller.categories.isEmpty
+                          ? List.generate(
+                              4, (index) => _buildCategorySkeleton())
+                          : controller.categories.map((category) {
+                              final categoryId = category['id'];
+                              final isSelected =
+                                  controller.selectedCategoryId.value ==
+                                      categoryId;
+                              return _buildCategoryChip(
+                                  category['name'].toString(), isSelected, () {
                                 if (isSelected) {
-                                  controller.filterProductsByCategory(null);
+                                  controller.filterProductsByCategory(
+                                      null, null);
                                 } else {
-                                  controller.filterProductsByCategory(categoryId);
+                                  controller.filterProductsByCategory(
+                                      categoryId, serviceId);
                                 }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppTheme.primaryColor
-                                      : Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: Text(
-                                  category['name'].toString(),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppTheme.primaryColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                              });
+                            }).toList(),
                     ),
                   ),
-                )
-              ],
-            ),
+                )),
             const SizedBox(height: 16),
             Expanded(
-              child: Obx(() => GridView.builder(
-                    itemCount: controller.filteredProducts.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.46,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 2,
+              child: Obx(() => Skeletonizer(
+                    enabled: controller.isLoading.value,
+                    child: GridView.builder(
+                      itemCount: controller.isLoading.value
+                          ? 6
+                          : controller.filteredProducts.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.46,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 2,
+                      ),
+                      itemBuilder: (context, index) {
+                        if (controller.isLoading.value) {
+                          return _buildProductSkeleton();
+                        }
+                        final item = controller.filteredProducts[index];
+                        final serviceId = item['service_id'] ??
+                            controller.currentService.value;
+                        final productId = item['id'];
+                        final key = '${serviceId}_$productId';
+                        return _buildProductCard(item, key);
+                      },
                     ),
-                    itemBuilder: (context, index) {
-                      final item = controller.filteredProducts[index];
-                      final serviceId = item['service_id'] ?? controller.currentService.value;
-                      final productId = item['id'];
-                      final key = '${serviceId}_$productId';
-                      return LayoutBuilder(
-                        builder: (context, constraints) {
-                          return Container(
-                            height: 200,
-                            padding: const EdgeInsets.all(8),
-                            margin: const EdgeInsets.only(bottom: 18),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Stack(
-                                  children: [
-                                    Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Image.asset(
-                                          item['image'],
-                                          height: 120,
-                                          fit: BoxFit.fill,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              Container(
-                                            height: constraints.maxHeight * 0.3,
-                                            color: Colors.grey[200],
-                                            child: const Icon(Icons.image_not_supported,
-                                                size: 40, color: Colors.grey),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: Icon(Icons.bookmark_border),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(item['name'],
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 4),
-                                const Text("All shirts (eg. cotton, denim)",
-                                    style:
-                                        TextStyle(fontSize: 12, color: Colors.grey)),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Text("\u20B9${item['oldPrice']}",
-                                        style: const TextStyle(
-                                            decoration: TextDecoration.lineThrough,
-                                            color: Colors.grey,
-                                            fontSize: 12)),
-                                    const SizedBox(width: 6),
-                                    Text("\u20B9${item['price']}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                                Text(item['discount'],
-                                    style: const TextStyle(
-                                        color: Colors.green, fontSize: 12)),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.star,
-                                        color: Colors.green, size: 16),
-                                    Text("${item['rating']}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w500)),
-                                    Text(" (${item['reviews']})",
-                                        style: const TextStyle(fontSize: 12)),
-                                  ],
-                                ),
-                                const Spacer(),
-                                Obx(() {
-                                  final quantity =
-                                      controller.cartQuantities[key] ?? 0;
-                                  return quantity > 0
-                                      ? Container(
-                                          height: 30,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            border:
-                                                Border.all(color: Colors.grey),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              InkWell(
-                                                onTap: () =>
-                                                    controller.removeFromCart(item),
-                                                child: const Icon(Icons.remove,
-                                                    size: 16),
-                                              ),
-                                              const SizedBox(width: 18),
-                                              Text(quantity.toString()),
-                                              const SizedBox(width: 18),
-                                              InkWell(
-                                                onTap: () =>
-                                                    controller.addToCart(item),
-                                                child: const Icon(Icons.add,
-                                                    size: 16),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      : ElevatedButton(
-                                          onPressed: () =>
-                                              controller.addToCart(item),
-                                          child: const Text('Add'),
-                                        );
-                                })
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
                   )),
             )
           ],
@@ -314,6 +165,166 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
             )
           : const SizedBox.shrink()),
+    );
+  }
+
+  Widget _buildCategoryChip(String label, bool isSelected, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.primaryColor : Colors.grey[200],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: isSelected ? Colors.white : AppTheme.primaryColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategorySkeleton() {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+
+  Widget _buildProductSkeleton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Map<String, dynamic> item, String key) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.only(bottom: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        item['image'],
+                        height: 120,
+                        fit: BoxFit.fill,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: constraints.maxHeight * 0.3,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.image_not_supported,
+                              size: 40, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // const Positioned(
+                  //     top: 0, right: 0, child: Icon(Icons.bookmark_border)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(item['name'],
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              const Text("All shirts (eg. cotton, denim)",
+                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Text("\u20B9${item['oldPrice']}",
+                      style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                          fontSize: 12)),
+                  const SizedBox(width: 6),
+                  Text("\u20B9${item['price']}",
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Text(item['discount'],
+                  style: const TextStyle(color: Colors.green, fontSize: 12)),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.green, size: 16),
+                  Text("${item['rating']}",
+                      style: const TextStyle(fontWeight: FontWeight.w500)),
+                  Text(" (${item['reviews']})",
+                      style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+              const Spacer(),
+              Obx(() {
+                final quantity = controller.cartQuantities[key] ?? 0;
+                return quantity > 0
+                    ? Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () => controller.removeFromCart(item),
+                              child: const Icon(Icons.remove, size: 16),
+                            ),
+                            const SizedBox(width: 18),
+                            Text(quantity.toString()),
+                            const SizedBox(width: 18),
+                            InkWell(
+                              onTap: () => controller.addToCart(item),
+                              child: const Icon(Icons.add, size: 16),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ElevatedButton(
+                        onPressed: () => controller.addToCart(item),
+                        child: const Text('Add'),
+                      );
+              })
+            ],
+          ),
+        );
+      },
     );
   }
 }

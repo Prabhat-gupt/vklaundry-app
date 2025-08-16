@@ -19,7 +19,7 @@ class TrackOrderController extends GetxController {
 
   @override
   void onClose() {
-    _unsubscribeFromOrderChanges();
+    unsubscribeFromOrderChanges();
     super.onClose();
   }
 
@@ -82,7 +82,7 @@ class TrackOrderController extends GetxController {
 }
 
  
- void _subscribeToOrderChanges(int orderId) {
+ void subscribeToOrderChanges(int orderId) {
     _orderChannel = supabase.channel('order_updates_$orderId')
       ..onPostgresChanges(
         event: PostgresChangeEvent.all,
@@ -101,7 +101,7 @@ class TrackOrderController extends GetxController {
       ..subscribe();
   }
 
-  void _unsubscribeFromOrderChanges() {
+  void unsubscribeFromOrderChanges() {
     if (_orderChannel != null) {
       supabase.removeChannel(_orderChannel!);
       _orderChannel = null;

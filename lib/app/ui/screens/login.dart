@@ -38,20 +38,20 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 20),
+                          horizontal: 24, vertical: 40),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'Skip >',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
+                          // Align(
+                          //   alignment: Alignment.topRight,
+                          //   child: TextButton(
+                          //     onPressed: () {},
+                          //     child: const Text(
+                          //       'Skip >',
+                          //       style: TextStyle(color: Colors.white),
+                          //     ),
+                          //   ),
+                          // ),
                           const SizedBox(height: 40),
                           const CircleAvatar(
                             backgroundColor: Colors.white,

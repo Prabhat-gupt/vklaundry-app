@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/orders_controller.dart';
+import 'package:laundry_app/app/controllers/payment_select_controller.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:laundry_app/app/controllers/razorpay_payment_controller.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -16,23 +19,46 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   final ProductListController controller = Get.find<ProductListController>();
-
   final OrderController orderController = Get.put(OrderController());
-
   final ProfileController profileController = Get.find<ProfileController>();
-
+  final paymentController = Get.put(PaymentSelectController(), permanent: true);
+  String? paymentMethod;
   DateTime? selectedPickupDate;
-
   String? selectedPickupSlot;
 
   final List<String> pickupSlots = ["7AM to 10AM", "5PM to 8PM"];
 
+  late RazorpayPaymentController razorpayController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Put once; you can also inject via bindings
+    razorpayController = Get.put(
+      RazorpayPaymentController(razorpayKeyId: 'RAZORPAY_KEY_ID_HERE'),
+      permanent: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final selectedItems = controller.getSelectedCartItems();
+    // Filter out items with zero quantity
+    final selectedItems = controller.getSelectedCartItems().where((item) {
+      final quantity = controller
+              .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+          0;
+      return quantity > 0;
+    }).toList();
+
+    // If no items left, pop the page automatically
+    if (selectedItems.isEmpty) {
+      Future.microtask(() => Get.back());
+      return const SizedBox();
+    }
+
     final double itemsTotal = controller.calculateItemsTotal();
-    final double deliveryCharge = 24.0;
-    final double handlingCharge = 10.0;
+    final double deliveryCharge = 5.0;
+    final double handlingCharge = 2.0;
     final double grandTotal = itemsTotal + deliveryCharge + handlingCharge;
 
     return Scaffold(
@@ -60,12 +86,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context, grandTotal),
+      bottomNavigationBar: _buildBottomBar(context, grandTotal, paymentMethod),
     );
   }
 
   Widget _buildUnifiedServiceCard(List<Map<String, dynamic>> items) {
-    print("Numbers of items: $items");
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -128,6 +153,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             onTap: () {
                               controller.removeFromCart(item['product']);
                               controller.update();
+                              setState(() {});
                             },
                             child: const Icon(Icons.remove,
                                 size: 16, color: Colors.white),
@@ -145,6 +171,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             onTap: () {
                               controller.addToCart(item['product']);
                               controller.update();
+                              setState(() {});
                             },
                             child: const Icon(Icons.add,
                                 size: 16, color: Colors.white),
@@ -160,7 +187,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       final totalPrice = quantity * item['product']['price'];
                       return Text("\u20B9$totalPrice");
                     }),
-                    // Text("\u20B9${item['product']['price'] ?? ''}")
                   ],
                 ),
               )),
@@ -360,7 +386,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, double grandTotal) {
+  Widget _buildBottomBar(
+      BuildContext context, double grandTotal, String? paymentMethod) {
     final userId = profileController.dbUserId.value;
 
     return Container(
@@ -385,47 +412,133 @@ class _CheckoutPageState extends State<CheckoutPage> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.payment,
-                          color: AppTheme.lightTheme.primaryColor, size: 20),
-                      const SizedBox(width: 8),
-                      const Text("PAY USING"),
-                    ],
-                  ),
-                  const Text("Google Pay UPI",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ],
+              GestureDetector(
+                onTap: () async {
+                  final selectedMethod =
+                      await Get.toNamed(AppRoutes.PAYMENTSELECT);
+                  print("Selected method: $selectedMethod");
+                  if (selectedMethod != null) {
+                    setState(() {
+                      paymentMethod = selectedMethod;
+                    });
+                  }
+                  print("Selected method1: $paymentMethod");
+                },
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.payment,
+                            color: AppTheme.lightTheme.primaryColor, size: 20),
+                        const SizedBox(width: 8),
+                        const Text("PAY USING"),
+                      ],
+                    ),
+                    Obx(() => Text(
+                          paymentController
+                                  .selectedPaymentMethod.value.isNotEmpty
+                              ? paymentController.selectedPaymentMethod.value
+                              : "Select Method",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        )),
+                  ],
+                ),
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed:
-                    (selectedPickupDate != null && selectedPickupSlot != null)
-                        ? () async {
+                onPressed: (selectedPickupDate != null &&
+                        selectedPickupSlot != null)
+                    ? () async {
+                        final userId = profileController.dbUserId.value;
+                        final customerName = profileController.name.value;
+                        final customerPhone = profileController.phone.value;
+                        final customerEmail = profileController.email.value;
+
+                        // OPTIONAL: If you create an order from your backend, put it here:
+                        // final backendOrderId = await yourApiCreateRazorpayOrder(grandTotal);
+                        final String? backendOrderId = null;
+
+                        // Start Razorpay payment
+                        razorpayController.payNow(
+                          amount: grandTotal,
+                          orderId:
+                              backendOrderId, // keep null if not using server-created order
+                          customerName: customerName.isNotEmpty
+                              ? customerName
+                              : 'Laundry User',
+                          description: 'Laundry order payment',
+                          prefillContact:
+                              customerPhone.isNotEmpty ? customerPhone : null,
+                          prefillEmail:
+                              customerEmail.isNotEmpty ? customerEmail : null,
+                          notes: {
+                            'user_id': '$userId',
+                            'pickup':
+                                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} $selectedPickupSlot",
+                          },
+                          onSuccess: (paymentId, orderId, signature) async {
                             try {
-                              // final orderId = await orderController.placeOrder(
-                              //   selectedItems: controller.getSelectedCartItems(),
-                              //   totalAmount: grandTotal,
-                              //   paymentMethod: 'Google Pay UPI',
-                              //   paymentStatus: 'paid',
-                              //   userId: userId,
-                              //   addressId: 1,
-                              // );
+                              // Mark payment & place order in your DB
+                              await orderController.placeOrder(
+                                selectedItems:
+                                    controller.getSelectedCartItems(),
+                                totalAmount: grandTotal,
+                                paymentMethod: 'Razorpay',
+                                paymentStatus: 'paid',
+                                pickupDateTime:
+                                    "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+                                deliveryDateTime:
+                                    "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+                                userId: userId,
+                                addressId:
+                                    userId, // replace with actual address id if you have it
+                                // If your order table wants paymentId/signature/orderId, add parameters to placeOrder
+                              );
+
+                              Get.snackbar(
+                                "Payment successful",
+                                "ID: $paymentId",
+                                backgroundColor: Colors.green.shade600,
+                                colorText: Colors.white,
+                              );
+
+                              // Navigate to success screen (replace with real order id if you have it)
                               Get.toNamed(
                                 AppRoutes.SUCCESS,
-                                arguments: {
-                                  'order_id': 58,
-                                },
+                                arguments: {'order_id': 58},
                               );
                             } catch (e) {
-                              Get.snackbar("Error", "Failed to place order: $e",
-                                  backgroundColor: Colors.red,
-                                  colorText: Colors.white);
+                              // Payment succeeded but order place failed: show a clear message
+                              Get.snackbar(
+                                "Order Error",
+                                "Payment captured, but order creation failed.\n${e.toString()}",
+                                backgroundColor: Colors.orange.shade700,
+                                colorText: Colors.white,
+                                duration: const Duration(seconds: 5),
+                              );
                             }
-                          }
-                        : null,
+                          },
+                          onFailure: (code, message) {
+                            // Unified error UI with helpful text
+                            final isCancelled = code == 2 ||
+                                message.toLowerCase().contains('cancel');
+                            Get.snackbar(
+                              isCancelled
+                                  ? "Payment cancelled"
+                                  : "Payment failed",
+                              isCancelled
+                                  ? "You cancelled the payment."
+                                  : "($code) $message",
+                              backgroundColor: Colors.red.shade600,
+                              colorText: Colors.white,
+                            );
+                          },
+                        );
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
@@ -458,7 +571,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             fontWeight: FontWeight.w700)),
                   ],
                 ),
-              ),
+              )
             ],
           ),
         ],
