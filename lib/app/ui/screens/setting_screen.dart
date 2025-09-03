@@ -4,6 +4,8 @@ import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../widgets/terms_conditions.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -16,8 +18,11 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Text("Settings", style: TextStyle(fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,)),
+        title: Text("Settings",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryColor,
+            )),
         centerTitle: true,
       ),
       body: Obx(
@@ -42,8 +47,8 @@ class SettingsScreen extends StatelessWidget {
                             radius: 32,
                             backgroundColor: Colors.transparent,
                             child: Image(
-                              image:
-                                  AssetImage('assets/icons/setting_profile.png'),
+                              image: AssetImage(
+                                  'assets/icons/setting_profile.png'),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -83,7 +88,8 @@ class SettingsScreen extends StatelessWidget {
                         Get.toNamed('/address_screen');
                       }),
                       const _DashedDivider(),
-                      _buildListTile(Icons.person_outline, "Profile", onTap: () {
+                      _buildListTile(Icons.person_outline, "Profile",
+                          onTap: () {
                         Get.toNamed('/profile_screen');
                       }),
                     ]),
@@ -99,11 +105,17 @@ class SettingsScreen extends StatelessWidget {
                       //     onTap: () {
                       //   Get.toNamed('/notification_screen');
                       // }),
-                      const _DashedDivider(),
-                      _buildListTile(Icons.info_outline, "Support",
-                          onTap: () {
+                      // const _DashedDivider(),
+                      _buildListTile(Icons.info_outline, "Support", onTap: () {
                         Get.toNamed('/support_screen');
                       }),
+                      const _DashedDivider(),
+                      _buildListTile(
+                          Icons.article_outlined, "Terms & Conditions",
+                          onTap: () {
+                        Get.to(() => const TermsAndConditionsPage());
+                      }),
+                      // TermsAndConditionsPage(),
                     ]),
                     const SizedBox(height: 24),
                     Center(

@@ -241,7 +241,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Image.asset(
+                      child: Image.network(
                         item['image'],
                         height: 120,
                         fit: BoxFit.fill,

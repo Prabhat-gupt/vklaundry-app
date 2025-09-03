@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/controllers/login_controller.dart';
+import 'package:laundry_app/app/ui/widgets/terms_conditions.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -117,13 +118,14 @@ class _OtpScreenState extends State<OtpScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back, color: Colors.white),
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.white),
                             onPressed: () => Get.back(),
                           ),
                           const SizedBox(height: 40),
@@ -181,8 +183,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                       Text(
                                         'Send OTP(SMS)',
                                         style: TextStyle(
-                                          decoration:
-                                              TextDecoration.underline,
+                                          decoration: TextDecoration.underline,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -209,28 +210,33 @@ class _OtpScreenState extends State<OtpScreen> {
                 alignment: Alignment.bottomCenter,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: const TextSpan(
-                      text: 'By continuing, you agree to our \n',
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                      children: [
-                        TextSpan(
-                          text: 'Terms of Use',
-                          style: TextStyle(
-                              color: Color.fromRGBO(89, 168, 146, 1),
-                              decoration: TextDecoration.underline,
-                              fontSize: 14),
-                        ),
-                        TextSpan(text: ' & '),
-                        TextSpan(
-                          text: 'Privacy Policy',
-                          style: TextStyle(
-                              color: Color.fromRGBO(89, 168, 146, 1),
-                              decoration: TextDecoration.underline,
-                              fontSize: 14),
-                        ),
-                      ],
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.to(() => const TermsAndConditionsPage());
+                    },
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        text: 'By continuing, you agree to our \n',
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        children: [
+                          TextSpan(
+                            text: 'Terms of Use',
+                            style: TextStyle(
+                                color: Color.fromRGBO(89, 168, 146, 1),
+                                decoration: TextDecoration.underline,
+                                fontSize: 14),
+                          ),
+                          TextSpan(text: ' & '),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: TextStyle(
+                                color: Color.fromRGBO(89, 168, 146, 1),
+                                decoration: TextDecoration.underline,
+                                fontSize: 14),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

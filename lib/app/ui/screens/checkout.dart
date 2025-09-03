@@ -6,9 +6,8 @@ import 'package:laundry_app/app/controllers/orders_controller.dart';
 import 'package:laundry_app/app/controllers/payment_select_controller.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
-import 'package:laundry_app/app/routes/app_pages.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:laundry_app/app/controllers/razorpay_payment_controller.dart';
+import 'package:laundry_app/app/routes/app_pages.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -29,6 +28,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final List<String> pickupSlots = ["7AM to 10AM", "5PM to 8PM"];
 
   late RazorpayPaymentController razorpayController;
+
+  bool discountApplied = false;
 
   @override
   void initState() {
@@ -61,6 +62,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final double handlingCharge = 2.0;
     final double grandTotal = itemsTotal + deliveryCharge + handlingCharge;
 
+    final offer = controller.activeOffer;
+    final bool canApplyDiscount =
+        offer.isNotEmpty && itemsTotal >= (offer['min_amount'] ?? 0);
+
+    double discount = 0.0;
+    String discountLabel = "";
+
+    if (discountApplied && canApplyDiscount) {
+      print("Applying discount for offer: $offer");
+      if (offer['discount_type'] == 'percentage') {
+        discount = itemsTotal * (offer['discount_value'] ?? 0) / 100;
+        discountLabel = "${offer['title']} (${offer['discount_value']}% off)";
+        print("Calculated percentage discount: $discount");
+      } else if (offer['discount_type'] == 'flat') {
+        discount = offer['discount_value'] ?? 0;
+        discountLabel =
+            "${offer['title']} (\u20B9${discount.toStringAsFixed(2)} off)";
+      }
+    }
+
+    final double finalTotal = grandTotal - discount;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Checkout"),
@@ -80,13 +103,86 @@ class _CheckoutPageState extends State<CheckoutPage> {
             if (selectedPickupDate != null && selectedPickupSlot != null)
               _buildDeliveryDateDisplay(),
             const SizedBox(height: 20),
-            _buildBillDetails(
-                itemsTotal, deliveryCharge, handlingCharge, grandTotal),
+            // Discount Section
+            if (offer.isNotEmpty)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.primaryColor),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            offer['title'] ?? 'Discount Offer',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            offer['discount_type'] == 'percentage'
+                                ? "${offer['discount_value']}% off on orders above \u20B9${offer['min_amount']}"
+                                : "\u20B9${offer['discount_value']} off on orders above \u20B9${offer['min_amount']}",
+                            style: const TextStyle(fontSize: 14),
+                            softWrap: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: canApplyDiscount && !discountApplied
+                          ? () {
+                              setState(() {
+                                discountApplied = true;
+                              });
+                            }
+                          : (discountApplied
+                              ? () {
+                                  setState(() {
+                                    discountApplied = false;
+                                  });
+                                }
+                              : null),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: discountApplied
+                            ? Colors.red
+                            : (canApplyDiscount
+                                ? AppTheme.primaryColor
+                                : Colors.grey),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                      ),
+                      child: Text(
+                        discountApplied ? "Remove" : "Apply",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            _buildBillDetails(itemsTotal, deliveryCharge, handlingCharge,
+                grandTotal, discount, discountLabel),
             const SizedBox(height: 20),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context, grandTotal, paymentMethod),
+      bottomNavigationBar: _buildBottomBar(context, finalTotal, paymentMethod),
     );
   }
 
@@ -111,8 +207,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        item['product']['image'] ?? 'assets/icons/shirt.png',
+                      child: Image.network(
+                        item['product']['image'] ??
+                            'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
                         height: 50,
                         width: 50,
                         fit: BoxFit.cover,
@@ -175,7 +272,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             },
                             child: const Icon(Icons.add,
                                 size: 16, color: Colors.white),
-                          ),
+                          )
                         ],
                       ),
                     ),
@@ -228,8 +325,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildBillDetails(double itemsTotal, double deliveryCharge,
-      double handlingCharge, double grandTotal) {
+  // Update bill details to accept discount and label
+  Widget _buildBillDetails(
+      double itemsTotal,
+      double deliveryCharge,
+      double handlingCharge,
+      double grandTotal,
+      double discount,
+      String discountLabel) {
+    final double finalTotal = grandTotal - discount;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -251,8 +356,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
           const SizedBox(height: 8),
           _billRow(
               "Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
+          if (discount > 0) ...[
+            const SizedBox(height: 8),
+            _billRow("Discount", "-\u20B9${discount.toStringAsFixed(2)}",
+                isBold: true),
+            Text(discountLabel, style: const TextStyle(color: Colors.green)),
+          ],
           const Divider(height: 24),
-          _billRow("Grand Total", "\u20B9${grandTotal.toStringAsFixed(2)}",
+          _billRow("Grand Total", "\u20B9${finalTotal.toStringAsFixed(2)}",
               isBold: true),
         ],
       ),
@@ -396,58 +507,59 @@ class _CheckoutPageState extends State<CheckoutPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Row(
+          //   children: [
+          //     Icon(Icons.location_on, color: AppTheme.primaryColor, size: 40),
+          //     const SizedBox(width: 8),
+          //     const Expanded(
+          //       child: Text(
+          //         "Pick Up from\nSy.No. 540'A, Gowdaval...",
+          //         style: TextStyle(fontWeight: FontWeight.w500),
+          //       ),
+          //     ),
+          //     const Icon(Icons.keyboard_arrow_down),
+          //   ],
+          // ),
+          // const SizedBox(height: 12),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.location_on, color: AppTheme.primaryColor, size: 40),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  "Pick Up from\nSy.No. 540'A, Gowdaval...",
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  final selectedMethod =
-                      await Get.toNamed(AppRoutes.PAYMENTSELECT);
-                  print("Selected method: $selectedMethod");
-                  if (selectedMethod != null) {
-                    setState(() {
-                      paymentMethod = selectedMethod;
-                    });
-                  }
-                  print("Selected method1: $paymentMethod");
-                },
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.payment,
-                            color: AppTheme.lightTheme.primaryColor, size: 20),
-                        const SizedBox(width: 8),
-                        const Text("PAY USING"),
-                      ],
-                    ),
-                    Obx(() => Text(
-                          paymentController
-                                  .selectedPaymentMethod.value.isNotEmpty
-                              ? paymentController.selectedPaymentMethod.value
-                              : "Select Method",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        )),
-                  ],
-                ),
-              ),
-              const Spacer(),
+              // GestureDetector(
+              //   onTap: () async {
+              //     final selectedMethod =
+              //         await Get.toNamed(AppRoutes.PAYMENTSELECT);
+              //     print("Selected method: $selectedMethod");
+              //     if (selectedMethod != null) {
+              //       setState(() {
+              //         paymentMethod = selectedMethod;
+              //       });
+              //     }
+              //     print("Selected method1: $paymentMethod");
+              //   },
+              //   child: Column(
+              //     children: [
+              //       Row(
+              //         children: [
+              //           Icon(Icons.payment,
+              //               color: AppTheme.lightTheme.primaryColor, size: 20),
+              //           const SizedBox(width: 8),
+              //           const Text("PAY USING"),
+              //         ],
+              //       ),
+              //       Obx(() => Text(
+              //             paymentController
+              //                     .selectedPaymentMethod.value.isNotEmpty
+              //                 ? paymentController.selectedPaymentMethod.value
+              //                 : "Select Method",
+              //             style: const TextStyle(
+              //               fontWeight: FontWeight.bold,
+              //               color: Colors.black87,
+              //             ),
+              //           )),
+              //     ],
+              //   ),
+              // ),
+              // const Spacer(),
               ElevatedButton(
                 onPressed: (selectedPickupDate != null &&
                         selectedPickupSlot != null)
@@ -459,84 +571,133 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                         // OPTIONAL: If you create an order from your backend, put it here:
                         // final backendOrderId = await yourApiCreateRazorpayOrder(grandTotal);
-                        final String? backendOrderId = null;
-
-                        // Start Razorpay payment
-                        razorpayController.payNow(
-                          amount: grandTotal,
-                          orderId:
-                              backendOrderId, // keep null if not using server-created order
-                          customerName: customerName.isNotEmpty
-                              ? customerName
-                              : 'Laundry User',
-                          description: 'Laundry order payment',
-                          prefillContact:
-                              customerPhone.isNotEmpty ? customerPhone : null,
-                          prefillEmail:
-                              customerEmail.isNotEmpty ? customerEmail : null,
-                          notes: {
-                            'user_id': '$userId',
-                            'pickup':
-                                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} $selectedPickupSlot",
-                          },
-                          onSuccess: (paymentId, orderId, signature) async {
-                            try {
-                              // Mark payment & place order in your DB
-                              await orderController.placeOrder(
-                                selectedItems:
-                                    controller.getSelectedCartItems(),
-                                totalAmount: grandTotal,
-                                paymentMethod: 'Razorpay',
-                                paymentStatus: 'paid',
-                                pickupDateTime:
-                                    "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
-                                deliveryDateTime:
-                                    "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
-                                userId: userId,
-                                addressId:
-                                    userId, // replace with actual address id if you have it
-                                // If your order table wants paymentId/signature/orderId, add parameters to placeOrder
-                              );
-
-                              Get.snackbar(
-                                "Payment successful",
-                                "ID: $paymentId",
-                                backgroundColor: Colors.green.shade600,
-                                colorText: Colors.white,
-                              );
-
-                              // Navigate to success screen (replace with real order id if you have it)
-                              Get.toNamed(
-                                AppRoutes.SUCCESS,
-                                arguments: {'order_id': 58},
-                              );
-                            } catch (e) {
-                              // Payment succeeded but order place failed: show a clear message
-                              Get.snackbar(
-                                "Order Error",
-                                "Payment captured, but order creation failed.\n${e.toString()}",
-                                backgroundColor: Colors.orange.shade700,
-                                colorText: Colors.white,
-                                duration: const Duration(seconds: 5),
-                              );
-                            }
-                          },
-                          onFailure: (code, message) {
-                            // Unified error UI with helpful text
-                            final isCancelled = code == 2 ||
-                                message.toLowerCase().contains('cancel');
-                            Get.snackbar(
-                              isCancelled
-                                  ? "Payment cancelled"
-                                  : "Payment failed",
-                              isCancelled
-                                  ? "You cancelled the payment."
-                                  : "($code) $message",
-                              backgroundColor: Colors.red.shade600,
-                              colorText: Colors.white,
-                            );
+                        final selectedItems = controller.getSelectedCartItems();
+                        final totalItemsCount = selectedItems.fold<int>(
+                          0,
+                          (sum, item) {
+                            final quantity = controller.cartQuantities[
+                                    '${item['service']}_${item['product']['id']}'] ??
+                                0;
+                            return sum + quantity;
                           },
                         );
+                        final hasSubscription = await profileController
+                            .validateAndUpdateSubscription(
+                                userId, totalItemsCount);
+                        final String? backendOrderId = null;
+                        if (hasSubscription == 1) {
+                          // Skip payment, place order directly
+                          await orderController.placeOrder(
+                            selectedItems: controller.getSelectedCartItems(),
+                            totalAmount: grandTotal,
+                            paymentMethod: 'Subscription',
+                            paymentStatus: 'paid',
+                            pickupDateTime:
+                                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+                            deliveryDateTime:
+                                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+                            userId: userId,
+                            addressId:
+                                userId, // replace with actual address id if needed
+                          );
+
+                          Get.snackbar(
+                            "Order Placed",
+                            "Your order has been placed using your subscription.",
+                            backgroundColor: Colors.green.shade600,
+                            colorText: Colors.white,
+                          );
+
+                          Get.toNamed(
+                            AppRoutes.SUCCESS,
+                            arguments: {'order_id': 58},
+                          );
+                        } else if (hasSubscription == 0) {
+                          // Start Razorpay payment
+                          razorpayController.payNow(
+                            amount: grandTotal,
+                            orderId:
+                                backendOrderId, // keep null if not using server-created order
+                            customerName: customerName.isNotEmpty
+                                ? customerName
+                                : 'Laundry User',
+                            description: 'Laundry order payment',
+                            prefillContact:
+                                customerPhone.isNotEmpty ? customerPhone : null,
+                            prefillEmail:
+                                customerEmail.isNotEmpty ? customerEmail : null,
+                            notes: {
+                              'user_id': '$userId',
+                              'pickup':
+                                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} $selectedPickupSlot",
+                            },
+                            onSuccess: (paymentId, orderId, signature) async {
+                              try {
+                                // Mark payment & place order in your DB
+                                await orderController.placeOrder(
+                                  selectedItems:
+                                      controller.getSelectedCartItems(),
+                                  totalAmount: grandTotal,
+                                  paymentMethod: 'Razorpay',
+                                  paymentStatus: 'paid',
+                                  pickupDateTime:
+                                      "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+                                  deliveryDateTime:
+                                      "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+                                  userId: userId,
+                                  addressId:
+                                      userId, // replace with actual address id if you have it
+                                  // If your order table wants paymentId/signature/orderId, add parameters to placeOrder
+                                );
+
+                                Get.snackbar(
+                                  "Payment successful",
+                                  "ID: $paymentId",
+                                  backgroundColor: Colors.green.shade600,
+                                  colorText: Colors.white,
+                                );
+
+                                // Navigate to success screen (replace with real order id if you have it)
+                                Get.toNamed(
+                                  AppRoutes.SUCCESS,
+                                  arguments: {'order_id': 58},
+                                );
+                              } catch (e) {
+                                // Payment succeeded but order place failed: show a clear message
+                                Get.snackbar(
+                                  "Order Error",
+                                  "Payment captured, but order creation failed.\n${e.toString()}",
+                                  backgroundColor: Colors.orange.shade700,
+                                  colorText: Colors.white,
+                                  duration: const Duration(seconds: 5),
+                                );
+                              }
+                            },
+                            onFailure: (code, message) {
+                              // Unified error UI with helpful text
+                              final isCancelled = code == 2 ||
+                                  message.toLowerCase().contains('cancel');
+                              Get.snackbar(
+                                isCancelled
+                                    ? "Payment cancelled"
+                                    : "Payment failed",
+                                isCancelled
+                                    ? "You cancelled the payment."
+                                    : "($code) $message",
+                                backgroundColor: Colors.red.shade600,
+                                colorText: Colors.white,
+                              );
+                            },
+                          );
+                        }else{
+                          // Subscription limit exceeded
+                          Get.snackbar(
+                            "Subscription Limit Exceeded",
+                            "You have exceeded your subscription limit. Please contact support or choose Pay Now.",
+                            backgroundColor: Colors.red.shade600,
+                            colorText: Colors.white,
+                          );
+                        }
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

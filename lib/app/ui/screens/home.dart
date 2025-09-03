@@ -88,16 +88,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       address['address_line'] ?? '',
                                       style: const TextStyle(
-                                        color: Colors.white, ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
+                                        color: Colors.white,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                     Text(
                                       '${address['city'] ?? ''}, ${address['landmark_pincode'] ?? ''}',
                                       style: const TextStyle(
                                           color: Colors.white70, fontSize: 12),
-                                          overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ],
                                 );
@@ -198,17 +199,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('#SpecialForYou',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
-                      Row(
-                        children: [
-                          Text('See all',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.blue)),
-                          Icon(Icons.chevron_right,
-                              color: Colors.blue, size: 22),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Text('See all',
+                      //         style: TextStyle(
+                      //             fontSize: 14,
+                      //             fontWeight: FontWeight.w500,
+                      //             color: Colors.blue)),
+                      //     Icon(Icons.chevron_right,
+                      //         color: Colors.blue, size: 22),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),

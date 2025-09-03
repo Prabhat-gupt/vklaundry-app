@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:flutter/foundation.dart';
+
 import 'package:get/get.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
@@ -50,7 +50,8 @@ class RazorpayPaymentController extends GetxController {
     String? prefillContact,
     String? prefillEmail,
     Map<String, String>? notes,
-    required void Function(String paymentId, String? orderId, String? signature) onSuccess,
+    required void Function(String paymentId, String? orderId, String? signature)
+        onSuccess,
     required void Function(int code, String message) onFailure,
   }) {
     if (amount <= 0) {
@@ -62,7 +63,7 @@ class RazorpayPaymentController extends GetxController {
     final int amountInPaise = (amount * 100).round();
 
     final options = {
-      'key': razorpayKeyId,
+      'key': 'rzp_test_R5aav0MP84trbb',
       'amount': amountInPaise,
       'currency': 'INR',
       if (orderId != null) 'order_id': orderId,
@@ -95,7 +96,8 @@ class RazorpayPaymentController extends GetxController {
   }
 
   // Store callbacks for this payment attempt
-  void Function(String paymentId, String? orderId, String? signature)? _pendingSuccess;
+  void Function(String paymentId, String? orderId, String? signature)?
+      _pendingSuccess;
   void Function(int code, String message)? _pendingFailure;
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {

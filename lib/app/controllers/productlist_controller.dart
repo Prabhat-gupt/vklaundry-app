@@ -12,7 +12,8 @@ class ProductListController extends GetxController {
 
   // Cart Data
   var cartQuantities = <String, int>{}.obs; // key = "service_productId"
-  var cartProductDetails = <String, Map<String, dynamic>>{}.obs; // full product details
+  var cartProductDetails =
+      <String, Map<String, dynamic>>{}.obs; // full product details
 
   // Categories & Services
   var categories = <Map<String, dynamic>>[].obs;
@@ -23,10 +24,26 @@ class ProductListController extends GetxController {
     super.onInit();
     loadCategoriesFromSupabase();
     preloadServiceNames();
+    fetchActiveOffer();
   }
 
   void setService(String service) {
     currentService.value = service;
+  }
+
+  RxMap<String, dynamic> activeOffer = <String, dynamic>{}.obs;
+
+  Future<void> fetchActiveOffer() async {
+    final response = await Supabase.instance.client
+        .from('offers')
+        .select()
+        .eq('active', true)
+        .limit(1)
+        .single();
+    print("Fetched active offer: $response");
+    if (response != null) {
+      activeOffer.value = response;
+    }
   }
 
   Future<void> loadProductsFromSupabase(int serviceId) async {
@@ -49,10 +66,8 @@ class ProductListController extends GetxController {
 
       final itemIds = prices.map((e) => e['item_id']).toSet().toList();
 
-      final itemsResponse = await supabase
-          .from('items')
-          .select('*')
-          .inFilter('id', itemIds);
+      final itemsResponse =
+          await supabase.from('items').select('*').inFilter('id', itemIds);
 
       final List<Map<String, dynamic>> items =
           List<Map<String, dynamic>>.from(itemsResponse);
@@ -66,7 +81,8 @@ class ProductListController extends GetxController {
         return {
           'id': itemId,
           'name': item['name'],
-          'image': item['image_url'] ?? 'assets/icons/shirt.png',
+          'image': item['image_url'] ??
+              'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
           'price': priceData['price'] ?? 0,
           'oldPrice': priceData['old_price'] ?? 0,
           'discount': priceData['discount'] ?? '',
@@ -80,7 +96,6 @@ class ProductListController extends GetxController {
       // ✅ Replace instead of append to avoid duplicates
       products.value = enrichedProducts;
       filteredProducts.value = enrichedProducts;
-
     } catch (e) {
       print('Error loading products for service $serviceId: $e');
       products.value = [];
@@ -159,8 +174,7 @@ class ProductListController extends GetxController {
     }
   }
 
-  int getTotalCartItems() =>
-      cartQuantities.values.fold(0, (a, b) => a + b);
+  int getTotalCartItems() => cartQuantities.values.fold(0, (a, b) => a + b);
 
   Future<void> loadCategoriesFromSupabase() async {
     try {
