@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
-import 'package:laundry_app/app/ui/screens/category.dart';
+import 'package:laundry_app/app/ui/screens/all_orders.dart';
 import 'package:laundry_app/app/ui/screens/home.dart';
+import 'package:laundry_app/app/ui/screens/services.dart';
 import 'package:laundry_app/app/ui/screens/setting_screen.dart';
 
 class RootPage extends StatefulWidget {
@@ -20,8 +21,8 @@ class _RootPageState extends State<RootPage> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    CategoryScreen(),
-    HomeScreen(),
+    ServiceScreen(),
+    AllOrdersPage(),
     SettingsScreen(),
   ];
 
@@ -64,11 +65,11 @@ class _RootPageState extends State<RootPage> {
                   backgroundColor: Colors.white),
               BottomNavigationBarItem(
                   icon: Icon(Icons.category_outlined),
-                  label: 'Category',
+                  label: 'Services',
                   backgroundColor: Colors.white),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.school),
-                  label: 'School',
+                  icon: Icon(Icons.receipt_long_outlined),
+                  label: 'Booking',
                   backgroundColor: Colors.white),
               BottomNavigationBarItem(
                   icon: Icon(Icons.settings),

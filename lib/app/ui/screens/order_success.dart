@@ -53,13 +53,13 @@ class OrderSuccessPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  // Navigate to Order Details/Tracking
-                  Get.offNamed(AppRoutes.TRACKING, arguments: {'order_id': orderId}); // Replace with actual order ID
-                },
-                child: const Text("Track Order", style: TextStyle(color: Color(0xFF1B1C39))),
-              ),
+              // TextButton(
+              //   onPressed: () {
+              //     // Navigate to Order Details/Tracking
+              //     Get.offNamed(AppRoutes.TRACKING, arguments: {'order_id': orderId}); // Replace with actual order ID
+              //   },
+              //   child: const Text("Track Order", style: TextStyle(color: Color(0xFF1B1C39))),
+              // ),
             ],
           ),
         ),

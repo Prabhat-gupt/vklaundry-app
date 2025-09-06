@@ -4,27 +4,52 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProductListController extends GetxController {
   final supabase = Supabase.instance.client;
 
-  var products = <Map<String, dynamic>>[].obs;
+  var isLoading = false.obs;
+  var products = <Map<String, dynamic>>[].obs; // current service products
   var filteredProducts = <Map<String, dynamic>>[].obs;
   var currentService = ''.obs;
   var selectedCategoryId = RxnInt();
+
+  // Cart Data
   var cartQuantities = <String, int>{}.obs; // key = "service_productId"
+  var cartProductDetails =
+      <String, Map<String, dynamic>>{}.obs; // full product details
+
+  // Categories & Services
   var categories = <Map<String, dynamic>>[].obs;
-  var serviceNamesCache = <String, String>{}.obs; // Caching service names
+  var serviceNamesCache = <String, String>{}.obs; // Cache service names
 
   @override
   void onInit() {
     super.onInit();
     loadCategoriesFromSupabase();
     preloadServiceNames();
+    fetchActiveOffer();
   }
 
   void setService(String service) {
     currentService.value = service;
   }
 
+  RxMap<String, dynamic> activeOffer = <String, dynamic>{}.obs;
+
+  Future<void> fetchActiveOffer() async {
+    final response = await Supabase.instance.client
+        .from('offers')
+        .select()
+        .eq('active', true)
+        .limit(1)
+        .single();
+    print("Fetched active offer: $response");
+    if (response != null) {
+      activeOffer.value = response;
+    }
+  }
+
   Future<void> loadProductsFromSupabase(int serviceId) async {
     try {
+      isLoading.value = true;
+
       final pricesResponse = await supabase
           .from('prices')
           .select('*, item_id')
@@ -41,10 +66,8 @@ class ProductListController extends GetxController {
 
       final itemIds = prices.map((e) => e['item_id']).toSet().toList();
 
-      final itemsResponse = await supabase
-          .from('items')
-          .select('*')
-          .inFilter('id', itemIds);
+      final itemsResponse =
+          await supabase.from('items').select('*').inFilter('id', itemIds);
 
       final List<Map<String, dynamic>> items =
           List<Map<String, dynamic>>.from(itemsResponse);
@@ -55,11 +78,11 @@ class ProductListController extends GetxController {
           (p) => p['item_id'] == itemId,
           orElse: () => {},
         );
-
         return {
           'id': itemId,
           'name': item['name'],
-          'image': item['image_url'] ?? 'assets/icons/shirt.png',
+          'image': item['image_url'] ??
+              'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
           'price': priceData['price'] ?? 0,
           'oldPrice': priceData['old_price'] ?? 0,
           'discount': priceData['discount'] ?? '',
@@ -70,21 +93,28 @@ class ProductListController extends GetxController {
         };
       }).toList();
 
-      products.addAll(enrichedProducts);
+      // ✅ Replace instead of append to avoid duplicates
+      products.value = enrichedProducts;
       filteredProducts.value = enrichedProducts;
     } catch (e) {
       print('Error loading products for service $serviceId: $e');
       products.value = [];
       filteredProducts.value = [];
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void filterProductsByCategory(int? categoryId) {
+  void filterProductsByCategory(int? categoryId, int? serviceId) {
     selectedCategoryId.value = categoryId;
     final originalList = List<Map<String, dynamic>>.from(products);
     filteredProducts.value = categoryId == null
         ? originalList
-        : originalList.where((product) => product['category_id'] == categoryId).toList();
+        : originalList
+            .where((product) =>
+                product['category_id'] == categoryId &&
+                product['service_id'] == serviceId)
+            .toList();
   }
 
   void addToCart(Map<String, dynamic> product) {
@@ -93,6 +123,9 @@ class ProductListController extends GetxController {
     final key = '${service}_$productId';
 
     cartQuantities[key] = (cartQuantities[key] ?? 0) + 1;
+
+    // ✅ Store full product details so cart works after service switch
+    cartProductDetails[key] = product;
   }
 
   void removeFromCart(Map<String, dynamic> product) {
@@ -102,23 +135,21 @@ class ProductListController extends GetxController {
 
     if (cartQuantities[key] != null && cartQuantities[key]! > 0) {
       cartQuantities[key] = cartQuantities[key]! - 1;
+
       if (cartQuantities[key] == 0) {
         cartQuantities.remove(key);
+        cartProductDetails.remove(key); // remove details too
       }
     }
   }
 
   List<Map<String, dynamic>> getSelectedCartItems() {
     final List<Map<String, dynamic>> items = [];
-    cartQuantities.forEach((key, quantity) {
-      final parts = key.split('_');
-      if (parts.length < 2) return;
-      final service = parts[0];
-      final productId = int.tryParse(parts[1]);
 
-      final product = products.firstWhereOrNull(
-          (item) => item['id'] == productId && item['service_id'].toString() == service);
+    cartQuantities.forEach((key, quantity) {
+      final product = cartProductDetails[key];
       if (product != null) {
+        final service = product['service_id'].toString();
         final serviceName = serviceNamesCache[service] ?? 'Loading...';
         items.add({
           'product': product,
@@ -128,6 +159,7 @@ class ProductListController extends GetxController {
         });
       }
     });
+
     return items;
   }
 
@@ -146,11 +178,26 @@ class ProductListController extends GetxController {
 
   Future<void> loadCategoriesFromSupabase() async {
     try {
-      final response = await supabase.from('categories').select('id, name');
+      final response =
+          await supabase.from('categories').select('id, name, image_url');
       categories.value = List<Map<String, dynamic>>.from(response);
     } catch (e) {
       print('Error loading categories: $e');
       categories.value = [];
+    }
+  }
+
+  void incrementQuantity(int productId, int serviceId) {
+    final key = '${serviceId}_$productId';
+    if (cartQuantities.containsKey(key)) {
+      cartQuantities[key] = (cartQuantities[key] ?? 1) + 1;
+    }
+  }
+
+  void decrementQuantity(int productId, int serviceId) {
+    final key = '${serviceId}_$productId';
+    if (cartQuantities.containsKey(key) && cartQuantities[key]! > 1) {
+      cartQuantities[key] = cartQuantities[key]! - 1;
     }
   }
 }
