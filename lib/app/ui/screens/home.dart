@@ -33,6 +33,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  String _formatServiceName(String name, {int maxLength = 12}) {
+    if (name.length <= maxLength) return name;
+    return name.substring(0, maxLength) + " . . .";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,8 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 0, vertical: 54),
+                  padding: const EdgeInsets.only(top: 60, bottom: 30),
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -59,15 +63,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(44),
-                      bottomRight: Radius.circular(44),
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.only(left: 8, right: 16),
                         child: Row(
                           children: [
                             const Icon(Icons.location_pin,
@@ -104,10 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }),
                             ),
-
-                            // GestureDetector(
-                            //   onTap: () => Get.toNamed(AppRoutes.NOTIFICATION),
-                            //   child: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 28)),
                             const SizedBox(width: 10),
                             GestureDetector(
                               onTap: () => Get.toNamed(AppRoutes.PROFILE),
@@ -132,58 +132,71 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 16),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: List.generate(
-                            controller.services.length,
-                            (index) {
-                              final service = controller.services[index];
-                              final iconPath =
-                                  index < controller.serviceIcons.length
-                                      ? controller.serviceIcons[index]
-                                      : 'assets/icons/others.png';
+                        child: Container(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: Row(
+                            children: List.generate(
+                              controller.services.length,
+                              (index) {
+                                final service = controller.services[index];
+                                final iconPath =
+                                    index < controller.serviceIcons.length
+                                        ? controller.serviceIcons[index]
+                                        : 'assets/icons/others.png';
 
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Get.to(
-                                      () => const ProductListScreen(),
-                                      arguments: {
-                                        'serviceName': service['name'],
-                                        'service_id': service['id']
-                                      },
-                                    );
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        height: 60,
-                                        width: 60,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black12,
-                                              blurRadius: 5,
-                                              offset: Offset(0, 2),
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 12.0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Get.to(
+                                        () => const ProductListScreen(),
+                                        arguments: {
+                                          'serviceName': service['name'],
+                                          'service_id': service['id']
+                                        },
+                                      );
+                                    },
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          height: 60,
+                                          width: 60,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black12,
+                                                blurRadius: 5,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipOval(
+                                            child: Image.network(
+                                              service['image_url'],
+                                              fit: BoxFit
+                                                  .cover, // ✅ fill circle properly
+                                              height: 60,
+                                              width: 60,
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                        child: Center(
-                                          child: Image.asset(iconPath,
-                                              height: 30, width: 30),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(service['name'] ?? 'Service',
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          _formatServiceName(
+                                              service['name'] ?? 'Service'),
                                           style: const TextStyle(
-                                              color: Colors.white)),
-                                    ],
+                                              color: Colors.white),
+                                          maxLines: 1,
+                                          overflow: TextOverflow
+                                              .clip, // avoid Flutter's default "..."
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -192,24 +205,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                  padding: EdgeInsets.symmetric(horizontal: 18.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text('#SpecialForYou',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
-                      // Row(
-                      //   children: [
-                      //     Text('See all',
-                      //         style: TextStyle(
-                      //             fontSize: 14,
-                      //             fontWeight: FontWeight.w500,
-                      //             color: Colors.blue)),
-                      //     Icon(Icons.chevron_right,
-                      //         color: Colors.blue, size: 22),
-                      //   ],
-                      // ),
                     ],
                   ),
                 ),
@@ -286,10 +288,6 @@ Widget _buildTestimonialsSection(testimonialsController) {
       SizedBox(
         height: 160,
         child: Obx(() {
-          // if (testimonialsController.testimonials.isEmpty) {
-          //   return const Center(child: CircularProgressIndicator());
-          // }
-
           return ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: testimonialsController.testimonials.length,
@@ -346,17 +344,6 @@ Widget _buildActiveOrdersSection(
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
-            // GestureDetector(
-            //   onTap: () {
-            //     Get.toNamed(AppRoutes.ALLORDERS);
-            //   },
-            //   child: const Row(
-            //     children: [
-            //       Text('View All', style: TextStyle(fontSize: 14, color: Colors.blue, fontWeight: FontWeight.w500, decorationColor: Colors.blue)),
-            //       Icon(Icons.chevron_right, color: Colors.blue, size: 22),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -364,14 +351,46 @@ Widget _buildActiveOrdersSection(
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
         child: Obx(() {
-          final ordersData = orderTrackController.order['orders'] ?? [];
+          final ordersData = List<Map<String, dynamic>>.from(
+              orderTrackController.order['orders'] ?? []);
+
           if (ordersData.isEmpty) {
-            return const Text("No orders found");
+            return Center(
+              child: Column(
+                children: [
+                  Image.network(
+                    "https://cdn-icons-png.flaticon.com/512/4076/4076503.png", // ✅ free empty box icon
+                    height: 120,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "No recent bookings found",
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            );
           }
+
+          // Sort by latest (assuming 'created_at' exists)
+          ordersData.sort((a, b) {
+            final dateA =
+                DateTime.tryParse(a['created_at'] ?? '') ?? DateTime(1970);
+            final dateB =
+                DateTime.tryParse(b['created_at'] ?? '') ?? DateTime(1970);
+            return dateB.compareTo(dateA);
+          });
+
+          final recentOrders = ordersData.take(2).toList();
+
           return OrderCard(
-              orders: List<Map<String, dynamic>>.from(
-                  orderTrackController.order['orders'] ?? []),
-              numbersOrders: 2);
+            orders: recentOrders,
+            numbersOrders: recentOrders.length,
+          );
         }),
       )
     ],

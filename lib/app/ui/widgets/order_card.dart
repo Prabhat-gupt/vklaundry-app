@@ -4,16 +4,33 @@ import 'package:intl/intl.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
 
+/// 🔹 Status mapping
+const ORDER_STATUS = {
+  'PENDING': 0,
+  'ACCEPTED': 1,
+  'PROCESSING': 2,
+  'COMPLETED': 3,
+  'REJECTED': 4,
+};
+
 class OrderCard extends StatelessWidget {
   final List<Map<String, dynamic>> orders;
-  var numbersOrders;
-  OrderCard({super.key, required this.orders, required this.numbersOrders});
+  final int numbersOrders;
+
+  const OrderCard({
+    super.key,
+    required this.orders,
+    required this.numbersOrders,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: List.generate(numbersOrders, (index) {
         final order = orders[index];
+        final int status = order['status'] ?? 0;
+        final String statusText = _getStatusText(status);
+
         return GestureDetector(
           onTap: () => _showOrderDetail(context, order),
           child: Container(
@@ -32,22 +49,21 @@ class OrderCard extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // 🔹 Left side
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      // '#${order['id']?.toString() ?? ''}',
+                    const Text(
                       'Booking Details',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      order['pickup_datetime'] ?? '',
+                      _formatDateTime(order['created_at']),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -55,6 +71,7 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // 🔹 Right side
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -70,14 +87,13 @@ class OrderCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _statusColor(order['status_text']?.toString())
-                            .withOpacity(0.15),
+                        color: _getStatusColor(status).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        order['status_text']?.toString() ?? '',
+                        statusText,
                         style: TextStyle(
-                          color: _statusColor(order['status_text']?.toString()),
+                          color: _getStatusColor(status),
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
@@ -104,7 +120,20 @@ String _formatDate(String? dateString) {
   }
 }
 
+String _formatDateTime(String? dateString) {
+  if (dateString == null || dateString.isEmpty) return '';
+  try {
+    final date = DateTime.parse(dateString);
+    return DateFormat('yyyy-MM-dd HH:mm').format(date);
+  } catch (e) {
+    return '';
+  }
+}
+
 void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
+  final int status = order['status'] ?? 0;
+  final String statusText = _getStatusText(status);
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -126,6 +155,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 🔹 Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -138,60 +168,75 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _statusColor(order['status_text']?.toString())
-                              .withOpacity(0.15),
+                          color: _getStatusColor(status).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          order['status_text']?.toString() ?? '',
+                          statusText,
                           style: TextStyle(
-                            color: _statusColor(order['status_text']?.toString()),
+                            color: _getStatusColor(status),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
+
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today,
-                          size: 16, color: Colors.grey),
-                      const SizedBox(width: 6),
-                      Text(
-                        order['pickup_datetime'] ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Pickup Date & Time',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 12)),
+                              const SizedBox(height: 4),
+                              Text(
+                                order['pickup_datetime'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Delivery Date & Time',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 12)),
+                              const SizedBox(height: 4),
+                              Text(
+                                order['delivery_datetime'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
+                  // 🔹 Pickup Info
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Delivery Date&Time',
-                                style: TextStyle(color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            Text(order['delivery_datetime']?.toString() ?? '',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  // 🔹 Items
                   const Text('Items',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
@@ -202,29 +247,26 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item['product']?['name']?.toString() ?? '',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    item['service_name']?.toString() ?? '',
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 12),
-                                  ),
-                                ],
-                              ),
+                              Text(item['product']?['name']?.toString() ?? '',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              Text(item['service_name']?.toString() ?? '',
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 12)),
                             ],
                           ),
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text('${item['quantity']} item'),
-                              Text('₹${item['price']}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                              Text(
+                                '₹${item['price']}',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
                             ],
                           ),
                         ],
@@ -233,14 +275,14 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                   }),
                   const SizedBox(height: 16),
                   Divider(color: Colors.grey.shade300),
-                  const SizedBox(height: 8),
-                  _priceRow(
-                      'Subtotal', '₹${(order['amount'] - 2)?.toString() ?? '0'}'),
-                  _priceRow('Delivery Fee',
-                      '₹2'),
-                  const SizedBox(height: 4),
+
+                  // 🔹 Price Summary
+                  _priceRow('Subtotal',
+                      '₹${(order['amount'] - 2)?.toString() ?? '0'}'),
+                  _priceRow('Delivery Fee', '₹2'),
                   _priceRow('Total', '₹${order['amount']?.toString() ?? '0'}',
                       isBold: true, isTotal: true),
+
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -298,15 +340,38 @@ Widget _priceRow(String title, String price,
   );
 }
 
-Color _statusColor(String? status) {
+/// 🔹 Status text mapper
+String _getStatusText(int status) {
   switch (status) {
-    case 'Delivered':
-      return Colors.green;
-    case 'Processing':
-      return Colors.orange;
-    case 'Pending':
-      return Colors.grey;
+    case 0:
+      return "Pending";
+    case 1:
+      return "Accepted";
+    case 2:
+      return "Processing";
+    case 3:
+      return "Completed";
+    case 4:
+      return "Rejected";
     default:
+      return "Unknown";
+  }
+}
+
+/// 🔹 Status color mapper
+Color _getStatusColor(int status) {
+  switch (status) {
+    case 0:
+      return Colors.grey;
+    case 1:
+      return Colors.orange;
+    case 2:
       return Colors.blue;
+    case 3:
+      return Colors.green;
+    case 4:
+      return Colors.red;
+    default:
+      return Colors.blueGrey;
   }
 }

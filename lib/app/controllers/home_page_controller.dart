@@ -150,35 +150,31 @@ class HomePageController extends GetxController {
   // }
 
   /// ✅ Subscribe User after payment
-  Future<void> subscribeUser(Map<String, dynamic> sub) async {
-    try {
-      int userId = await fetchUserDetails();
+  Future<bool> subscribeUser(Map<String, dynamic> sub) async {
+  try {
+    int userId = await fetchUserDetails();
 
-      // Example: subscription for 30 days
-      final startDate = DateTime.now();
-      final endDate = startDate.add(const Duration(days: 30));
+    final startDate = DateTime.now();
+    final endDate = startDate.add(const Duration(days: 30));
 
-      final insertResponse = await supabase.from('user_subscriptions').insert({
-        'user_id': userId,
-        'subscription_id': sub['id'],
-        'start_date': DateFormat('yyyy-MM-dd').format(startDate),
-        'end_date': DateFormat('yyyy-MM-dd').format(endDate),
-        'status': 1,
-        'created_at': DateTime.now().toIso8601String(),
-      }).select();
+    final insertResponse = await supabase.from('user_subscriptions').insert({
+      'user_id': userId,
+      'subscription_id': sub['id'],
+      'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+      'end_date': DateFormat('yyyy-MM-dd').format(endDate),
+      'status': 1,
+      'created_at': DateTime.now().toIso8601String(),
+    }).select();
 
-      if (insertResponse.isNotEmpty) {
-        Get.snackbar(
-          'Success',
-          'You have subscribed to ${sub['name']}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF59A892),
-          colorText: const Color(0xFFFFFFFF),
-        );
-      }
-    } catch (e) {
-      print("Subscription Error: $e");
-      Get.snackbar('Error', 'Subscription failed: $e');
+    if (insertResponse.isNotEmpty) {
+      return true; // ✅ Subscription added successfully
+    } else {
+      return false; // ❌ Insert failed (no rows returned)
     }
+  } catch (e, st) {
+    print("Subscription Error: $e\n$st");
+    return false;
   }
+}
+
 }

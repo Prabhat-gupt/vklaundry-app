@@ -72,12 +72,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           ? List.generate(
                               4, (index) => _buildCategorySkeleton())
                           : controller.categories.map((category) {
+                              print("DEBUG Category Data: $category");
                               final categoryId = category['id'];
                               final isSelected =
                                   controller.selectedCategoryId.value ==
                                       categoryId;
                               return _buildCategoryChip(
-                                  category['name'].toString(), isSelected, () {
+                                  category['name'].toString(),
+                                  category['image_url'],
+                                  isSelected, () {
                                 if (isSelected) {
                                   controller.filterProductsByCategory(
                                       null, null);
@@ -92,32 +95,58 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 )),
             const SizedBox(height: 16),
             Expanded(
-              child: Obx(() => Skeletonizer(
-                    enabled: controller.isLoading.value,
-                    child: GridView.builder(
-                      itemCount: controller.isLoading.value
-                          ? 6
-                          : controller.filteredProducts.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.46,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 2,
-                      ),
-                      itemBuilder: (context, index) {
-                        if (controller.isLoading.value) {
-                          return _buildProductSkeleton();
-                        }
-                        final item = controller.filteredProducts[index];
-                        final serviceId = item['service_id'] ??
-                            controller.currentService.value;
-                        final productId = item['id'];
-                        final key = '${serviceId}_$productId';
-                        return _buildProductCard(item, key);
-                      },
+              child: Obx(() {
+                if (!controller.isLoading.value &&
+                    controller.filteredProducts.isEmpty) {
+                  // Show empty logo
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.network(
+                          "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",
+                          height: 120,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "No items available",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                  )),
+                  );
+                }
+                return Skeletonizer(
+                  enabled: controller.isLoading.value,
+                  child: GridView.builder(
+                    itemCount: controller.isLoading.value
+                        ? 6
+                        : controller.filteredProducts.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.46,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 2,
+                    ),
+                    itemBuilder: (context, index) {
+                      if (controller.isLoading.value) {
+                        return _buildProductSkeleton();
+                      }
+                      final item = controller.filteredProducts[index];
+                      final serviceId =
+                          item['service_id'] ?? controller.currentService.value;
+                      final productId = item['id'];
+                      final key = '${serviceId}_$productId';
+                      return _buildProductCard(item, key);
+                    },
+                  ),
+                );
+              }),
             )
           ],
         ),
@@ -168,25 +197,49 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  Widget _buildCategoryChip(String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildCategoryChip(
+      String label, String? iconUrl, bool isSelected, VoidCallback onTap) {
+    print("DEBUG Category -> label: $label, iconUrl: $iconUrl");
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: const EdgeInsets.only(right: 10.0),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.primaryColor : Colors.grey[200],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? Colors.white : AppTheme.primaryColor,
+            color: isSelected ? AppTheme.primaryColor : Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
             ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                        color: AppTheme.primaryColor.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3))
+                  ]
+                : [],
+          ),
+          child: Row(
+            children: [
+              if (iconUrl != null && iconUrl.isNotEmpty)
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: Colors.transparent,
+                  backgroundImage: NetworkImage(iconUrl),
+                ),
+              if (iconUrl != null && iconUrl.isNotEmpty)
+                const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : AppTheme.primaryColor,
+                ),
+              ),
+            ],
           ),
         ),
       ),

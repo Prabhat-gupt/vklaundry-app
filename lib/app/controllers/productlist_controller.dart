@@ -178,7 +178,8 @@ class ProductListController extends GetxController {
 
   Future<void> loadCategoriesFromSupabase() async {
     try {
-      final response = await supabase.from('categories').select('id, name');
+      final response =
+          await supabase.from('categories').select('id, name, image_url');
       categories.value = List<Map<String, dynamic>>.from(response);
     } catch (e) {
       print('Error loading categories: $e');

@@ -16,6 +16,17 @@ class _LoginPageState extends State<LoginPage> {
   final LoginController loginController = Get.put(LoginController());
 
   @override
+  void initState() {
+    super.initState();
+
+    // validate phone number length
+    phoneController.addListener(() {
+      loginController.isPhoneValid.value =
+          phoneController.text.trim().length == 10;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -43,16 +54,6 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Align(
-                          //   alignment: Alignment.topRight,
-                          //   child: TextButton(
-                          //     onPressed: () {},
-                          //     child: const Text(
-                          //       'Skip >',
-                          //       style: TextStyle(color: Colors.white),
-                          //     ),
-                          //   ),
-                          // ),
                           const SizedBox(height: 40),
                           const CircleAvatar(
                             backgroundColor: Colors.white,
@@ -70,6 +71,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           const SizedBox(height: 30),
+
+                          // phone input
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -108,40 +111,64 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          GestureDetector(
-                            onTap: () async {
-                              String phone = phoneController.text.trim();
-                              if (phone.length == 10) {
-                                await loginController.sendOtp(phone);
-                              }
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color.fromRGBO(89, 168, 146, 1),
-                                    Color.fromRGBO(60, 113, 98, 1),
-                                    Color.fromRGBO(35, 66, 57, 1)
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+
+                          // ✅ Continue button with loader
+                          Obx(() {
+                            final isEnabled =
+                                loginController.isPhoneValid.value;
+                            return GestureDetector(
+                              onTap:
+                                  isEnabled && !loginController.isLoading.value
+                                      ? () async {
+                                          String phone =
+                                              phoneController.text.trim();
+                                          await loginController.sendOtp(phone);
+                                        }
+                                      : null,
+                              child: Container(
+                                width: double.infinity,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  gradient: isEnabled
+                                      ? const LinearGradient(
+                                          colors: [
+                                            Color.fromRGBO(89, 168, 146, 1),
+                                            Color.fromRGBO(60, 113, 98, 1),
+                                            Color.fromRGBO(35, 66, 57, 1)
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        )
+                                      : const LinearGradient(
+                                          colors: [Colors.grey, Colors.grey],
+                                        ),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'Continue',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                child: Center(
+                                  child: loginController.isLoading.value
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.white),
+                                          ),
+                                        )
+                                      : const Text(
+                                          'Continue',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -160,6 +187,8 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
+
+              // ✅ Terms & Conditions footer
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
@@ -177,17 +206,19 @@ class _LoginPageState extends State<LoginPage> {
                           TextSpan(
                             text: 'Terms of Use',
                             style: TextStyle(
-                                color: Color.fromRGBO(89, 168, 146, 1),
-                                decoration: TextDecoration.underline,
-                                fontSize: 14),
+                              color: Color.fromRGBO(89, 168, 146, 1),
+                              decoration: TextDecoration.underline,
+                              fontSize: 14,
+                            ),
                           ),
                           TextSpan(text: ' & '),
                           TextSpan(
                             text: 'Privacy Policy',
                             style: TextStyle(
-                                color: Color.fromRGBO(89, 168, 146, 1),
-                                decoration: TextDecoration.underline,
-                                fontSize: 14),
+                              color: Color.fromRGBO(89, 168, 146, 1),
+                              decoration: TextDecoration.underline,
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),

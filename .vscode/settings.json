@@ -1,3 +1,4 @@
 {
-    "dart.flutterSdkPath": "C:\\src\\flutter_windows_3.0.4-stable\\flutter"
+    "dart.flutterSdkPath": "C:\\src\\flutter_windows_3.0.4-stable\\flutter",
+    "cmake.sourceDirectory": "D:/Laundry/laundry_app/linux/flutter"
 }

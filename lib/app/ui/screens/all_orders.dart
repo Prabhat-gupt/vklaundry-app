@@ -12,7 +12,6 @@ class AllOrdersPage extends StatefulWidget {
 }
 
 class _AllOrdersPageState extends State<AllOrdersPage> {
-
   final orderTrackController = Get.find<TrackOrderController>();
 
   @override
@@ -22,18 +21,48 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Text("All Orders", style: TextStyle(fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,)),
+        title: Text(
+          "All Orders",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
         child: Obx(() {
           final ordersData = orderTrackController.order['orders'] ?? [];
+
           if (ordersData.isEmpty) {
-            return const Text("No orders found");
+            return Center(
+              child: Column(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // ✅ center vertically
+                children: [
+                  Image.network(
+                    "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",
+                    height: 120,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "No recent bookings found",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
-          return OrderCard(orders: List<Map<String, dynamic>>.from(orderTrackController.order['orders'] ?? []), numbersOrders: List<Map<String, dynamic>>.from(orderTrackController.order['orders'] ?? []).length,);
+
+          return OrderCard(
+            orders: List<Map<String, dynamic>>.from(ordersData),
+            numbersOrders: ordersData.length,
+          );
         }),
       ),
     );
