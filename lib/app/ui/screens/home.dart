@@ -19,17 +19,40 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final HomePageController controller = Get.put(HomePageController());
-  final TrackOrderController orderTrackController =
-      Get.put(TrackOrderController());
+  final TrackOrderController orderTrackController = Get.put(
+    TrackOrderController(),
+  );
   final productListController = Get.find<ProductListController>();
   final testimonialsController = Get.put(TestimonialsController());
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      int userId = await controller.fetchUserDetails();
+    // Future.microtask(() async {
+    //   int userId = await controller.fetchUserDetails();
+    //   await orderTrackController.fetchOrderDetails(userId);
+
+    //   if (orderTrackController.order.value['orders'] != null &&
+    //       orderTrackController.order.value['orders'].isNotEmpty) {
+    //     for (var order in orderTrackController.order.value['orders']) {
+    //       final orderId = order['id'] as int;
+    //       orderTrackController.subscribeToOrderChanges(orderId);
+    //     }
+    //   }
+    // });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      dynamic userId = await controller.fetchUserDetails();
+      print("my userid is send here $userId");
       await orderTrackController.fetchOrderDetails(userId);
+
+      if (orderTrackController.order.value['orders'] != null &&
+          orderTrackController.order.value['orders'].isNotEmpty) {
+        for (var order in orderTrackController.order.value['orders']) {
+          final orderId = order['id'] as int;
+          orderTrackController.subscribeToOrderChanges(orderId);
+        }
+      }
     });
   }
 
@@ -57,10 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF5768AB),
-                        Color(0xFF232F46),
-                      ],
+                      colors: [Color(0xFF5768AB), Color(0xFF232F46)],
                     ),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(24),
@@ -74,8 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.only(left: 8, right: 16),
                         child: Row(
                           children: [
-                            const Icon(Icons.location_pin,
-                                color: Colors.white, size: 30),
+                            const Icon(
+                              Icons.location_pin,
+                              color: Colors.white,
+                              size: 30,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Obx(() {
@@ -100,7 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       '${address['city'] ?? ''}, ${address['landmark_pincode'] ?? ''}',
                                       style: const TextStyle(
-                                          color: Colors.white70, fontSize: 12),
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
                                     ),
@@ -114,7 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: const CircleAvatar(
                                 backgroundColor: Colors.white,
                                 backgroundImage: AssetImage(
-                                    'assets/icons/setting_profile.png'),
+                                  'assets/icons/setting_profile.png',
+                                ),
                               ),
                             ),
                           ],
@@ -123,11 +149,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 24),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: const Text('Our Services',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
+                        child: const Text(
+                          'Our Services',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       SingleChildScrollView(
@@ -135,68 +164,69 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Container(
                           padding: const EdgeInsets.only(left: 16),
                           child: Row(
-                            children: List.generate(
-                              controller.services.length,
-                              (index) {
-                                final service = controller.services[index];
-                                final iconPath =
-                                    index < controller.serviceIcons.length
-                                        ? controller.serviceIcons[index]
-                                        : 'assets/icons/others.png';
+                            children: List.generate(controller.services.length, (
+                              index,
+                            ) {
+                              final service = controller.services[index];
+                              final iconPath =
+                                  index < controller.serviceIcons.length
+                                  ? controller.serviceIcons[index]
+                                  : 'assets/icons/others.png';
 
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 12.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Get.to(
-                                        () => const ProductListScreen(),
-                                        arguments: {
-                                          'serviceName': service['name'],
-                                          'service_id': service['id']
-                                        },
-                                      );
-                                    },
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          height: 60,
-                                          width: 60,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black12,
-                                                blurRadius: 5,
-                                                offset: Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: ClipOval(
-                                            child: Image.network(
-                                              service['image_url'],
-                                              fit: BoxFit
-                                                  .cover, // ✅ fill circle properly
-                                              height: 60,
-                                              width: 60,
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Get.to(
+                                      () => const ProductListScreen(),
+                                      arguments: {
+                                        'serviceName': service['name'],
+                                        'service_id': service['id'],
+                                      },
+                                    );
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        height: 60,
+                                        width: 60,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 5,
+                                              offset: Offset(0, 2),
                                             ),
+                                          ],
+                                        ),
+                                        child: ClipOval(
+                                          child: Image.network(
+                                            service['image_url'],
+                                            fit: BoxFit
+                                                .cover, // ✅ fill circle properly
+                                            height: 60,
+                                            width: 60,
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          _formatServiceName(
-                                              service['name'] ?? 'Service'),
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                          maxLines: 1,
-                                          overflow: TextOverflow
-                                              .clip, // avoid Flutter's default "..."
-                                        )
-                                      ],
-                                    ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        _formatServiceName(
+                                          service['name'] ?? 'Service',
+                                        ),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow
+                                            .clip, // avoid Flutter's default "..."
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
                       ),
@@ -209,9 +239,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('#SpecialForYou',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(
+                        '#SpecialForYou',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -220,55 +254,62 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 _buildActiveOrdersSection(context, orderTrackController),
                 _buildTestimonialsSection(testimonialsController),
-                const SizedBox(height: 64),
+                // const SizedBox(height: 64),
               ],
             ),
           ),
         );
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton:
-          Obx(() => productListController.getTotalCartItems() > 0
-              ? Container(
-                  margin: const EdgeInsets.all(16),
-                  height: 50,
-                  width: 250,
-                  decoration: BoxDecoration(
-                      color: Colors.indigo,
-                      borderRadius: BorderRadius.circular(32)),
-                  child: InkWell(
-                    onTap: () {
-                      final selectedItems =
-                          productListController.getSelectedCartItems();
-                      Navigator.pushNamed(context, '/checkout_page',
-                          arguments: {
-                            'selectedItems': selectedItems,
-                          });
-                    },
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.shopping_cart, color: Colors.white),
-                          const SizedBox(width: 8),
-                          const Text("View Cart",
-                              style: TextStyle(color: Colors.white)),
-                          const SizedBox(width: 8),
-                          CircleAvatar(
-                            radius: 10,
-                            backgroundColor: Colors.white,
-                            child: Text(
-                                productListController
-                                    .getTotalCartItems()
-                                    .toString(),
-                                style: const TextStyle(fontSize: 12)),
+
+      floatingActionButton: Obx(
+        () => productListController.getTotalCartItems() > 0
+            ? Container(
+                margin: const EdgeInsets.all(16),
+                height: 50,
+                width: 250,
+                decoration: BoxDecoration(
+                  color: Colors.indigo,
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: InkWell(
+                  onTap: () {
+                    final selectedItems = productListController
+                        .getSelectedCartItems();
+                    Navigator.pushNamed(
+                      context,
+                      '/checkout_page',
+                      arguments: {'selectedItems': selectedItems},
+                    );
+                  },
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.shopping_cart, color: Colors.white),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "View Cart",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        const SizedBox(width: 8),
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            productListController
+                                .getTotalCartItems()
+                                .toString(),
+                            style: const TextStyle(fontSize: 12),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                )
-              : const SizedBox.shrink()),
+                ),
+              )
+            : const SizedBox.shrink(),
+      ),
     );
   }
 }
@@ -302,16 +343,19 @@ Widget _buildTestimonialsSection(testimonialsController) {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(testimonial['customer_name'],
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      testimonial['customer_name'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 6),
                     Text(testimonial['customer_feedback']),
                   ],
@@ -326,7 +370,9 @@ Widget _buildTestimonialsSection(testimonialsController) {
 }
 
 Widget _buildActiveOrdersSection(
-    BuildContext context, TrackOrderController orderTrackController) {
+  BuildContext context,
+  TrackOrderController orderTrackController,
+) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -339,9 +385,10 @@ Widget _buildActiveOrdersSection(
               children: [
                 Icon(Icons.history, size: 18, color: Colors.blueGrey),
                 SizedBox(width: 6),
-                Text('Recent Bookings',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Recent Bookings',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ],
@@ -352,23 +399,25 @@ Widget _buildActiveOrdersSection(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
         child: Obx(() {
           final ordersData = List<Map<String, dynamic>>.from(
-              orderTrackController.order['orders'] ?? []);
+            orderTrackController.order['orders'] ?? [],
+          );
 
           if (ordersData.isEmpty) {
             return Center(
               child: Column(
                 children: [
                   Image.network(
-                    "https://cdn-icons-png.flaticon.com/512/4076/4076503.png", // ✅ free empty box icon
+                    "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",
                     height: 120,
                   ),
                   const SizedBox(height: 12),
                   const Text(
                     "No recent bookings found",
                     style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500),
+                      fontSize: 16,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -386,13 +435,13 @@ Widget _buildActiveOrdersSection(
           });
 
           final recentOrders = ordersData.take(2).toList();
-
+          print("my orders data is ::::: ${ordersData}");
           return OrderCard(
             orders: recentOrders,
             numbersOrders: recentOrders.length,
           );
         }),
-      )
+      ),
     ],
   );
 }

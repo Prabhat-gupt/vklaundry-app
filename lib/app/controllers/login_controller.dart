@@ -5,7 +5,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:http/http.dart' as http;
-// import 'package:laundry_app/app/routes/app_pages.dart';
+// import 'package:laundryapp/app/routes/app_pages.dart';
 // import 'package:supabase_flutter/supabase_flutter.dart';
 
 // class LoginController extends GetxController {
@@ -158,9 +158,10 @@
 // }
 
 import 'dart:math';
+import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:laundry_app/app/routes/app_pages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -171,6 +172,8 @@ class LoginController extends GetxController {
   String? lastOtp; // store generated OTP
   String? lastMessageId; // store message ID from SMS API
   var isPhoneValid = false.obs;
+
+  var storages = GetStorage();
 
   /// Generate random 6-digit OTP
   String _generateOtp() {
@@ -238,8 +241,72 @@ class LoginController extends GetxController {
   //   }
   // }
 
-  Future<void> verifyOtp(String phone, String enteredOtp,
-      {VoidCallback? onWrongOtp}) async {
+  // Future<void> verifyOtp(
+  //   String phone,
+  //   String enteredOtp, {
+  //   VoidCallback? onWrongOtp,
+  // }) async {
+  //   isLoading.value = true;
+  //   try {
+  //     if (lastOtp == null) {
+  //       Get.snackbar("Error", "OTP not generated. Please request again.");
+  //       return;
+  //     }
+
+  //     if (enteredOtp == lastOtp) {
+  //       // ✅ Create / fetch Supabase user anonymously
+  //       final authResponse = await supabase.auth.signInAnonymously();
+  //       final user = authResponse.user;
+
+  //       if (user != null) {
+  //         final uuid = user.id;
+  //         final phoneNumber = '+91$phone';
+
+  //         // ✅ Check if user exists in custom "users" table
+  //         final existingUser = await supabase
+  //             .from('users')
+  //             .select()
+  //             .eq('uuid', uuid)
+  //             .maybeSingle();
+
+  //         if (existingUser == null) {
+  //           // New user → insert
+  //           await supabase.from('users').insert({
+  //             'uuid': uuid,
+  //             'phone': phoneNumber,
+  //           });
+  //           Get.offAllNamed(AppRoutes.SETUPSCREEN);
+  //         } else {
+  //           // Existing user → go to home
+  //           Get.offAllNamed(AppRoutes.ROOT);
+  //         }
+
+  //         // ✅ Store UUID in SharedPreferences
+  //         // final prefs = await SharedPreferences.getInstance();
+  //         // await prefs.setString("uuid", uuid);
+
+  //         print("User mapped with uuid: $uuid and stored locally");
+  //       } else {
+  //         if (onWrongOtp != null) onWrongOtp();
+  //         Get.snackbar("Error", "Unable to create Supabase user");
+  //       }
+  //     } else {
+  //       if (onWrongOtp != null) onWrongOtp();
+  //       Get.snackbar("Invalid OTP", "The OTP you entered is incorrect.");
+  //     }
+  //   } catch (e) {
+  //     if (onWrongOtp != null) onWrongOtp();
+  //     Get.snackbar("Error", "OTP verification failed: $e");
+  //     print("Error verifying OTP: $e");
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+  Future<void> verifyOtp(
+    String phone,
+    String enteredOtp, {
+    VoidCallback? onWrongOtp,
+  }) async {
     isLoading.value = true;
     try {
       if (lastOtp == null) {
@@ -248,50 +315,88 @@ class LoginController extends GetxController {
       }
 
       if (enteredOtp == lastOtp) {
-        // ✅ Create / fetch Supabase user anonymously
-        final authResponse = await supabase.auth.signInAnonymously();
-        final user = authResponse.user;
+        final phoneNumber = '+91$phone';
 
-        if (user != null) {
-          final uuid = user.id;
-          final phoneNumber = '+91$phone';
+        // ✅ First check if user already exists with this phone
+        final existingUser = await supabase
+            .from('users')
+            .select()
+            .eq('phone', phoneNumber)
+            .maybeSingle();
 
-          // ✅ Check if user exists in custom "users" table
-          final existingUser = await supabase
-              .from('users')
-              .select()
-              .eq('uuid', uuid)
-              .maybeSingle();
+        if (existingUser != null) {
+          // 👤 Existing user → just login
+          print("👤 Existing user logged in: $existingUser");
 
-          if (existingUser == null) {
-            // New user → insert
-            await supabase.from('users').insert({
-              'uuid': uuid,
-              'phone': phoneNumber,
-            });
+          // store in GetStorage
+          storages.write("userId", existingUser['id']);
+          storages.write("isLoggedIn", true);
+
+          Get.offAllNamed(AppRoutes.ROOT);
+        } else {
+          // 🆕 New user → create Supabase user
+          final authResponse = await supabase.auth.signInAnonymously();
+          final user = authResponse.user;
+
+          if (user != null) {
+            final uuid = user.id;
+
+            final inserted = await supabase
+                .from('users')
+                .insert({'uuid': uuid, 'phone': phoneNumber})
+                .select()
+                .single();
+
+            print("🆕 New user created: $inserted");
+
+            storages.write("userId", inserted['id']);
+            storages.write("isLoggedIn", true);
+
             Get.offAllNamed(AppRoutes.SETUPSCREEN);
           } else {
-            // Existing user → go to home
-            Get.offAllNamed(AppRoutes.ROOT);
+            if (onWrongOtp != null) onWrongOtp();
+            Get.snackbar("Error", "Unable to create Supabase user");
           }
-
-          // ✅ Store UUID in SharedPreferences
-          // final prefs = await SharedPreferences.getInstance();
-          // await prefs.setString("uuid", uuid);
-
-          print("User mapped with uuid: $uuid and stored locally");
-        } else {
-          if (onWrongOtp != null) onWrongOtp();
-          Get.snackbar("Error", "Unable to create Supabase user");
         }
-      } else {
-        if (onWrongOtp != null) onWrongOtp();
-        Get.snackbar("Invalid OTP", "The OTP you entered is incorrect.");
       }
+
+      //   if (existingUser != null) {
+      //     // 👤 User already exists → just login (no new account)
+      //     print("👤 Existing user logged in: $existingUser");
+
+      //     storages.write("userId", existingUser['id']);
+
+      //     Get.offAllNamed(AppRoutes.ROOT);
+      //   } else {
+      //     // 🆕 New user → create Supabase auth user and insert into table
+      //     final authResponse = await supabase.auth.signInAnonymously();
+      //     final user = authResponse.user;
+
+      //     if (user != null) {
+      //       final uuid = user.id;
+
+      //       await supabase.from('users').insert({
+      //         'uuid': uuid,
+      //         'phone': phoneNumber,
+      //       });
+
+      //       print(
+      //         "🆕 New user created with uuid: $uuid and phone: $phoneNumber",
+      //       );
+      //       Get.offAllNamed(AppRoutes.SETUPSCREEN);
+      //     } else {
+      //       if (onWrongOtp != null) onWrongOtp();
+      //       Get.snackbar("Error", "Unable to create Supabase user");
+      //     }
+      //   }
+      // } else {
+      //   if (onWrongOtp != null) onWrongOtp();
+      //   Get.snackbar("Invalid OTP", "The OTP you entered is incorrect.");
+      // }
     } catch (e) {
       if (onWrongOtp != null) onWrongOtp();
       Get.snackbar("Error", "OTP verification failed: $e");
-      print("Error verifying OTP: $e");
+      print("❌ Error verifying OTP: $e");
     } finally {
       isLoading.value = false;
     }

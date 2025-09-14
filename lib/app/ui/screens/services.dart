@@ -65,7 +65,7 @@ class ServiceScreen extends StatelessWidget {
                   () => const ProductListScreen(),
                   arguments: {
                     'serviceName': service['name'],
-                    'service_id': service['id']
+                    'service_id': service['id'],
                   },
                 );
               },
@@ -86,7 +86,8 @@ class ServiceScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: const BorderRadius.horizontal(
-                          left: Radius.circular(20)),
+                        left: Radius.circular(20),
+                      ),
                       child: Image.network(
                         service['image_url'] ??
                             'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZGOWHxy5gcPkGjr4AxlsSgRIVVTCaQ0sJDw&s',
@@ -125,8 +126,10 @@ class ServiceScreen extends StatelessWidget {
                     ),
                     const Padding(
                       padding: EdgeInsets.only(right: 12.0),
-                      child:
-                          Icon(Icons.arrow_forward_ios, color: Colors.black38),
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.black38,
+                      ),
                     ),
                   ],
                 ),

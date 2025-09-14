@@ -1,6 +1,5 @@
-import 'dart:ui';
-
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,6 +8,7 @@ class HomePageController extends GetxController {
 
   var userAddress = <Map<String, dynamic>>[].obs;
   var userLocationDetails = ''.obs;
+  var storages = GetStorage();
 
   var services = [].obs;
   var specialItems = [].obs;
@@ -47,19 +47,53 @@ class HomePageController extends GetxController {
   }
 
   /// ✅ Fetch User ID
+  // Future<int> fetchUserDetails() async {
+  //   try {
+  //     isLoading.value = true;
+  //     final userId = supabase.auth.currentUser?.id ?? storages.read('userId');
+  //     print("myuserid is getting in homepage :::: ----- $userId");
+  //     final response = await supabase
+  //         .from('users')
+  //         .select('*')
+  //         .eq('uuid', userId!)
+  //         .single();
+
+  //     // print("response is printing homepage ::::::::: $response");
+  //     if (response != null && response['id'] != null) {
+  //       return response['id'] as int;
+  //       // return storages.read('userId');
+  //     }
+  //     throw Exception('User ID not found');
+  //   } catch (e) {
+  //     Get.snackbar('Error', 'Failed to load user details');
+  //     throw Exception('Failed to load user details');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+
   Future<int> fetchUserDetails() async {
     try {
       isLoading.value = true;
-      final userId = supabase.auth.currentUser?.id;
-      final response =
-          await supabase.from('users').select('*').eq('uuid', userId!).single();
+
+      final userId = storages.read('userId');
+      print("my userId returned on home page is ${userId}");
+      if (userId == null) throw Exception('User not logged in');
+
+      final response = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
       if (response != null && response['id'] != null) {
         return response['id'] as int;
       }
+
       throw Exception('User ID not found');
     } catch (e) {
       Get.snackbar('Error', 'Failed to load user details');
-      throw Exception('Failed to load user details');
+      throw Exception('Failed to load user details: $e');
     } finally {
       isLoading.value = false;
     }
@@ -90,11 +124,12 @@ class HomePageController extends GetxController {
     }
   }
 
-  /// ✅ Fetch active subscriptions
   void fetchSubscriptions() async {
     try {
-      final response =
-          await supabase.from('subscriptions').select('*').eq('active', true);
+      final response = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('active', true);
       subscriptions.value = response;
     } catch (e) {
       Get.snackbar('Error', 'Failed to load subscriptions');
@@ -151,30 +186,29 @@ class HomePageController extends GetxController {
 
   /// ✅ Subscribe User after payment
   Future<bool> subscribeUser(Map<String, dynamic> sub) async {
-  try {
-    int userId = await fetchUserDetails();
+    try {
+      int userId = await fetchUserDetails();
 
-    final startDate = DateTime.now();
-    final endDate = startDate.add(const Duration(days: 30));
+      final startDate = DateTime.now();
+      final endDate = startDate.add(const Duration(days: 30));
 
-    final insertResponse = await supabase.from('user_subscriptions').insert({
-      'user_id': userId,
-      'subscription_id': sub['id'],
-      'start_date': DateFormat('yyyy-MM-dd').format(startDate),
-      'end_date': DateFormat('yyyy-MM-dd').format(endDate),
-      'status': 1,
-      'created_at': DateTime.now().toIso8601String(),
-    }).select();
+      final insertResponse = await supabase.from('user_subscriptions').insert({
+        'user_id': userId,
+        'subscription_id': sub['id'],
+        'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+        'end_date': DateFormat('yyyy-MM-dd').format(endDate),
+        'status': 1,
+        'created_at': DateTime.now().toIso8601String(),
+      }).select();
 
-    if (insertResponse.isNotEmpty) {
-      return true; // ✅ Subscription added successfully
-    } else {
-      return false; // ❌ Insert failed (no rows returned)
+      if (insertResponse.isNotEmpty) {
+        return true; // ✅ Subscription added successfully
+      } else {
+        return false; // ❌ Insert failed (no rows returned)
+      }
+    } catch (e, st) {
+      print("Subscription Error: $e\n$st");
+      return false;
     }
-  } catch (e, st) {
-    print("Subscription Error: $e\n$st");
-    return false;
   }
-}
-
 }

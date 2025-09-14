@@ -16,9 +16,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.yellow.shade100
+        "bg": Colors.yellow.shade100,
       },
       {
         "status": "Processing",
@@ -28,9 +28,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.white
+        "bg": Colors.white,
       },
       {
         "status": "Order Confirmed",
@@ -40,9 +40,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.white
+        "bg": Colors.white,
       },
       {
         "status": "Delivered",
@@ -52,9 +52,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.white
+        "bg": Colors.white,
       },
     ];
 
@@ -69,8 +69,10 @@ class OrdersScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Orders",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Orders",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: ListView.separated(
@@ -103,7 +105,8 @@ class OrdersScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           image: DecorationImage(
                             image: AssetImage(
-                                (order["images"] as List<String>)[imgIndex]),
+                              (order["images"] as List<String>)[imgIndex],
+                            ),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -121,13 +124,21 @@ class OrdersScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(order["status"]! as String,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(
+                          order["status"]! as String,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(order["date"]! as String,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey)),
+                        Text(
+                          order["date"]! as String,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ],
                     ),
 
@@ -138,14 +149,19 @@ class OrdersScreen extends StatelessWidget {
                           Get.context!,
                           // MaterialPageRoute(builder: (context) => const ProfileScreen()),
                           MaterialPageRoute(
-                              builder: (context) => const OrderDetailsPage()),
+                            builder: (context) => const OrderDetailsPage(),
+                          ),
                         );
                       },
                       child: Row(
                         children: [
-                          Text(order["amount"]! as String,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(
+                            order["amount"]! as String,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                           const Icon(Icons.chevron_right),
                         ],
                       ),
@@ -163,12 +179,12 @@ class OrdersScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color:
                             ((order["action"] as String?) ?? "") == "Get Help"
-                                ? Colors.indigo
-                                : Colors.green,
+                            ? Colors.indigo
+                            : Colors.green,
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           );

@@ -50,7 +50,9 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 40),
+                        horizontal: 24,
+                        vertical: 40,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -58,8 +60,9 @@ class _LoginPageState extends State<LoginPage> {
                           const CircleAvatar(
                             backgroundColor: Colors.white,
                             radius: 28,
-                            backgroundImage:
-                                AssetImage('assets/icons/app_logo.png'),
+                            backgroundImage: AssetImage(
+                              'assets/icons/app_logo.png',
+                            ),
                           ),
                           const SizedBox(height: 30),
                           const Text(
@@ -79,17 +82,21 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(30),
                             ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             child: Row(
                               children: [
                                 const Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
                                   child: Text(
                                     '+91',
                                     style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                                 const VerticalDivider(color: Colors.black54),
@@ -119,23 +126,24 @@ class _LoginPageState extends State<LoginPage> {
                             return GestureDetector(
                               onTap:
                                   isEnabled && !loginController.isLoading.value
-                                      ? () async {
-                                          String phone =
-                                              phoneController.text.trim();
-                                          await loginController.sendOtp(phone);
-                                        }
-                                      : null,
+                                  ? () async {
+                                      String phone = phoneController.text
+                                          .trim();
+                                      await loginController.sendOtp(phone);
+                                    }
+                                  : null,
                               child: Container(
                                 width: double.infinity,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 decoration: BoxDecoration(
                                   gradient: isEnabled
                                       ? const LinearGradient(
                                           colors: [
                                             Color.fromRGBO(89, 168, 146, 1),
                                             Color.fromRGBO(60, 113, 98, 1),
-                                            Color.fromRGBO(35, 66, 57, 1)
+                                            Color.fromRGBO(35, 66, 57, 1),
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
@@ -154,7 +162,8 @@ class _LoginPageState extends State<LoginPage> {
                                             strokeWidth: 2,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                    Colors.white),
+                                                  Colors.white,
+                                                ),
                                           ),
                                         )
                                       : const Text(

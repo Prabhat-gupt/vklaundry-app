@@ -31,6 +31,7 @@ class OrderCard extends StatelessWidget {
         final int status = order['status'] ?? 0;
         final String statusText = _getStatusText(status);
 
+        print("my order is rejected here :::::: ${orders[index]}");
         return GestureDetector(
           onTap: () => _showOrderDetail(context, order),
           child: Container(
@@ -64,10 +65,7 @@ class OrderCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       _formatDateTime(order['created_at']),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -85,7 +83,9 @@ class OrderCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _getStatusColor(status).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -162,11 +162,15 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                       Text(
                         'Order #${order['id']?.toString() ?? ''}',
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: _getStatusColor(status).withOpacity(0.15),
                           borderRadius: BorderRadius.circular(20),
@@ -195,14 +199,19 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Pickup Date & Time',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
+                              const Text(
+                                'Pickup Date & Time',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 order['pickup_datetime'],
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -219,14 +228,19 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Delivery Date & Time',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
+                              const Text(
+                                'Delivery Date & Time',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 order['delivery_datetime'],
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -237,8 +251,10 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                   // 🔹 Pickup Info
                   const SizedBox(height: 16),
                   // 🔹 Items
-                  const Text('Items',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Items',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   ...List.generate(order['items']?.length ?? 0, (i) {
                     final item = order['items'][i];
@@ -250,12 +266,19 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(item['product']?['name']?.toString() ?? '',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              Text(item['service_name']?.toString() ?? '',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
+                              Text(
+                                item['product']?['name']?.toString() ?? '',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                item['service_name']?.toString() ?? '',
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                           ),
                           Column(
@@ -265,7 +288,9 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                               Text(
                                 '₹${item['price']}',
                                 style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -277,11 +302,17 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                   Divider(color: Colors.grey.shade300),
 
                   // 🔹 Price Summary
-                  _priceRow('Subtotal',
-                      '₹${(order['amount'] - 2)?.toString() ?? '0'}'),
+                  _priceRow(
+                    'Subtotal',
+                    '₹${(order['amount'] - 2)?.toString() ?? '0'}',
+                  ),
                   _priceRow('Delivery Fee', '₹2'),
-                  _priceRow('Total', '₹${order['amount']?.toString() ?? '0'}',
-                      isBold: true, isTotal: true),
+                  _priceRow(
+                    'Total',
+                    '₹${order['amount']?.toString() ?? '0'}',
+                    isBold: true,
+                    isTotal: true,
+                  ),
 
                   const SizedBox(height: 20),
                   SizedBox(
@@ -289,17 +320,21 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         backgroundColor: AppTheme.primaryColor,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       icon: const Icon(Icons.location_on, color: Colors.white),
-                      label: const Text('Track Order',
-                          style: TextStyle(color: Colors.white)),
+                      label: const Text(
+                        'Track Order',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       onPressed: () {
-                        Get.toNamed(AppRoutes.TRACKING, arguments: {
-                          'order': order,
-                        });
+                        Get.toNamed(
+                          AppRoutes.TRACKING,
+                          arguments: {'order': order},
+                        );
                       },
                     ),
                   ),
@@ -313,8 +348,12 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
   );
 }
 
-Widget _priceRow(String title, String price,
-    {bool isBold = false, bool isTotal = false}) {
+Widget _priceRow(
+  String title,
+  String price, {
+  bool isBold = false,
+  bool isTotal = false,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(

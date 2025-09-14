@@ -5,8 +5,6 @@ import 'package:laundry_app/app/routes/app_pages.dart'; // Make sure this import
 class OrderSuccessPage extends StatelessWidget {
   const OrderSuccessPage({super.key});
 
-  
-
   @override
   Widget build(BuildContext context) {
     final orderId = Get.arguments['order_id'];
@@ -18,11 +16,7 @@ class OrderSuccessPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 100,
-              ),
+              const Icon(Icons.check_circle, color: Colors.green, size: 100),
               const SizedBox(height: 24),
               const Text(
                 "Order Placed Successfully!",
@@ -49,7 +43,10 @@ class OrderSuccessPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text("Continue Shopping", style: TextStyle(fontSize: 16)),
+                  child: const Text(
+                    "Continue Shopping",
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

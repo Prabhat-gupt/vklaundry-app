@@ -31,18 +31,19 @@ class ProductListController extends GetxController {
     currentService.value = service;
   }
 
-  RxMap<String, dynamic> activeOffer = <String, dynamic>{}.obs;
+  RxList activeOffer = [].obs;
 
+  var activeOfferselected = <String, dynamic>{}.obs;
   Future<void> fetchActiveOffer() async {
     final response = await Supabase.instance.client
         .from('offers')
         .select()
-        .eq('active', true)
-        .limit(1)
-        .single();
-    print("Fetched active offer: $response");
+        .eq('active', true);
+
+    print("Fetched active offers: $response");
+
     if (response != null) {
-      activeOffer.value = response;
+      activeOffer.value = List<Map<String, dynamic>>.from(response);
     }
   }
 
@@ -55,8 +56,9 @@ class ProductListController extends GetxController {
           .select('*, item_id')
           .eq('service_id', serviceId);
 
-      final List<Map<String, dynamic>> prices =
-          List<Map<String, dynamic>>.from(pricesResponse);
+      final List<Map<String, dynamic>> prices = List<Map<String, dynamic>>.from(
+        pricesResponse,
+      );
 
       if (prices.isEmpty) {
         products.value = [];
@@ -66,11 +68,14 @@ class ProductListController extends GetxController {
 
       final itemIds = prices.map((e) => e['item_id']).toSet().toList();
 
-      final itemsResponse =
-          await supabase.from('items').select('*').inFilter('id', itemIds);
+      final itemsResponse = await supabase
+          .from('items')
+          .select('*')
+          .inFilter('id', itemIds);
 
-      final List<Map<String, dynamic>> items =
-          List<Map<String, dynamic>>.from(itemsResponse);
+      final List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(
+        itemsResponse,
+      );
 
       final enrichedProducts = items.map((item) {
         final itemId = item['id'];
@@ -81,7 +86,8 @@ class ProductListController extends GetxController {
         return {
           'id': itemId,
           'name': item['name'],
-          'image': item['image_url'] ??
+          'image':
+              item['image_url'] ??
               'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
           'price': priceData['price'] ?? 0,
           'oldPrice': priceData['old_price'] ?? 0,
@@ -111,10 +117,12 @@ class ProductListController extends GetxController {
     filteredProducts.value = categoryId == null
         ? originalList
         : originalList
-            .where((product) =>
-                product['category_id'] == categoryId &&
-                product['service_id'] == serviceId)
-            .toList();
+              .where(
+                (product) =>
+                    product['category_id'] == categoryId &&
+                    product['service_id'] == serviceId,
+              )
+              .toList();
   }
 
   void addToCart(Map<String, dynamic> product) {
@@ -155,7 +163,7 @@ class ProductListController extends GetxController {
           'product': product,
           'quantity': quantity,
           'service': service,
-          'service_name': serviceName
+          'service_name': serviceName,
         });
       }
     });
@@ -178,8 +186,9 @@ class ProductListController extends GetxController {
 
   Future<void> loadCategoriesFromSupabase() async {
     try {
-      final response =
-          await supabase.from('categories').select('id, name, image_url');
+      final response = await supabase
+          .from('categories')
+          .select('id, name, image_url');
       categories.value = List<Map<String, dynamic>>.from(response);
     } catch (e) {
       print('Error loading categories: $e');

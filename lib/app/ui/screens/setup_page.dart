@@ -34,18 +34,19 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   void _validateForm() {
-  setState(() {
-    final email = emailController.text.trim();
-    final isEmailValid = email.isNotEmpty && email.contains("@") && email.contains(".com");
+    setState(() {
+      final email = emailController.text.trim();
+      final isEmailValid =
+          email.isNotEmpty && email.contains("@") && email.contains(".com");
 
-    isFormValid =
-        nameController.text.trim().isNotEmpty &&
-        isEmailValid &&
-        houseController.text.trim().isNotEmpty &&
-        buildingController.text.trim().isNotEmpty &&
-        landmarkController.text.trim().isNotEmpty;
-  });
-}
+      isFormValid =
+          nameController.text.trim().isNotEmpty &&
+          isEmailValid &&
+          houseController.text.trim().isNotEmpty &&
+          buildingController.text.trim().isNotEmpty &&
+          landmarkController.text.trim().isNotEmpty;
+    });
+  }
 
   Future<void> _saveUserData() async {
     setState(() => isLoading = true);
@@ -53,10 +54,13 @@ class _SetupScreenState extends State<SetupScreen> {
       final user = supabase.auth.currentUser;
       if (user == null) throw Exception('User not logged in');
 
-      await supabase.from('users').update({
-        'name': nameController.text.trim(),
-        'email': emailController.text.trim(),
-      }).eq('uuid', user.id);
+      await supabase
+          .from('users')
+          .update({
+            'name': nameController.text.trim(),
+            'email': emailController.text.trim(),
+          })
+          .eq('uuid', user.id);
 
       int id = await supabase
           .from('users')
@@ -67,7 +71,9 @@ class _SetupScreenState extends State<SetupScreen> {
 
       await supabase.from('addresses').upsert({
         'id': id, // foreign key to users table
-        'address_line': '${houseController.text.trim()}' '${buildingController.text.trim()}',
+        'address_line':
+            '${houseController.text.trim()}'
+            '${buildingController.text.trim()}',
         'city': 'Hyderabad',
         'state': 'Telangana',
         'landmark_pincode': landmarkController.text.trim(),
@@ -76,7 +82,11 @@ class _SetupScreenState extends State<SetupScreen> {
       Get.offAllNamed('/root');
     } catch (e) {
       print("Error saving user data: $e");
-      Get.snackbar('Error: ',"Please try in sometime", snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error: ',
+        "Please try in sometime",
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       setState(() => isLoading = false);
     }
@@ -85,53 +95,70 @@ class _SetupScreenState extends State<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup Profile'),centerTitle: true,),
+      appBar: AppBar(title: const Text('Setup Profile'), centerTitle: true),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField("Full Name", nameController,
-                  hintText: "Enter your full name"),
+              _buildTextField(
+                "Full Name",
+                nameController,
+                hintText: "Enter your full name",
+              ),
               const SizedBox(height: 12),
               _buildTextField(
                 "Email",
                 emailController,
                 hintText: "Enter your email",
                 keyboardType: TextInputType.emailAddress,
-                errorText: emailController.text.isNotEmpty &&
+                errorText:
+                    emailController.text.isNotEmpty &&
                         (!emailController.text.contains("@") ||
                             !emailController.text.contains(".com"))
                     ? "Enter a valid email address"
                     : null,
               ),
               const SizedBox(height: 16),
-              const Text("Add Address",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text(
+                "Add Address",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               const SizedBox(height: 16),
-              _buildTextField("House No. & Floor*", houseController,
-                  hintText: "A5, 2nd floor"),
+              _buildTextField(
+                "House No. & Floor*",
+                houseController,
+                hintText: "A5, 2nd floor",
+              ),
               const SizedBox(height: 12),
-              _buildTextField("Building Name & Block No.*", buildingController,
-                  hintText: "Sikhar Tower, 10"),
+              _buildTextField(
+                "Building Name & Block No.*",
+                buildingController,
+                hintText: "Sikhar Tower, 10",
+              ),
               const SizedBox(height: 12),
-              _buildTextField("Landmark Pincode*", landmarkController,
-                  hintText: "Enter nearby landmark", keyboardType: TextInputType.number),
+              _buildTextField(
+                "Landmark Pincode*",
+                landmarkController,
+                hintText: "Enter nearby landmark",
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        isFormValid ? AppTheme.primaryColor : Colors.grey, // ✅
+                    backgroundColor: isFormValid
+                        ? AppTheme.primaryColor
+                        : Colors.grey, // ✅
                   ),
                   onPressed: (!isFormValid || isLoading) ? null : _saveUserData,
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text('Save', style: TextStyle(fontSize: 20)),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -139,15 +166,20 @@ class _SetupScreenState extends State<SetupScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {String? hintText,
-      String? errorText,
-      TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    String? hintText,
+    String? errorText,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
@@ -158,10 +190,13 @@ class _SetupScreenState extends State<SetupScreen> {
             filled: true,
             fillColor: const Color(0xFFE0E0E0),
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 16,
+            ),
           ),
         ),
       ],

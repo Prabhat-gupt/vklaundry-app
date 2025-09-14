@@ -28,12 +28,10 @@ class AppPages {
   AppPages._();
 
   static const INITIAL = AppRoutes.SPLASHSCREEN;
+  static const Homepage = AppRoutes.ROOT;
 
   static final routes = [
-    GetPage(
-      name: AppRoutes.SPLASHSCREEN, 
-      page: () => const SplashScreen()
-    ),
+    GetPage(name: AppRoutes.SPLASHSCREEN, page: () => const SplashScreen()),
     GetPage(
       name: AppRoutes.HOME,
       page: () => HomeScreen(),
@@ -71,7 +69,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.CHECKOUTPAGE,
-      page: () =>  CheckoutPage(),
+      page: () => CheckoutPage(),
       // binding: HomeBinding(),
     ),
     GetPage(

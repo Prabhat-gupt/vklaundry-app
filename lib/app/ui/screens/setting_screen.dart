@@ -18,19 +18,23 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Text("Settings",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            )),
+        title: Text(
+          "Settings",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
+        ),
         centerTitle: true,
       ),
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -48,7 +52,8 @@ class SettingsScreen extends StatelessWidget {
                             backgroundColor: Colors.transparent,
                             child: Image(
                               image: AssetImage(
-                                  'assets/icons/setting_profile.png'),
+                                'assets/icons/setting_profile.png',
+                              ),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -56,25 +61,35 @@ class SettingsScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(controller.name.value,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Color(0xFF111827))),
-                              Text(controller.phone.value,
-                                  style: const TextStyle(
-                                      color: Colors.black54, fontSize: 14)),
+                              Text(
+                                controller.name.value,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: Color(0xFF111827),
+                                ),
+                              ),
+                              Text(
+                                controller.phone.value,
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text("Your Information",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF111827),
-                            fontSize: 16)),
+                    const Text(
+                      "Your Information",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827),
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     _buildInfoCard([
                       // _buildListTile(Icons.shopping_bag_outlined, "Your Orders",
@@ -83,22 +98,30 @@ class SettingsScreen extends StatelessWidget {
                       // }),
                       // const _DashedDivider(),
                       _buildListTile(
-                          Icons.location_on_outlined, "Saved Address",
-                          onTap: () {
-                        Get.toNamed('/address_screen');
-                      }),
+                        Icons.location_on_outlined,
+                        "Saved Address",
+                        onTap: () {
+                          Get.toNamed('/address_screen');
+                        },
+                      ),
                       const _DashedDivider(),
-                      _buildListTile(Icons.person_outline, "Profile",
-                          onTap: () {
-                        Get.toNamed('/profile_screen');
-                      }),
+                      _buildListTile(
+                        Icons.person_outline,
+                        "Profile",
+                        onTap: () {
+                          Get.toNamed('/profile_screen');
+                        },
+                      ),
                     ]),
                     const SizedBox(height: 24),
-                    const Text("Other Information",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF111827),
-                            fontSize: 16)),
+                    const Text(
+                      "Other Information",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827),
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     _buildInfoCard([
                       // _buildListTile(Icons.notifications_none, "Notifications",
@@ -106,15 +129,21 @@ class SettingsScreen extends StatelessWidget {
                       //   Get.toNamed('/notification_screen');
                       // }),
                       // const _DashedDivider(),
-                      _buildListTile(Icons.info_outline, "Support", onTap: () {
-                        Get.toNamed('/support_screen');
-                      }),
+                      _buildListTile(
+                        Icons.info_outline,
+                        "Support",
+                        onTap: () {
+                          Get.toNamed('/support_screen');
+                        },
+                      ),
                       const _DashedDivider(),
                       _buildListTile(
-                          Icons.article_outlined, "Terms & Conditions",
-                          onTap: () {
-                        Get.to(() => const TermsAndConditionsPage());
-                      }),
+                        Icons.article_outlined,
+                        "Terms & Conditions",
+                        onTap: () {
+                          Get.to(() => const TermsAndConditionsPage());
+                        },
+                      ),
                       // TermsAndConditionsPage(),
                     ]),
                     const SizedBox(height: 24),
@@ -124,6 +153,7 @@ class SettingsScreen extends StatelessWidget {
                         child: OutlinedButton(
                           onPressed: () async {
                             await Supabase.instance.client.auth.signOut();
+                            controller.storages.erase();
                             Get.offAllNamed('/login');
                           },
                           style: OutlinedButton.styleFrom(
@@ -134,9 +164,13 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             side: const BorderSide(color: Color(0xFFCBD5E1)),
                           ),
-                          child: const Text("Log Out",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            "Log Out",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -165,12 +199,17 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildListTile(IconData icon, String title,
-      {required Function() onTap}) {
+  Widget _buildListTile(
+    IconData icon,
+    String title, {
+    required Function() onTap,
+  }) {
     return ListTile(
       leading: Icon(icon, color: Colors.black),
-      title: Text(title,
-          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
     );

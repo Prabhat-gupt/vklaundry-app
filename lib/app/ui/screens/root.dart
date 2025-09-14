@@ -49,10 +49,7 @@ class _RootPageState extends State<RootPage> {
           decoration: const BoxDecoration(
             color: Colors.white,
             border: Border(
-              top: BorderSide(
-                color: Color.fromRGBO(35, 42, 69, 1),
-                width: 1.0,
-              ),
+              top: BorderSide(color: Color.fromRGBO(35, 42, 69, 1), width: 1.0),
             ),
           ),
           child: BottomNavigationBar(
@@ -60,21 +57,25 @@ class _RootPageState extends State<RootPage> {
             elevation: 0,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                  backgroundColor: Colors.white),
+                icon: Icon(Icons.home),
+                label: 'Home',
+                backgroundColor: Colors.white,
+              ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.category_outlined),
-                  label: 'Services',
-                  backgroundColor: Colors.white),
+                icon: Icon(Icons.category_outlined),
+                label: 'Services',
+                backgroundColor: Colors.white,
+              ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.receipt_long_outlined),
-                  label: 'Booking',
-                  backgroundColor: Colors.white),
+                icon: Icon(Icons.receipt_long_outlined),
+                label: 'Booking',
+                backgroundColor: Colors.white,
+              ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Setting',
-                  backgroundColor: Colors.white),
+                icon: Icon(Icons.settings),
+                label: 'Setting',
+                backgroundColor: Colors.white,
+              ),
             ],
             currentIndex: _selectedIndex,
             selectedItemColor: Color.fromRGBO(35, 42, 69, 1),

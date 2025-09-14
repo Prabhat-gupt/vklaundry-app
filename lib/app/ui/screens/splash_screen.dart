@@ -53,6 +53,40 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  // Future<void> _checkLoginStatus() async {
+  //   await Future.delayed(const Duration(seconds: 2));
+
+  //   final newVersion = NewVersionPlus(
+  //     androidId: "com.example.laundry_app",
+  //   );
+
+  //   final status = await newVersion.getVersionStatus();
+
+  //   print("my status is :::: printing here :::: ${status}");
+
+  //   if (status != null && status.canUpdate) {
+  //     final url = status.appStoreLink;
+  //     print("my url is :::: url here :::: ${url}");
+
+  //     if (await canLaunchUrl(Uri.parse(url))) {
+  //       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  //     }
+  //     return;
+  //   }
+
+  //   final session = Supabase.instance.client.auth.currentSession;
+
+  //   _timer?.cancel();
+
+  //   if (session != null && session.user != null) {
+  //     Get.offAllNamed(AppRoutes.ROOT);
+  //   } else {
+  //     Get.offAllNamed(AppRoutes.GETSTARTED);
+  //   }
+  // }
+
+  // uncomment it when it upload to the playstore
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -76,10 +110,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
             // Old image: instantly removed (no animation)
             if (child.key == ValueKey<int>(_currentIndex)) {
-              return SlideTransition(
-                position: slideIn,
-                child: child,
-              );
+              return SlideTransition(position: slideIn, child: child);
             } else {
               return const SizedBox.shrink(); // remove immediately
             }

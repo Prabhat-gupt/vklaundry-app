@@ -63,36 +63,43 @@ class _ProductListScreenState extends State<ProductListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(() => Skeletonizer(
-                  enabled: controller.isLoading.value,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: controller.categories.isEmpty
-                          ? List.generate(
-                              4, (index) => _buildCategorySkeleton())
-                          : controller.categories.map((category) {
-                              print("DEBUG Category Data: $category");
-                              final categoryId = category['id'];
-                              final isSelected =
-                                  controller.selectedCategoryId.value ==
-                                      categoryId;
-                              return _buildCategoryChip(
-                                  category['name'].toString(),
-                                  category['image_url'],
-                                  isSelected, () {
+            Obx(
+              () => Skeletonizer(
+                enabled: controller.isLoading.value,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: controller.categories.isEmpty
+                        ? List.generate(4, (index) => _buildCategorySkeleton())
+                        : controller.categories.map((category) {
+                            print("DEBUG Category Data: $category");
+                            final categoryId = category['id'];
+                            final isSelected =
+                                controller.selectedCategoryId.value ==
+                                categoryId;
+                            return _buildCategoryChip(
+                              category['name'].toString(),
+                              category['image_url'],
+                              isSelected,
+                              () {
                                 if (isSelected) {
                                   controller.filterProductsByCategory(
-                                      null, null);
+                                    null,
+                                    null,
+                                  );
                                 } else {
                                   controller.filterProductsByCategory(
-                                      categoryId, serviceId);
+                                    categoryId,
+                                    serviceId,
+                                  );
                                 }
-                              });
-                            }).toList(),
-                    ),
+                              },
+                            );
+                          }).toList(),
                   ),
-                )),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: Obx(() {
@@ -128,11 +135,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         : controller.filteredProducts.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.46,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 2,
-                    ),
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.46,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 2,
+                        ),
                     itemBuilder: (context, index) {
                       if (controller.isLoading.value) {
                         return _buildProductSkeleton();
@@ -147,58 +154,66 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ),
                 );
               }),
-            )
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: Obx(() => controller.getTotalCartItems() > 0
-          ? Container(
-              margin: const EdgeInsets.all(16),
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.indigo,
-                borderRadius: BorderRadius.circular(32),
-              ),
-              child: InkWell(
-                onTap: () {
-                  final selectedItems = controller.getSelectedCartItems();
-                  Navigator.pushNamed(
-                    context,
-                    '/checkout_page',
-                    arguments: {
-                      'selectedItems': selectedItems,
-                      'serviceName': serviceName,
-                    },
-                  );
-                },
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.shopping_cart, color: Colors.white),
-                      const SizedBox(width: 8),
-                      const Text("View Cart",
-                          style: TextStyle(color: Colors.white)),
-                      const SizedBox(width: 8),
-                      CircleAvatar(
-                        radius: 10,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          controller.getTotalCartItems().toString(),
-                          style: const TextStyle(fontSize: 12),
+      bottomNavigationBar: Obx(
+        () => controller.getTotalCartItems() > 0
+            ? Container(
+                margin: const EdgeInsets.all(16),
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.indigo,
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: InkWell(
+                  onTap: () {
+                    final selectedItems = controller.getSelectedCartItems();
+                    Navigator.pushNamed(
+                      context,
+                      '/checkout_page',
+                      arguments: {
+                        'selectedItems': selectedItems,
+                        'serviceName': serviceName,
+                      },
+                    );
+                  },
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.shopping_cart, color: Colors.white),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "View Cart",
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            controller.getTotalCartItems().toString(),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            )
-          : const SizedBox.shrink()),
+              )
+            : const SizedBox.shrink(),
+      ),
     );
   }
 
   Widget _buildCategoryChip(
-      String label, String? iconUrl, bool isSelected, VoidCallback onTap) {
+    String label,
+    String? iconUrl,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     print("DEBUG Category -> label: $label, iconUrl: $iconUrl");
     return Padding(
       padding: const EdgeInsets.only(right: 10.0),
@@ -215,9 +230,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                        color: AppTheme.primaryColor.withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3))
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
                   ]
                 : [],
           ),
@@ -263,7 +279,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2))
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
         ],
       ),
     );
@@ -301,8 +317,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         errorBuilder: (context, error, stackTrace) => Container(
                           height: constraints.maxHeight * 0.3,
                           color: Colors.grey[200],
-                          child: const Icon(Icons.image_not_supported,
-                              size: 40, color: Colors.grey),
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -312,34 +331,49 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(item['name'],
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                item['name'],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
-              const Text("All shirts (eg. cotton, denim)",
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const Text(
+                "All shirts (eg. cotton, denim)",
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Text("\u20B9${item['oldPrice']}",
-                      style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                          fontSize: 12)),
+                  Text(
+                    "\u20B9${item['oldPrice']}",
+                    style: const TextStyle(
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(width: 6),
-                  Text("\u20B9${item['price']}",
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    "\u20B9${item['price']}",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
-              Text(item['discount'],
-                  style: const TextStyle(color: Colors.green, fontSize: 12)),
+              Text(
+                item['discount'],
+                style: const TextStyle(color: Colors.green, fontSize: 12),
+              ),
               const SizedBox(height: 4),
               Row(
                 children: [
                   const Icon(Icons.star, color: Colors.green, size: 16),
-                  Text("${item['rating']}",
-                      style: const TextStyle(fontWeight: FontWeight.w500)),
-                  Text(" (${item['reviews']})",
-                      style: const TextStyle(fontSize: 12)),
+                  Text(
+                    "${item['rating']}",
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    " (${item['reviews']})",
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
               ),
               const Spacer(),
@@ -373,7 +407,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         onPressed: () => controller.addToCart(item),
                         child: const Text('Add'),
                       );
-              })
+              }),
             ],
           ),
         );

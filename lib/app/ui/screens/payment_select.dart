@@ -52,43 +52,59 @@ class PaymentSelectPage extends StatelessWidget {
         children: [
           _buildSectionTitle('UPI'),
           _buildPaymentTile(
-              title: 'Google Pay',
-              icon: Icons.account_balance_wallet,
-              value: 'GPay'),
+            title: 'Google Pay',
+            icon: Icons.account_balance_wallet,
+            value: 'GPay',
+          ),
           _buildPaymentTile(
-              title: 'PhonePe', icon: Icons.phone_android, value: 'Phonepe'),
+            title: 'PhonePe',
+            icon: Icons.phone_android,
+            value: 'Phonepe',
+          ),
           _buildPaymentTile(
-              title: 'Paytm', icon: Icons.payment, value: 'Paytm'),
+            title: 'Paytm',
+            icon: Icons.payment,
+            value: 'Paytm',
+          ),
           _buildPaymentTile(
-              title: 'Amazon Pay', icon: Icons.shopping_cart, value: 'Amazonpay'),
+            title: 'Amazon Pay',
+            icon: Icons.shopping_cart,
+            value: 'Amazonpay',
+          ),
 
           const Divider(),
 
           _buildSectionTitle('Net Banking'),
           _buildPaymentTile(
-              title: 'Net Banking',
-              icon: Icons.account_balance,
-              value: 'netbanking'),
+            title: 'Net Banking',
+            icon: Icons.account_balance,
+            value: 'netbanking',
+          ),
 
           const Divider(),
 
           _buildSectionTitle('Credit/Debit Card'),
           _buildPaymentTile(
-              title: 'Credit/Debit Card',
-              icon: Icons.credit_card,
-              value: 'card'),
+            title: 'Credit/Debit Card',
+            icon: Icons.credit_card,
+            value: 'card',
+          ),
 
           const Divider(),
 
           _buildSectionTitle('Cash on Delivery'),
           _buildPaymentTile(
-              title: 'Cash on Delivery', icon: Icons.money, value: 'cod'),
+            title: 'Cash on Delivery',
+            icon: Icons.money,
+            value: 'cod',
+          ),
         ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
         child: Obx(() {
-          bool isSelected = paymentController.selectedPaymentMethod.value.isNotEmpty;
+          bool isSelected =
+              paymentController.selectedPaymentMethod.value.isNotEmpty;
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: isSelected ? AppTheme.primaryColor : Colors.grey,

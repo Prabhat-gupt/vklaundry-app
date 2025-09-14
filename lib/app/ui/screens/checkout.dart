@@ -8,6 +8,7 @@ import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:laundry_app/app/controllers/razorpay_payment_controller.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
+import 'package:laundry_app/app/ui/screens/myOffers.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -34,7 +35,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void initState() {
     super.initState();
-    // Put once; you can also inject via bindings
     razorpayController = Get.put(
       RazorpayPaymentController(razorpayKeyId: 'RAZORPAY_KEY_ID_HERE'),
       permanent: true,
@@ -45,13 +45,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget build(BuildContext context) {
     // Filter out items with zero quantity
     final selectedItems = controller.getSelectedCartItems().where((item) {
-      final quantity = controller
+      final quantity =
+          controller
               .cartQuantities['${item['service']}_${item['product']['id']}'] ??
           0;
       return quantity > 0;
     }).toList();
 
-    // If no items left, pop the page automatically
     if (selectedItems.isEmpty) {
       Future.microtask(() => Get.back());
       return const SizedBox();
@@ -62,27 +62,29 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final double handlingCharge = 2.0;
     final double grandTotal = itemsTotal + deliveryCharge + handlingCharge;
 
-    final offer = controller.activeOffer;
-    final bool canApplyDiscount =
-        offer.isNotEmpty && itemsTotal >= (offer['min_amount'] ?? 0);
+    // currently applied offer (Map<String, dynamic> or empty if none)
+    final offer = controller.activeOfferselected.isEmpty
+        ? null
+        : controller.activeOfferselected;
 
     double discount = 0.0;
     String discountLabel = "";
 
-    if (discountApplied && canApplyDiscount) {
-      print("Applying discount for offer: $offer");
-      if (offer['discount_type'] == 'percentage') {
-        discount = itemsTotal * (offer['discount_value'] ?? 0) / 100;
-        discountLabel = "${offer['title']} (${offer['discount_value']}% off)";
-        print("Calculated percentage discount: $discount");
-      } else if (offer['discount_type'] == 'flat') {
-        discount = offer['discount_value'] ?? 0;
-        discountLabel =
-            "${offer['title']} (\u20B9${discount.toStringAsFixed(2)} off)";
+    if (discountApplied && offer != null) {
+      final double minAmount = (offer['min_amount'] ?? 0).toDouble();
+      if (grandTotal >= minAmount) {
+        if (offer['discount_type'] == 'percentage') {
+          discount = grandTotal * ((offer['discount_value'] ?? 0) / 100);
+          discountLabel = "${offer['title']} (${offer['discount_value']}% off)";
+        } else if (offer['discount_type'] == 'fixed') {
+          discount = (offer['discount_value'] ?? 0).toDouble();
+          discountLabel =
+              "${offer['title']} (₹${discount.toStringAsFixed(2)} off)";
+        }
       }
     }
 
-    final double finalTotal = grandTotal - discount;
+    final double finalTotal = (grandTotal - discount).clamp(0, double.infinity);
 
     return Scaffold(
       appBar: AppBar(
@@ -102,82 +104,47 @@ class _CheckoutPageState extends State<CheckoutPage> {
             _buildPickupSlotSelector(context),
             if (selectedPickupDate != null && selectedPickupSlot != null)
               _buildDeliveryDateDisplay(),
-            const SizedBox(height: 20),
-            // Discount Section
-            if (offer.isNotEmpty)
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.backgroundColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.primaryColor),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            offer['title'] ?? 'Discount Offer',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: AppTheme.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            offer['discount_type'] == 'percentage'
-                                ? "${offer['discount_value']}% off on orders above \u20B9${offer['min_amount']}"
-                                : "\u20B9${offer['discount_value']} off on orders above \u20B9${offer['min_amount']}",
-                            style: const TextStyle(fontSize: 14),
-                            softWrap: true,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: canApplyDiscount && !discountApplied
-                          ? () {
-                              setState(() {
-                                discountApplied = true;
-                              });
-                            }
-                          : (discountApplied
-                              ? () {
-                                  setState(() {
-                                    discountApplied = false;
-                                  });
-                                }
-                              : null),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: discountApplied
-                            ? Colors.red
-                            : (canApplyDiscount
-                                ? AppTheme.primaryColor
-                                : Colors.grey),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                      ),
-                      child: Text(
-                        discountApplied ? "Remove" : "Apply",
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 10),
+
+            /// Offers Section
+            Container(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  showOffersBottomSheet(
+                    context,
+                    controller.activeOffer,
+                    grandTotal,
+                    (selectedOffer) {
+                      setState(() {
+                        if (selectedOffer != null) {
+                          controller.activeOfferselected.value = selectedOffer;
+                          discountApplied = true;
+                        } else {
+                          controller.activeOfferselected.value = {};
+                          discountApplied = false;
+                        }
+                      });
+                    },
+                    alreadyAppliedOffer: controller.activeOfferselected,
+                  );
+                },
+                child: const Text("View Offers"),
               ),
-            _buildBillDetails(itemsTotal, deliveryCharge, handlingCharge,
-                grandTotal, discount, discountLabel),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// Bill Details
+            _buildBillDetails(
+              itemsTotal,
+              deliveryCharge,
+              handlingCharge,
+              grandTotal,
+              discount,
+              discountLabel,
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -198,106 +165,129 @@ class _CheckoutPageState extends State<CheckoutPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Selected Items",
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            "Selected Items",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        item['product']['image'] ??
-                            'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
-                        height: 50,
-                        width: 50,
-                        fit: BoxFit.cover,
-                      ),
+          ...items.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      item['product']['image'] ??
+                          'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
+                      height: 50,
+                      width: 50,
+                      fit: BoxFit.cover,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(item['product']['name'] ?? '',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600)),
-                          Text("Service: ${item['service_name']}",
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color.fromRGBO(87, 104, 171, 1),
-                            Color.fromRGBO(35, 42, 69, 1)
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['product']['name'] ?? '',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              controller.removeFromCart(item['product']);
-                              controller.update();
-                              setState(() {});
-                            },
-                            child: const Icon(Icons.remove,
-                                size: 16, color: Colors.white),
+                        Text(
+                          "Service: ${item['service_name']}",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
-                          const SizedBox(width: 8),
-                          Obx(() {
-                            final quantity = controller.cartQuantities[
-                                    '${item['service']}_${item['product']['id']}'] ??
-                                0;
-                            return Text("$quantity",
-                                style: const TextStyle(color: Colors.white));
-                          }),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              controller.addToCart(item['product']);
-                              controller.update();
-                              setState(() {});
-                            },
-                            child: const Icon(Icons.add,
-                                size: 16, color: Colors.white),
-                          )
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Obx(() {
-                      final quantity = controller.cartQuantities[
-                              '${item['service']}_${item['product']['id']}'] ??
-                          0;
-                      final totalPrice = quantity * item['product']['price'];
-                      return Text("\u20B9$totalPrice");
-                    }),
-                  ],
-                ),
-              )),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color.fromRGBO(87, 104, 171, 1),
+                          Color.fromRGBO(35, 42, 69, 1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            controller.removeFromCart(item['product']);
+                            controller.update();
+                            setState(() {});
+                          },
+                          child: const Icon(
+                            Icons.remove,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Obx(() {
+                          final quantity =
+                              controller
+                                  .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+                              0;
+                          return Text(
+                            "$quantity",
+                            style: const TextStyle(color: Colors.white),
+                          );
+                        }),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            controller.addToCart(item['product']);
+                            controller.update();
+                            setState(() {});
+                          },
+                          child: const Icon(
+                            Icons.add,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Obx(() {
+                    final quantity =
+                        controller
+                            .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+                        0;
+                    final totalPrice = quantity * item['product']['price'];
+                    return Text("\u20B9$totalPrice");
+                  }),
+                ],
+              ),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Missed something?",
-                  style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text(
+                "Missed something?",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
                       Color.fromRGBO(87, 104, 171, 1),
-                      Color.fromRGBO(35, 42, 69, 1)
+                      Color.fromRGBO(35, 42, 69, 1),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -313,11 +303,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: const Text("+ Add More Items"),
                 ),
-              )
+              ),
             ],
           ),
         ],
@@ -327,12 +318,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   // Update bill details to accept discount and label
   Widget _buildBillDetails(
-      double itemsTotal,
-      double deliveryCharge,
-      double handlingCharge,
-      double grandTotal,
-      double discount,
-      String discountLabel) {
+    double itemsTotal,
+    double deliveryCharge,
+    double handlingCharge,
+    double grandTotal,
+    double discount,
+    String discountLabel,
+  ) {
     final double finalTotal = grandTotal - discount;
 
     return Container(
@@ -346,25 +338,37 @@ class _CheckoutPageState extends State<CheckoutPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Bill details",
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            "Bill details",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           _billRow("Items total", "\u20B9${itemsTotal.toStringAsFixed(2)}"),
           const SizedBox(height: 8),
           _billRow(
-              "Delivery charge", "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
+            "Delivery charge",
+            "\u20B9${deliveryCharge.toStringAsFixed(2)}",
+          ),
           const SizedBox(height: 8),
           _billRow(
-              "Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
+            "Handling charge",
+            "\u20B9${handlingCharge.toStringAsFixed(2)}",
+          ),
           if (discount > 0) ...[
             const SizedBox(height: 8),
-            _billRow("Discount", "-\u20B9${discount.toStringAsFixed(2)}",
-                isBold: true),
+            _billRow(
+              "Discount",
+              "-\u20B9${discount.toStringAsFixed(2)}",
+              isBold: true,
+            ),
             Text(discountLabel, style: const TextStyle(color: Colors.green)),
           ],
           const Divider(height: 24),
-          _billRow("Grand Total", "\u20B9${finalTotal.toStringAsFixed(2)}",
-              isBold: true),
+          _billRow(
+            "Grand Total",
+            "\u20B9${finalTotal.toStringAsFixed(2)}",
+            isBold: true,
+          ),
         ],
       ),
     );
@@ -374,12 +378,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: TextStyle(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
-        Text(value,
-            style: TextStyle(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
       ],
     );
   }
@@ -388,15 +398,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Select Pickup Date & Slot",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          "Select Pickup Date & Slot",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: List.generate(7, (index) {
               DateTime date = DateTime.now().add(Duration(days: index));
-              bool isSelected = selectedPickupDate != null &&
+              bool isSelected =
+                  selectedPickupDate != null &&
                   DateUtils.isSameDay(selectedPickupDate, date);
               return GestureDetector(
                 onTap: () {
@@ -404,8 +417,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected ? AppTheme.primaryColor : Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -413,15 +428,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   child: Column(
                     children: [
-                      Text(DateFormat.E().format(date),
-                          style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black)),
+                      Text(
+                        DateFormat.E().format(date),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text(date.day.toString(),
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.white : Colors.black)),
+                      Text(
+                        date.day.toString(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -430,8 +451,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
         ),
         const SizedBox(height: 16),
-        const Text("Select Time Slot",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          "Select Time Slot",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 10,
@@ -446,8 +469,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
               checkmarkColor: Colors.white,
               selectedColor: AppTheme.primaryColor,
               labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.w500),
+                color: isSelected ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w500,
+              ),
               backgroundColor: Colors.grey.shade200,
             );
           }).toList(),
@@ -469,10 +493,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         const SizedBox(height: 16),
         const Text(
           "Expected Delivery",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 8),
         Container(
@@ -486,8 +507,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
               const Icon(Icons.local_shipping, color: Colors.blueGrey),
               const SizedBox(width: 10),
               Text(
-                DateFormat('EEEE, MMM d, yyyy  |  hh:mm a')
-                    .format(deliveryDate),
+                DateFormat(
+                  'EEEE, MMM d, yyyy  |  hh:mm a',
+                ).format(deliveryDate),
                 style: const TextStyle(fontSize: 14),
               ),
             ],
@@ -498,8 +520,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildBottomBar(
-      BuildContext context, double grandTotal, String? paymentMethod) {
-    final userId = profileController.dbUserId.value;
+    BuildContext context,
+    double grandTotal,
+    String? paymentMethod,
+  ) {
+    // final userId = profileController.dbUserId.value;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -561,10 +586,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
               // ),
               // const Spacer(),
               ElevatedButton(
-                onPressed: (selectedPickupDate != null &&
-                        selectedPickupSlot != null)
+                onPressed:
+                    (selectedPickupDate != null && selectedPickupSlot != null)
                     ? () async {
-                        final userId = profileController.dbUserId.value;
+                        final userIdMy = profileController.storages.read(
+                          'userId',
+                        );
                         final customerName = profileController.name.value;
                         final customerPhone = profileController.phone.value;
                         final customerEmail = profileController.email.value;
@@ -572,21 +599,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         // OPTIONAL: If you create an order from your backend, put it here:
                         // final backendOrderId = await yourApiCreateRazorpayOrder(grandTotal);
                         final selectedItems = controller.getSelectedCartItems();
-                        final totalItemsCount = selectedItems.fold<int>(
-                          0,
-                          (sum, item) {
-                            final quantity = controller.cartQuantities[
-                                    '${item['service']}_${item['product']['id']}'] ??
-                                0;
-                            return sum + quantity;
-                          },
-                        );
+                        final totalItemsCount = selectedItems.fold<int>(0, (
+                          sum,
+                          item,
+                        ) {
+                          final quantity =
+                              controller
+                                  .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+                              0;
+                          return sum + quantity;
+                        });
                         final hasSubscription = await profileController
                             .validateAndUpdateSubscription(
-                                userId, totalItemsCount);
+                              userIdMy,
+                              totalItemsCount,
+                            );
                         final String? backendOrderId = null;
                         if (hasSubscription == 1) {
-                          // Skip payment, place order directly
                           await orderController.placeOrder(
                             selectedItems: controller.getSelectedCartItems(),
                             totalAmount: grandTotal,
@@ -596,9 +625,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
                             deliveryDateTime:
                                 "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
-                            userId: userId,
+                            userId: userIdMy,
                             addressId:
-                                userId, // replace with actual address id if needed
+                                userIdMy, // replace with actual address id if needed
                           );
 
                           Get.snackbar(
@@ -622,21 +651,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 ? customerName
                                 : 'Laundry User',
                             description: 'Laundry order payment',
-                            prefillContact:
-                                customerPhone.isNotEmpty ? customerPhone : null,
-                            prefillEmail:
-                                customerEmail.isNotEmpty ? customerEmail : null,
+                            prefillContact: customerPhone.isNotEmpty
+                                ? customerPhone
+                                : null,
+                            prefillEmail: customerEmail.isNotEmpty
+                                ? customerEmail
+                                : null,
                             notes: {
-                              'user_id': '$userId',
+                              'user_id': '$userIdMy',
                               'pickup':
                                   "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} $selectedPickupSlot",
                             },
                             onSuccess: (paymentId, orderId, signature) async {
+                              print(
+                                "gjgjgjgjggjgjgj onSuccess is ::::::::: $paymentId",
+                              );
                               try {
                                 // Mark payment & place order in your DB
                                 await orderController.placeOrder(
-                                  selectedItems:
-                                      controller.getSelectedCartItems(),
+                                  selectedItems: controller
+                                      .getSelectedCartItems(),
                                   totalAmount: grandTotal,
                                   paymentMethod: 'Razorpay',
                                   paymentStatus: 'paid',
@@ -644,10 +678,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
                                   deliveryDateTime:
                                       "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
-                                  userId: userId,
+                                  userId: userIdMy,
                                   addressId:
-                                      userId, // replace with actual address id if you have it
+                                      userIdMy, // replace with actual address id if you have it
                                   // If your order table wants paymentId/signature/orderId, add parameters to placeOrder
+                                  transactionId: paymentId,
                                 );
 
                                 Get.snackbar(
@@ -675,7 +710,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             },
                             onFailure: (code, message) {
                               // Unified error UI with helpful text
-                              final isCancelled = code == 2 ||
+                              final isCancelled =
+                                  code == 2 ||
                                   message.toLowerCase().contains('cancel');
                               Get.snackbar(
                                 isCancelled
@@ -689,7 +725,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               );
                             },
                           );
-                        }else{
+                        } else {
                           // Subscription limit exceeded
                           Get.snackbar(
                             "Subscription Limit Exceeded",
@@ -703,36 +739,48 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 child: Row(
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("\u20B9${grandTotal.toStringAsFixed(2)}",
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700)),
-                        const Text("Total",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400)),
+                        Text(
+                          "\u20B9${grandTotal.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Text(
+                          "Total",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(width: 25),
-                    const Text("Place Order",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700)),
+                    const Text(
+                      "Place Order",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ],

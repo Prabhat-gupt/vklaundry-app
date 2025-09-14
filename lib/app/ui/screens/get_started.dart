@@ -59,16 +59,13 @@ class _GetStartedState extends State<GetStarted> {
                   const Text(
                     'Experience premium garment care with effortless pickup and delivery.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: GestureDetector(
-                      onTap: (){
+                      onTap: () {
                         Get.offAllNamed(AppRoutes.LOGIN);
                       },
                       child: Container(
@@ -77,7 +74,7 @@ class _GetStartedState extends State<GetStarted> {
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [
-                              Color.fromRGBO(87, 104,171, 1),
+                              Color.fromRGBO(87, 104, 171, 1),
                               Color.fromRGBO(35, 42, 69, 1),
                             ],
                           ),
@@ -87,9 +84,10 @@ class _GetStartedState extends State<GetStarted> {
                           child: Text(
                             "Let's Start",
                             style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

@@ -1,9 +1,11 @@
 // profile_controller.dart
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
+  var storages = GetStorage();
 
   var name = ''.obs;
   var email = ''.obs;
@@ -12,23 +14,27 @@ class ProfileController extends GetxController {
   var dbUserId = 0.obs; // Store user ID from 'users' table
   var isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchUserProfile();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   fetchUserProfile();
+  // }
 
-  Future<void> fetchUserProfile() async {
+  Future<void> fetchUserProfile(user) async {
+    print("fsaifafoighsghshhd $user");
     try {
       isLoading.value = true;
-      final user = supabase.auth.currentUser;
+      // final user = supabase.auth.currentUser;
+      // dynamic user = storages.read('userId');
+      // print("my profile userid is :::::: $userId");
       if (user != null) {
-        userId.value = user.id;
+        // userId.value = user.id;
+        // userId.value = user.toString();
 
         final response = await supabase
             .from('users')
             .select('*')
-            .eq('uuid', user.id)
+            .eq('id', user)
             .maybeSingle();
         print("Response from the user $response");
         if (response != null) {
@@ -46,16 +52,20 @@ class ProfileController extends GetxController {
   }
 
   Future<void> updateProfile(
-      String newName, String newEmail, int newNumber) async {
+    String newName,
+    String newEmail,
+    int newNumber,
+  ) async {
+    print("my dbuservcaielues is :::::: ${dbUserId.value}");
     try {
       isLoading.value = true;
-      final user = supabase.auth.currentUser;
-      if (user != null && dbUserId.value > 0) {
-        await supabase.from('users').update({
-          'name': newName,
-          'email': newEmail,
-          'phone': newNumber,
-        }).eq('id', dbUserId.value);
+      // final user = supabase.auth.currentUser;
+      // if (user != null && dbUserId.value > 0) {
+      if (storages.read('userId') != null && dbUserId.value > 0) {
+        await supabase
+            .from('users')
+            .update({'name': newName, 'email': newEmail, 'phone': newNumber})
+            .eq('id', dbUserId.value);
 
         name.value = newName;
         email.value = newEmail;
@@ -88,7 +98,8 @@ class ProfileController extends GetxController {
   Future<int> validateAndUpdateSubscription(int userId, int itemsCount) async {
     try {
       print(
-          "Validating subscription for user $userId with item count $itemsCount");
+        "Validating subscription for user $userId with item count $itemsCount",
+      );
       // 1. Get active subscription for user
       final userSub = await supabase
           .from('user_subscriptions')
@@ -99,7 +110,9 @@ class ProfileController extends GetxController {
 
       if (userSub == null) {
         Get.snackbar(
-            "No Subscription", "You do not have an active subscription.");
+          "No Subscription",
+          "You do not have an active subscription.",
+        );
         return 0;
       }
 
@@ -132,7 +145,9 @@ class ProfileController extends GetxController {
 
       if ((currentCount + itemsCount) > maxPieces) {
         Get.snackbar(
-            "Limit Exceeded", "You have exceeded your subscription limit.");
+          "Limit Exceeded",
+          "You have exceeded your subscription limit.",
+        );
         return 2;
       }
 
@@ -140,7 +155,8 @@ class ProfileController extends GetxController {
       final newCount = currentCount + itemsCount;
       await supabase
           .from('user_subscriptions')
-          .update({'count': newCount}).eq('id', userSub['id']);
+          .update({'count': newCount})
+          .eq('id', userSub['id']);
 
       return 1;
     } catch (e) {

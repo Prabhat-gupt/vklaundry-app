@@ -26,8 +26,9 @@ class TrackOrderController extends GetxController {
   Future<void> fetchAllServices() async {
     try {
       print("Supabase service, start");
-      final servicesResponse =
-          await supabase.from('services').select('id, name');
+      final servicesResponse = await supabase
+          .from('services')
+          .select('id, name');
 
       for (var service in servicesResponse) {
         serviceNames[service['id']] = service['name'] ?? '';
@@ -38,51 +39,56 @@ class TrackOrderController extends GetxController {
     }
   }
 
- Future<void> fetchOrderDetails(int userID) async {
-  try {
-    isLoading.value = true;
+  Future<void> fetchOrderDetails(int userID) async {
+    try {
+      isLoading.value = true;
 
-    final response = await supabase
-        .from('orders')
-        .select('*, order_items(*, product:item_id(*))')
-        .eq('user_id', userID);
-
-    if (response == null || response.isEmpty) {
-      throw Exception("No orders found for this user");
-    }
-
-    print("Service name list , $serviceNames");
-
-    final processedOrders = response.map((orderData) {
-      final statusCode = orderData['status'] as int?;
-      orderData['status_text'] = _getStatusText(statusCode);
-
-      // Ensure order_items exists
-      if (orderData['order_items'] != null) {
-        orderData['order_items'] = (orderData['order_items'] as List).map((item) {
-          final serviceId = item['service_id'] as int?;
-          return {
-            ...item,
-            'service_name': serviceId != null ? (serviceNames[serviceId] ?? '') : ''
-          };
-        }).toList();
+      // Make sure services are loaded
+      if (serviceNames.isEmpty) {
+        await fetchAllServices();
       }
 
-      orderData['items'] = orderData['order_items'] ?? [];
-      return orderData;
-    }).toList();
+      final response = await supabase
+          .from('orders')
+          .select('*, order_items(*, product:item_id(*))')
+          .eq('user_id', userID);
 
-    order.value = {"orders": processedOrders};
-    print("Order value, $order");
-  } catch (e) {
-    print("Error fetching orders: $e");
-  } finally {
-    isLoading.value = false;
+      if (response == null || response.isEmpty) {
+        throw Exception("No orders found for this user");
+      }
+
+      final processedOrders = response.map((orderData) {
+        final statusCode = orderData['status'] as int?;
+        orderData['status_text'] = _getStatusText(statusCode);
+
+        if (orderData['order_items'] != null) {
+          orderData['order_items'] = (orderData['order_items'] as List).map((
+            item,
+          ) {
+            final serviceId = item['service_id'] as int?;
+            return {
+              ...item,
+              'service_name': serviceId != null
+                  ? (serviceNames[serviceId] ?? '')
+                  : '',
+            };
+          }).toList();
+        }
+
+        orderData['items'] = orderData['order_items'] ?? [];
+        return orderData;
+      }).toList();
+
+      order.value = {"orders": processedOrders};
+      print("Order value, $order");
+    } catch (e) {
+      print("Error fetching orders: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
-}
 
- 
- void subscribeToOrderChanges(int orderId) {
+  void subscribeToOrderChanges(int orderId) {
     _orderChannel = supabase.channel('order_updates_$orderId')
       ..onPostgresChanges(
         event: PostgresChangeEvent.all,
@@ -93,12 +99,53 @@ class TrackOrderController extends GetxController {
           column: 'id',
           value: orderId,
         ),
-        callback: (payload) {
-          print("Order updated: ${payload.toString()}");
-          fetchOrderDetails(orderId);
+        callback: (payload) async {
+          print("Order updated: $payload");
+
+          // Fetch only this order by ID
+          final response = await supabase
+              .from('orders')
+              .select('*, order_items(*, product:item_id(*))')
+              .eq('id', orderId)
+              .single();
+
+          if (response != null) {
+            final updatedOrder = _processOrder(response);
+
+            final ordersList = order.value['orders'] as List<dynamic>? ?? [];
+            final index = ordersList.indexWhere((o) => o['id'] == orderId);
+
+            if (index != -1) {
+              ordersList[index] = updatedOrder; // Update the order
+            } else {
+              ordersList.add(updatedOrder); // Or add if missing
+            }
+
+            order.value = {"orders": ordersList}; // Trigger UI update
+          }
         },
       )
       ..subscribe();
+  }
+
+  Map<String, dynamic> _processOrder(Map<String, dynamic> orderData) {
+    final statusCode = orderData['status'] as int?;
+    orderData['status_text'] = _getStatusText(statusCode);
+
+    if (orderData['order_items'] != null) {
+      orderData['order_items'] = (orderData['order_items'] as List).map((item) {
+        final serviceId = item['service_id'] as int?;
+        return {
+          ...item,
+          'service_name': serviceId != null
+              ? (serviceNames[serviceId] ?? '')
+              : '',
+        };
+      }).toList();
+    }
+
+    orderData['items'] = orderData['order_items'] ?? [];
+    return orderData;
   }
 
   void unsubscribeFromOrderChanges() {

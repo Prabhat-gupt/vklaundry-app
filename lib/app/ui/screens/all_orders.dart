@@ -38,8 +38,7 @@ class _AllOrdersPageState extends State<AllOrdersPage> {
           if (ordersData.isEmpty) {
             return Center(
               child: Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // ✅ center vertically
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.network(
                     "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",

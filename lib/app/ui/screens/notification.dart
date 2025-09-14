@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:laundry_app/app/controllers/notification_controller.dart';
 
 class NotificationScreen extends StatefulWidget {
-
   const NotificationScreen({super.key});
 
   @override
@@ -11,8 +10,9 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final NotificationController notificationController =
-      Get.put(NotificationController());
+  final NotificationController notificationController = Get.put(
+    NotificationController(),
+  );
 
   @override
   void initState() {
