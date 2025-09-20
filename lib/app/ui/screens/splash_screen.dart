@@ -139,13 +139,13 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Add delay for better UX
       Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          if (isLoggedIn) {
-            Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
-          } else {
-            Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
-          }
-        }
+        // if (mounted) {
+        //   if (isLoggedIn) {
+        //     Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
+        //   } else {
+        //     Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
+        //   }
+        // }
       });
     });
   }
@@ -237,7 +237,7 @@ class _SplashScreenState extends State<SplashScreen>
                           return Transform.translate(
                             offset: Offset(0, -_floatingAnimation.value),
                             child: Container(
-                              padding: const EdgeInsets.all(30),
+                              padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white.withOpacity(0.1),
@@ -250,7 +250,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ],
                               ),
                               child: Container(
-                                padding: const EdgeInsets.all(20),
+                                // padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,
@@ -280,8 +280,8 @@ class _SplashScreenState extends State<SplashScreen>
                                   child: Image.asset(
                                     splashImages[_currentIndex],
                                     key: ValueKey<int>(_currentIndex),
-                                    height: 125,
-                                    width: 125,
+                                    height: 200,
+                                    width: 200,
                                   ),
                                 ),
                               ),
@@ -313,28 +313,41 @@ class _SplashScreenState extends State<SplashScreen>
                             //     ],
                             //   ),
                             // ),
-                            AnimatedTextKit(
-                              animatedTexts: [
-                                FadeAnimatedText(
-                                  'VK Laundry',
-                                  textStyle: const TextStyle(
-                                    fontSize: 42.0,
-                                    fontWeight: FontWeight.bold,
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'VK Laundary',
+                                  style: TextStyle(
+                                    fontSize: 42,
                                     color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                TweenAnimationBuilder<double>(
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  duration: Duration(seconds: 2),
+                                  builder: (context, value, child) => Opacity(
+                                    opacity: value,
+                                    child: child,
+                                  ),
+                                  child: Text(
+                                    'Your Laundry, Our Priority',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
                                   ),
                                 ),
                               ],
-                              isRepeatingAnimation: false, // Change this from true to false
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Your Laundry, Our Priority',
-                              style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white.withOpacity(0.9),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+
+                            //
+
+
+
                           ],
                         ),
                       ),
