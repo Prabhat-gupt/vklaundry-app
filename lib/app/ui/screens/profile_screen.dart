@@ -50,8 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final email = emailController.text.trim();
 
     // Check if any value has changed
-    final isChanged =
-        nameController.text.trim() != controller.name.value ||
+    final isChanged = nameController.text.trim() != controller.name.value ||
         phone != controller.phone.value ||
         email != controller.email.value;
 

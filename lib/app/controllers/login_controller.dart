@@ -5,7 +5,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:http/http.dart' as http;
-// import 'package:laundryapp/app/routes/app_pages.dart';
+// import 'package:laundry_app/app/routes/app_pages.dart';
 // import 'package:supabase_flutter/supabase_flutter.dart';
 
 // class LoginController extends GetxController {

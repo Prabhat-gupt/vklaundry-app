@@ -71,27 +71,21 @@ class PaymentSelectPage extends StatelessWidget {
             icon: Icons.shopping_cart,
             value: 'Amazonpay',
           ),
-
           const Divider(),
-
           _buildSectionTitle('Net Banking'),
           _buildPaymentTile(
             title: 'Net Banking',
             icon: Icons.account_balance,
             value: 'netbanking',
           ),
-
           const Divider(),
-
           _buildSectionTitle('Credit/Debit Card'),
           _buildPaymentTile(
             title: 'Credit/Debit Card',
             icon: Icons.credit_card,
             value: 'card',
           ),
-
           const Divider(),
-
           _buildSectionTitle('Cash on Delivery'),
           _buildPaymentTile(
             title: 'Cash on Delivery',

@@ -25,87 +25,88 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(numbersOrders, (index) {
-        final order = orders[index];
-        final int status = order['status'] ?? 0;
-        final String statusText = _getStatusText(status);
-
-        print("my order is rejected here :::::: ${orders[index]}");
-        return GestureDetector(
-          onTap: () => _showOrderDetail(context, order),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // 🔹 Left side
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Booking Details',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDateTime(order['created_at']),
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-                // 🔹 Right side
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '₹${order['amount']?.toString() ?? '0'}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(status).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        statusText,
+    return SingleChildScrollView(
+      child: Column(
+        children: List.generate(numbersOrders, (index) {
+          final order = orders[index];
+          final int status = order['status'] ?? 0;
+          final String statusText = _getStatusText(status);
+          print("my order is rejected here :::::: ${orders[index]}");
+          return GestureDetector(
+            onTap: () => _showOrderDetail(context, order),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // 🔹 Left side
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Booking Details',
                         style: TextStyle(
-                          color: _getStatusColor(status),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDateTime(order['created_at']),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                  // 🔹 Right side
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '₹${order['amount']?.toString() ?? '0'}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(status).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            color: _getStatusColor(status),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
@@ -124,7 +125,8 @@ String _formatDateTime(String? dateString) {
   if (dateString == null || dateString.isEmpty) return '';
   try {
     final date = DateTime.parse(dateString);
-    return DateFormat('yyyy-MM-dd HH:mm').format(date);
+    // return DateFormat('yyyy-MM-dd HH:mm').format(date);
+    return DateFormat('yyyy-MM-dd').format(date);
   } catch (e) {
     return '';
   }
@@ -306,7 +308,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                     'Subtotal',
                     '₹${(order['amount'] - 2)?.toString() ?? '0'}',
                   ),
-                  _priceRow('Delivery Fee', '₹2'),
+                  _priceRow('Delivery Fee', '₹5'),
                   _priceRow(
                     'Total',
                     '₹${order['amount']?.toString() ?? '0'}',

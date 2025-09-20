@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -18,6 +19,7 @@ class _SetupScreenState extends State<SetupScreen> {
   final houseController = TextEditingController();
   final buildingController = TextEditingController();
   final landmarkController = TextEditingController();
+  var storage = GetStorage();
 
   bool isLoading = false;
   bool isFormValid = false;
@@ -39,8 +41,7 @@ class _SetupScreenState extends State<SetupScreen> {
       final isEmailValid =
           email.isNotEmpty && email.contains("@") && email.contains(".com");
 
-      isFormValid =
-          nameController.text.trim().isNotEmpty &&
+      isFormValid = nameController.text.trim().isNotEmpty &&
           isEmailValid &&
           houseController.text.trim().isNotEmpty &&
           buildingController.text.trim().isNotEmpty &&
@@ -51,28 +52,24 @@ class _SetupScreenState extends State<SetupScreen> {
   Future<void> _saveUserData() async {
     setState(() => isLoading = true);
     try {
-      final user = supabase.auth.currentUser;
-      if (user == null) throw Exception('User not logged in');
+      // final user = supabase.auth.currentUser;
+      if (storage.read('userId') == null) throw Exception('User not logged in');
 
-      await supabase
-          .from('users')
-          .update({
-            'name': nameController.text.trim(),
-            'email': emailController.text.trim(),
-          })
-          .eq('uuid', user.id);
+      await supabase.from('users').update({
+        'name': nameController.text.trim(),
+        'email': emailController.text.trim(),
+      }).eq('id', storage.read('userId'));
 
       int id = await supabase
           .from('users')
           .select('id')
-          .eq('uuid', user.id)
+          .eq('id', storage.read('userId'))
           .single()
           .then((data) => data['id']);
 
       await supabase.from('addresses').upsert({
         'id': id, // foreign key to users table
-        'address_line':
-            '${houseController.text.trim()}'
+        'address_line': '${houseController.text.trim()}'
             '${buildingController.text.trim()}',
         'city': 'Hyderabad',
         'state': 'Telangana',
@@ -113,8 +110,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 emailController,
                 hintText: "Enter your email",
                 keyboardType: TextInputType.emailAddress,
-                errorText:
-                    emailController.text.isNotEmpty &&
+                errorText: emailController.text.isNotEmpty &&
                         (!emailController.text.contains("@") ||
                             !emailController.text.contains(".com"))
                     ? "Enter a valid email address"
@@ -149,9 +145,8 @@ class _SetupScreenState extends State<SetupScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isFormValid
-                        ? AppTheme.primaryColor
-                        : Colors.grey, // ✅
+                    backgroundColor:
+                        isFormValid ? AppTheme.primaryColor : Colors.grey, // ✅
                   ),
                   onPressed: (!isFormValid || isLoading) ? null : _saveUserData,
                   child: isLoading

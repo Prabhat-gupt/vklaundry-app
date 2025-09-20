@@ -50,7 +50,7 @@ class TrackOrderPage extends StatelessWidget {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 5,
-                  )
+                  ),
                 ],
               ),
               child: Column(
@@ -62,19 +62,25 @@ class TrackOrderPage extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Order #${orderData['id']}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(
+                            'Order #${orderData['id']}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             'Placed on ${DateFormat('yyyy-MM-dd : HH:mm').format(DateTime.parse(orderData['created_at']).toLocal())}',
                             style: const TextStyle(color: Colors.grey),
-                          )
+                          ),
                         ],
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: _getStatusColor(status),
                           borderRadius: BorderRadius.circular(20),
@@ -82,9 +88,11 @@ class TrackOrderPage extends StatelessWidget {
                         child: Text(
                           statusText,
                           style: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -96,8 +104,10 @@ class TrackOrderPage extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Estimated Delivery',
-                              style: TextStyle(color: Colors.grey)),
+                          const Text(
+                            'Estimated Delivery',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                           Text(
                             orderData['delivery_datetime'] ?? 'N/A',
                             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -110,11 +120,13 @@ class TrackOrderPage extends StatelessWidget {
                           color: Colors.blue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.local_shipping,
-                            color: Colors.blue),
+                        child: const Icon(
+                          Icons.local_shipping,
+                          color: Colors.blue,
+                        ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -128,15 +140,18 @@ class TrackOrderPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.05), blurRadius: 5)
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 5,
+                  ),
                 ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Order Status',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Order Status',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 20),
                   _buildTimeline(status),
                 ],
@@ -199,19 +214,23 @@ Widget _buildTimeline(int currentStatus) {
 
   return FixedTimeline.tileBuilder(
     theme: TimelineThemeData(
-      connectorTheme:
-          const ConnectorThemeData(thickness: 2.5, color: Colors.grey),
+      connectorTheme: const ConnectorThemeData(
+        thickness: 2.5,
+        color: Colors.grey,
+      ),
     ),
     builder: TimelineTileBuilder.connected(
       connectionDirection: ConnectionDirection.before,
       itemCount: steps.length,
-      nodePositionBuilder: (context, index) => 0.1, // Left side
-      indicatorPositionBuilder: (context, index) => 0.1, // Left side
+      nodePositionBuilder: (context, index) => 0.1,
+      indicatorPositionBuilder: (context, index) => 0.1,
       contentsBuilder: (context, index) {
-        final isActive = index <= currentStatus;
+        final isActive =
+            (currentStatus != 4 && index <= currentStatus) ||
+            (currentStatus == 4 && index == 3);
+
         return Padding(
-          padding: const EdgeInsets.only(
-              left: 24.0, bottom: 30.0), // More left padding
+          padding: const EdgeInsets.only(left: 24.0, bottom: 30.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -220,7 +239,11 @@ Widget _buildTimeline(int currentStatus) {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: isActive ? Colors.blue : Colors.black87,
+                  color: isActive
+                      ? (currentStatus == 4 && index == 3
+                            ? Colors.red
+                            : Colors.blue)
+                      : Colors.black87,
                 ),
               ),
               const SizedBox(height: 4),
@@ -236,6 +259,26 @@ Widget _buildTimeline(int currentStatus) {
         final isCompleted = currentStatus == 3;
         final isRejected = currentStatus == 4;
 
+        if (isRejected) {
+          if (index == 3) {
+            return const DotIndicator(
+              size: 24,
+              color: Colors.red,
+              child: Icon(Icons.close, color: Colors.white, size: 18),
+            );
+          } else {
+            return const DotIndicator(
+              size: 24,
+              color: Colors.grey,
+              child: Icon(
+                Icons.radio_button_unchecked,
+                color: Colors.white,
+                size: 16,
+              ),
+            );
+          }
+        }
+
         if (index < currentStatus) {
           return const DotIndicator(
             size: 24,
@@ -245,51 +288,40 @@ Widget _buildTimeline(int currentStatus) {
         } else if (index == currentStatus) {
           if (isCompleted) {
             return const DotIndicator(
-              size: 24, // Changed from 26 to 24
+              size: 24,
               color: Colors.green,
               child: Icon(Icons.check_circle, color: Colors.white, size: 18),
             );
-          } else if (isRejected) {
-            return const DotIndicator(
-              size: 24, // Changed from 26 to 24
-              color: Colors.red,
-              child: Icon(Icons.close, color: Colors.white, size: 18),
-            );
           } else {
             return const DotIndicator(
-              size: 24, // Changed from 26 to 24
+              size: 24,
               color: Colors.blue,
-              child: Icon(Icons.radio_button_checked,
-                  color: Colors.white, size: 18),
+              child: Icon(
+                Icons.radio_button_checked,
+                color: Colors.white,
+                size: 18,
+              ),
             );
           }
         } else {
           return const DotIndicator(
             size: 24,
             color: Colors.grey,
-            child: Icon(Icons.radio_button_unchecked,
-                color: Colors.white, size: 16),
+            child: Icon(
+              Icons.radio_button_unchecked,
+              color: Colors.white,
+              size: 16,
+            ),
           );
         }
       },
       connectorBuilder: (context, index, connectorType) {
-        final isCompleted = currentStatus == 3;
-        final isRejected = currentStatus == 4;
-
-        if (isCompleted) {
+        if (currentStatus == 4) {
+          return const SolidLineConnector(color: Colors.grey);
+        } else if (index < currentStatus) {
           return const SolidLineConnector(color: Colors.green);
-        } else if (isRejected) {
-          if (index < currentStatus) {
-            return const SolidLineConnector(color: Colors.green);
-          } else {
-            return const SolidLineConnector(color: Colors.red);
-          }
         } else {
-          if (index < currentStatus) {
-            return const SolidLineConnector(color: Colors.green);
-          } else {
-            return const SolidLineConnector(color: Colors.grey);
-          }
+          return const SolidLineConnector(color: Colors.grey);
         }
       },
     ),

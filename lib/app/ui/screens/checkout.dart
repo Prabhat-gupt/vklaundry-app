@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
+import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/orders_controller.dart';
 import 'package:laundry_app/app/controllers/payment_select_controller.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
@@ -19,34 +21,58 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   final ProductListController controller = Get.find<ProductListController>();
+  final HomePageController controllersHome = Get.find<HomePageController>();
+
   final OrderController orderController = Get.put(OrderController());
   final ProfileController profileController = Get.find<ProfileController>();
   final paymentController = Get.put(PaymentSelectController(), permanent: true);
   String? paymentMethod;
   DateTime? selectedPickupDate;
   String? selectedPickupSlot;
-
+  var storage = GetStorage();
   final List<String> pickupSlots = ["7AM to 10AM", "5PM to 8PM"];
 
   late RazorpayPaymentController razorpayController;
+  int? hasSubscription;
 
   bool discountApplied = false;
 
   @override
   void initState() {
     super.initState();
+    controller.activeOfferselected.value = {};
+    discountApplied = false;
+
     razorpayController = Get.put(
       RazorpayPaymentController(razorpayKeyId: 'RAZORPAY_KEY_ID_HERE'),
       permanent: true,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final selectedItems = controller.getSelectedCartItems();
+      final totalItemsCount = selectedItems.fold<int>(0, (sum, item) {
+        final quantity = controller.cartQuantities[
+                '${item['service']}_${item['product']['id']}'] ??
+            0;
+        return sum + quantity;
+      });
+
+      hasSubscription = await profileController.validateAndUpdateSubscription(
+        storage.read('userId'),
+      );
+      setState(() {});
+      print("has subscrition is ::::::::: $hasSubscription");
+      // print("has selectedItems is ::::::::: ${selectedItems}");
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     // Filter out items with zero quantity
+    print(
+      "my subscription is checking here is ::::: ${storage.read('subscriptionCheck')}",
+    );
     final selectedItems = controller.getSelectedCartItems().where((item) {
-      final quantity =
-          controller
+      final quantity = controller
               .cartQuantities['${item['service']}_${item['product']['id']}'] ??
           0;
       return quantity > 0;
@@ -90,63 +116,83 @@ class _CheckoutPageState extends State<CheckoutPage> {
       appBar: AppBar(
         title: const Text("Checkout"),
         centerTitle: true,
-        leading: const BackButton(),
+        leading: GestureDetector(
+          onTap: () async {
+            Get.back();
+            await controllersHome.fetchSubscriptions();
+          },
+          child: Icon(Icons.arrow_back),
+        ),
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.black,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildUnifiedServiceCard(selectedItems),
-            const SizedBox(height: 10),
-            _buildPickupSlotSelector(context),
-            if (selectedPickupDate != null && selectedPickupSlot != null)
-              _buildDeliveryDateDisplay(),
-            const SizedBox(height: 10),
+      body: WillPopScope(
+        onWillPop: () async {
+          await controllersHome.fetchSubscriptions();
+          return true;
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildUnifiedServiceCard(selectedItems),
+              const SizedBox(height: 10),
+              _buildPickupSlotSelector(context),
+              if (selectedPickupDate != null && selectedPickupSlot != null)
+                _buildDeliveryDateDisplay(),
+              const SizedBox(height: 10),
 
-            /// Offers Section
-            Container(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  showOffersBottomSheet(
-                    context,
-                    controller.activeOffer,
-                    grandTotal,
-                    (selectedOffer) {
-                      setState(() {
-                        if (selectedOffer != null) {
-                          controller.activeOfferselected.value = selectedOffer;
-                          discountApplied = true;
-                        } else {
-                          controller.activeOfferselected.value = {};
-                          discountApplied = false;
-                        }
-                      });
-                    },
-                    alreadyAppliedOffer: controller.activeOfferselected,
-                  );
-                },
-                child: const Text("View Offers"),
-              ),
-            ),
+              /// Offers Section
+              hasSubscription == 1
+                  ? SizedBox.shrink()
+                  : Container(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          showOffersBottomSheet(
+                            context,
+                            controller.activeOffer,
+                            grandTotal,
+                            (selectedOffer) {
+                              setState(() {
+                                if (selectedOffer != null) {
+                                  controller.activeOfferselected.value =
+                                      selectedOffer;
+                                  discountApplied = true;
+                                } else {
+                                  controller.activeOfferselected.value = {};
+                                  discountApplied = false;
+                                }
+                              });
+                            },
+                            alreadyAppliedOffer: controller.activeOfferselected,
+                          );
+                        },
+                        child: const Text("View Offers"),
+                      ),
+                    ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-            /// Bill Details
-            _buildBillDetails(
-              itemsTotal,
-              deliveryCharge,
-              handlingCharge,
-              grandTotal,
-              discount,
-              discountLabel,
-            ),
-            const SizedBox(height: 20),
-          ],
+              /// Bill Details
+              hasSubscription == 1
+                  ? _buildBillDetailWithoutSubscription(
+                      itemsTotal,
+                      profileController.totalPreviousCount,
+                    )
+                  : _buildBillDetails(
+                      itemsTotal,
+                      deliveryCharge,
+                      handlingCharge,
+                      grandTotal,
+                      discount,
+                      discountLabel,
+                    ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _buildBottomBar(context, finalTotal, paymentMethod),
@@ -237,9 +283,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                         const SizedBox(width: 8),
                         Obx(() {
-                          final quantity =
-                              controller
-                                  .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+                          final quantity = controller.cartQuantities[
+                                  '${item['service']}_${item['product']['id']}'] ??
                               0;
                           return Text(
                             "$quantity",
@@ -264,9 +309,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   const SizedBox(width: 12),
                   Obx(() {
-                    final quantity =
-                        controller
-                            .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+                    final quantity = controller.cartQuantities[
+                            '${item['service']}_${item['product']['id']}'] ??
                         0;
                     final totalPrice = quantity * item['product']['price'];
                     return Text("\u20B9$totalPrice");
@@ -364,15 +408,60 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Text(discountLabel, style: const TextStyle(color: Colors.green)),
           ],
           const Divider(height: 24),
+          // storage.read('subscriptionCheck') == 1
+          //     ? _billRow("Grand Total", "0", isBold: true)
+          //     :
           _billRow(
             "Grand Total",
-            "\u20B9${finalTotal.toStringAsFixed(2)}",
+            hasSubscription == 1
+                ? "0"
+                : "\u20B9${finalTotal.toStringAsFixed(2)}",
             isBold: true,
           ),
         ],
       ),
     );
   }
+
+  // without suscription codeWritten
+  Widget _buildBillDetailWithoutSubscription(
+    double itemsTotal,
+    int? totalItemDelivered,
+  ) {
+    final int totalSubscriptionItems = 30; // fixed total
+    final int delivered = totalItemDelivered ?? 0; // avoid null
+    final int newItems = controller.getTotalCartItems(); // new added items
+    final int remaining = totalSubscriptionItems - (delivered + newItems);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Bill details",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _billRow("Total Subscription items", "$totalSubscriptionItems"),
+          const SizedBox(height: 8),
+          _billRow("New Items Added", "$newItems"),
+          const SizedBox(height: 8),
+          _billRow("Previous Items", "$delivered"),
+          const SizedBox(height: 8),
+          _billRow("Remaining Items", "$remaining", isBold: true),
+        ],
+      ),
+    );
+  }
+
+  // ---------
 
   Widget _billRow(String label, String value, {bool isBold = false}) {
     return Row(
@@ -408,8 +497,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           child: Row(
             children: List.generate(7, (index) {
               DateTime date = DateTime.now().add(Duration(days: index));
-              bool isSelected =
-                  selectedPickupDate != null &&
+              bool isSelected = selectedPickupDate != null &&
                   DateUtils.isSameDay(selectedPickupDate, date);
               return GestureDetector(
                 onTap: () {
@@ -549,100 +637,93 @@ class _CheckoutPageState extends State<CheckoutPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // GestureDetector(
-              //   onTap: () async {
-              //     final selectedMethod =
-              //         await Get.toNamed(AppRoutes.PAYMENTSELECT);
-              //     print("Selected method: $selectedMethod");
-              //     if (selectedMethod != null) {
-              //       setState(() {
-              //         paymentMethod = selectedMethod;
-              //       });
-              //     }
-              //     print("Selected method1: $paymentMethod");
-              //   },
-              //   child: Column(
-              //     children: [
-              //       Row(
-              //         children: [
-              //           Icon(Icons.payment,
-              //               color: AppTheme.lightTheme.primaryColor, size: 20),
-              //           const SizedBox(width: 8),
-              //           const Text("PAY USING"),
-              //         ],
-              //       ),
-              //       Obx(() => Text(
-              //             paymentController
-              //                     .selectedPaymentMethod.value.isNotEmpty
-              //                 ? paymentController.selectedPaymentMethod.value
-              //                 : "Select Method",
-              //             style: const TextStyle(
-              //               fontWeight: FontWeight.bold,
-              //               color: Colors.black87,
-              //             ),
-              //           )),
-              //     ],
-              //   ),
-              // ),
-              // const Spacer(),
               ElevatedButton(
-                onPressed:
-                    (selectedPickupDate != null && selectedPickupSlot != null)
+                onPressed: (selectedPickupDate != null &&
+                        selectedPickupSlot != null)
                     ? () async {
                         final userIdMy = profileController.storages.read(
                           'userId',
                         );
+
+                        final checkUserScreen =
+                            await profileController.checkUserPincode(userIdMy);
+
+                        print(
+                          "check user screen here is :::::: $checkUserScreen",
+                        );
+
+                        if (checkUserScreen == false) {
+                          Get.toNamed('/setup_screen');
+                          return;
+                        }
+
                         final customerName = profileController.name.value;
                         final customerPhone = profileController.phone.value;
                         final customerEmail = profileController.email.value;
 
-                        // OPTIONAL: If you create an order from your backend, put it here:
-                        // final backendOrderId = await yourApiCreateRazorpayOrder(grandTotal);
-                        final selectedItems = controller.getSelectedCartItems();
-                        final totalItemsCount = selectedItems.fold<int>(0, (
-                          sum,
-                          item,
-                        ) {
-                          final quantity =
-                              controller
-                                  .cartQuantities['${item['service']}_${item['product']['id']}'] ??
-                              0;
-                          return sum + quantity;
-                        });
-                        final hasSubscription = await profileController
-                            .validateAndUpdateSubscription(
-                              userIdMy,
-                              totalItemsCount,
-                            );
+                        final int totalSubscriptionItems = 30; // fixed total
+                        // final int delivered =
+                        //     totalItemDelivered ?? 0; // avoid null
+                        final int newItems =
+                            controller.getTotalCartItems(); // new added items
+                        final num remaining = totalSubscriptionItems -
+                            (profileController.currentCount);
+
                         final String? backendOrderId = null;
+                        print("my hasSubscription is ::::::: $hasSubscription");
                         if (hasSubscription == 1) {
-                          await orderController.placeOrder(
-                            selectedItems: controller.getSelectedCartItems(),
-                            totalAmount: grandTotal,
-                            paymentMethod: 'Subscription',
-                            paymentStatus: 'paid',
-                            pickupDateTime:
-                                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
-                            deliveryDateTime:
-                                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
-                            userId: userIdMy,
-                            addressId:
-                                userIdMy, // replace with actual address id if needed
+                          print(
+                            "my remaining is :::: ${profileController.currentCount} ad ${remaining}",
                           );
+                          int total = profileController.currentCount + newItems;
 
-                          Get.snackbar(
-                            "Order Placed",
-                            "Your order has been placed using your subscription.",
-                            backgroundColor: Colors.green.shade600,
-                            colorText: Colors.white,
+                          print(
+                            "my item toal $total and $totalSubscriptionItems is ::::: ${total == totalSubscriptionItems}",
                           );
+                          if (total > totalSubscriptionItems) {
+                            Get.snackbar(
+                              "Place order remaining",
+                              "Remanining orders $remaining",
+                              backgroundColor: Colors.green.shade600,
+                              colorText: Colors.white,
+                            );
+                          } else if (total < totalSubscriptionItems ||
+                              total == totalSubscriptionItems) {
+                            await orderController.placeOrder(
+                              selectedItems: controller.getSelectedCartItems(),
+                              totalAmount: grandTotal,
+                              paymentMethod: 'Subscription',
+                              paymentStatus: 'paid',
+                              pickupDateTime:
+                                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+                              deliveryDateTime:
+                                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+                              userId: userIdMy,
+                              addressId:
+                                  userIdMy, // replace with actual address id if needed
+                            );
 
-                          Get.toNamed(
-                            AppRoutes.SUCCESS,
-                            arguments: {'order_id': 58},
-                          );
+                            Get.snackbar(
+                              "Order Placed",
+                              "Your order has been placed using your subscription.",
+                              backgroundColor: Colors.green.shade600,
+                              colorText: Colors.white,
+                            );
+
+                            await profileController.UpdateSubscription(
+                              storage.read('userId'),
+                              profileController.currentCount,
+                              newItems,
+                            );
+                            Get.offAllNamed(
+                              AppRoutes.SUCCESS,
+                              arguments: {'order_id': 58},
+                            );
+                          }
                         } else if (hasSubscription == 0) {
                           // Start Razorpay payment
+                          await controllersHome.fetchSubscriptions();
+
                           razorpayController.payNow(
                             amount: grandTotal,
                             orderId:
@@ -651,12 +732,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 ? customerName
                                 : 'Laundry User',
                             description: 'Laundry order payment',
-                            prefillContact: customerPhone.isNotEmpty
-                                ? customerPhone
-                                : null,
-                            prefillEmail: customerEmail.isNotEmpty
-                                ? customerEmail
-                                : null,
+                            prefillContact:
+                                customerPhone.isNotEmpty ? customerPhone : null,
+                            prefillEmail:
+                                customerEmail.isNotEmpty ? customerEmail : null,
                             notes: {
                               'user_id': '$userIdMy',
                               'pickup':
@@ -669,8 +748,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               try {
                                 // Mark payment & place order in your DB
                                 await orderController.placeOrder(
-                                  selectedItems: controller
-                                      .getSelectedCartItems(),
+                                  selectedItems:
+                                      controller.getSelectedCartItems(),
                                   totalAmount: grandTotal,
                                   paymentMethod: 'Razorpay',
                                   paymentStatus: 'paid',
@@ -685,6 +764,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   transactionId: paymentId,
                                 );
 
+                                await profileController
+                                    .updateAmountTransactionTable(
+                                  grandTotal,
+                                  paymentId,
+                                );
                                 Get.snackbar(
                                   "Payment successful",
                                   "ID: $paymentId",
@@ -693,7 +777,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 );
 
                                 // Navigate to success screen (replace with real order id if you have it)
-                                Get.toNamed(
+                                Get.offAllNamed(
                                   AppRoutes.SUCCESS,
                                   arguments: {'order_id': 58},
                                 );
@@ -710,8 +794,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             },
                             onFailure: (code, message) {
                               // Unified error UI with helpful text
-                              final isCancelled =
-                                  code == 2 ||
+                              final isCancelled = code == 2 ||
                                   message.toLowerCase().contains('cancel');
                               Get.snackbar(
                                 isCancelled
@@ -727,12 +810,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           );
                         } else {
                           // Subscription limit exceeded
-                          Get.snackbar(
-                            "Subscription Limit Exceeded",
-                            "You have exceeded your subscription limit. Please contact support or choose Pay Now.",
-                            backgroundColor: Colors.red.shade600,
-                            colorText: Colors.white,
-                          );
+                          // Get.snackbar(
+                          //   "Subscription Limit Exceeded",
+                          //   "You have exceeded your subscription limit. Please contact support or choose Pay Now.",
+                          //   backgroundColor: Colors.red.shade600,
+                          //   colorText: Colors.white,
+                          // );
                         }
                       }
                     : null,
@@ -748,27 +831,29 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 child: Row(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "\u20B9${grandTotal.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                    hasSubscription == 1
+                        ? SizedBox.shrink()
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "\u20B9${grandTotal.toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const Text(
+                                "Total",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const Text(
-                          "Total",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
                     const SizedBox(width: 25),
                     const Text(
                       "Place Order",

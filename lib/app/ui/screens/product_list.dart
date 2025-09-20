@@ -76,7 +76,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             final categoryId = category['id'];
                             final isSelected =
                                 controller.selectedCategoryId.value ==
-                                categoryId;
+                                    categoryId;
                             return _buildCategoryChip(
                               category['name'].toString(),
                               category['image_url'],
@@ -135,11 +135,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         : controller.filteredProducts.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.46,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 2,
-                        ),
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.46,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 2,
+                    ),
                     itemBuilder: (context, index) {
                       if (controller.isLoading.value) {
                         return _buildProductSkeleton();
@@ -376,10 +376,34 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   ),
                 ],
               ),
-              const Spacer(),
+              // const Spacer(),
+              SizedBox(height: 20),
               Obx(() {
                 final quantity = controller.cartQuantities[key] ?? 0;
                 return quantity > 0
+                    // ? Container(
+                    //     height: 30,
+                    //     decoration: BoxDecoration(
+                    //       borderRadius: BorderRadius.circular(8),
+                    //       border: Border.all(color: Colors.grey),
+                    //     ),
+                    //     child: Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       children: [
+                    //         InkWell(
+                    //           onTap: () => controller.removeFromCart(item),
+                    //           child: const Icon(Icons.remove, size: 16),
+                    //         ),
+                    //         const SizedBox(width: 18),
+                    //         Text(quantity.toString()),
+                    //         const SizedBox(width: 18),
+                    //         InkWell(
+                    //           onTap: () => controller.addToCart(item),
+                    //           child: const Icon(Icons.add, size: 16),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   )
                     ? Container(
                         height: 30,
                         decoration: BoxDecoration(
@@ -387,18 +411,55 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           border: Border.all(color: Colors.grey),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            InkWell(
-                              onTap: () => controller.removeFromCart(item),
-                              child: const Icon(Icons.remove, size: 16),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => controller.removeFromCart(item),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.remove, size: 16),
+                                  ],
+                                ),
+                              ),
                             ),
-                            const SizedBox(width: 18),
-                            Text(quantity.toString()),
-                            const SizedBox(width: 18),
-                            InkWell(
-                              onTap: () => controller.addToCart(item),
-                              child: const Icon(Icons.add, size: 16),
+
+                            // Divider
+                            const SizedBox(
+                              height: 20,
+                              child: VerticalDivider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+
+                            // Middle (Quantity)
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  quantity.toString(),
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ),
+                            ),
+
+                            // Divider
+                            const SizedBox(
+                              height: 20,
+                              child: VerticalDivider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => controller.addToCart(item),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [Icon(Icons.add, size: 16)],
+                                ),
+                              ),
                             ),
                           ],
                         ),

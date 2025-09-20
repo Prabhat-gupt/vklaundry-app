@@ -126,12 +126,12 @@ class _LoginPageState extends State<LoginPage> {
                             return GestureDetector(
                               onTap:
                                   isEnabled && !loginController.isLoading.value
-                                  ? () async {
-                                      String phone = phoneController.text
-                                          .trim();
-                                      await loginController.sendOtp(phone);
-                                    }
-                                  : null,
+                                      ? () async {
+                                          String phone =
+                                              phoneController.text.trim();
+                                          await loginController.sendOtp(phone);
+                                        }
+                                      : null,
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.symmetric(
@@ -162,8 +162,8 @@ class _LoginPageState extends State<LoginPage> {
                                             strokeWidth: 2,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                  Colors.white,
-                                                ),
+                                              Colors.white,
+                                            ),
                                           ),
                                         )
                                       : const Text(

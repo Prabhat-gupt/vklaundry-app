@@ -76,15 +76,18 @@ class HomePageController extends GetxController {
     try {
       isLoading.value = true;
 
-      final userId = storages.read('userId');
-      print("my userId returned on home page is ${userId}");
-      if (userId == null) throw Exception('User not logged in');
+      // final userId = storages.read('userId');
+      // print("my userId returned on home page is ${userId}");
+      // if (userId == null) throw Exception('User not logged in');
+
+      print("my usrID is ::::::::: ${storages.read('userId')}");
 
       final response = await supabase
           .from('users')
           .select('*')
-          .eq('id', userId)
+          .eq('id', storages.read('userId'))
           .single();
+      print("my userdetails is ::::::::: $response");
 
       if (response != null && response['id'] != null) {
         return response['id'] as int;
@@ -124,7 +127,7 @@ class HomePageController extends GetxController {
     }
   }
 
-  void fetchSubscriptions() async {
+  Future<void> fetchSubscriptions() async {
     try {
       final response = await supabase
           .from('subscriptions')

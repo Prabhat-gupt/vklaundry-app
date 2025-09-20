@@ -97,9 +97,8 @@ void showOffersBottomSheet(
                                       : "₹$discountValue off on orders above ₹$minAmount",
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: isEligible
-                                        ? Colors.black
-                                        : Colors.grey,
+                                    color:
+                                        isEligible ? Colors.black : Colors.grey,
                                   ),
                                 ),
                               ],
@@ -126,8 +125,8 @@ void showOffersBottomSheet(
                               backgroundColor: isSelected
                                   ? Colors.red
                                   : (isEligible
-                                        ? AppTheme.primaryColor
-                                        : Colors.grey),
+                                      ? AppTheme.primaryColor
+                                      : Colors.grey),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),

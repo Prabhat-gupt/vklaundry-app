@@ -52,35 +52,38 @@ class _RootPageState extends State<RootPage> {
               top: BorderSide(color: Color.fromRGBO(35, 42, 69, 1), width: 1.0),
             ),
           ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.shifting,
-            elevation: 0,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-                backgroundColor: Colors.white,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.category_outlined),
-                label: 'Services',
-                backgroundColor: Colors.white,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.receipt_long_outlined),
-                label: 'Booking',
-                backgroundColor: Colors.white,
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Setting',
-                backgroundColor: Colors.white,
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            selectedItemColor: Color.fromRGBO(35, 42, 69, 1),
-            unselectedItemColor: Colors.grey,
-            onTap: _onItemTapped,
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.shifting,
+              elevation: 0,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Home',
+                  backgroundColor: Colors.white,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.category_outlined),
+                  label: 'Services',
+                  backgroundColor: Colors.white,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.receipt_long_outlined),
+                  label: 'Booking',
+                  backgroundColor: Colors.white,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Setting',
+                  backgroundColor: Colors.white,
+                ),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Color.fromRGBO(35, 42, 69, 1),
+              unselectedItemColor: Colors.grey,
+              onTap: _onItemTapped,
+            ),
           ),
         ),
       ),

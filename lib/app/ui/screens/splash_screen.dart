@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final bool? isLoggedIn;
+  SplashScreen({this.isLoggedIn = false, super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -24,11 +24,46 @@ class _SplashScreenState extends State<SplashScreen> {
   int _currentIndex = 0;
   Timer? _timer;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _startImageSlideshow();
+  //   // _checkLoginStatus();
+  //   final storages = GetStorage();
+
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     final isLoggedIn = storages.read('isLoggedIn') ?? false;
+  //     print("my login status is ::::::: $isLoggedIn");
+  //     // isLoggedIn ? AppRoutes.ROOT : AppRoutes.SPLASHSCREEN;
+  //     if (isLoggedIn) {
+  //       Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
+  //     } else {
+  //       Navigator.pushReplacementNamed(context, AppRoutes.SPLASHSCREEN);
+  //     }
+  //   });
+  // }
+
+  bool _navigated = false; // add this as a state variable
+
   @override
   void initState() {
     super.initState();
     _startImageSlideshow();
-    _checkLoginStatus();
+    final storages = GetStorage();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_navigated) return; // 👈 prevent multiple calls
+      _navigated = true;
+
+      final isLoggedIn = storages.read('isLoggedIn') ?? false;
+      print("my login status is ::::::: $isLoggedIn");
+
+      if (isLoggedIn) {
+        Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
+      }
+    });
   }
 
   void _startImageSlideshow() {
@@ -37,20 +72,6 @@ class _SplashScreenState extends State<SplashScreen> {
         _currentIndex = (_currentIndex + 1) % splashImages.length;
       });
     });
-  }
-
-  Future<void> _checkLoginStatus() async {
-    await Future.delayed(const Duration(seconds: 4)); // total splash time
-
-    final session = Supabase.instance.client.auth.currentSession;
-
-    _timer?.cancel(); // stop timer after navigation
-
-    if (session != null && session.user != null) {
-      Get.offAllNamed(AppRoutes.ROOT);
-    } else {
-      Get.offAllNamed(AppRoutes.GETSTARTED);
-    }
   }
 
   // Future<void> _checkLoginStatus() async {

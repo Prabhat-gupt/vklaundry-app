@@ -6,13 +6,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../widgets/terms_conditions.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(ProfileController());
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
 
+class _SettingsScreenState extends State<SettingsScreen> {
+  final controller = Get.put(ProfileController());
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await controller.fetchUserProfile(controller.storages.read('userId'));
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F2F5),
       appBar: AppBar(

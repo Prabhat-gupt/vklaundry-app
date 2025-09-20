@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
@@ -17,27 +18,25 @@ class SpecialCarousel extends StatefulWidget {
 class _SpecialCarouselState extends State<SpecialCarousel> {
   final HomePageController controller = Get.find<HomePageController>();
   final ProfileController profileController = Get.find<ProfileController>();
-
-  int _current = 0;
   final PageController _pageController = PageController(viewportFraction: 0.88);
+
   late final Razorpay _razorpay;
-  bool _processingPayment = false;
+  int _current = 0;
+  final storage = GetStorage();
+  bool _isProcessingPayment = false;
 
   @override
   void initState() {
     super.initState();
 
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-
-    debugPrint("Razorpay listeners registered");
+    _razorpay = Razorpay()
+      ..on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess)
+      ..on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError)
+      ..on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
 
     once(controller.subscriptions, (_) async {
       try {
         int userId = await controller.fetchUserDetails();
-        print("my userId is in carausel is :::::: $userId");
         await controller.preloadSubscribedStatus(userId);
       } catch (e) {
         debugPrint("Error preloading subscription status: $e");
@@ -45,21 +44,17 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
     });
   }
 
-  // @override
-  // void dispose() {
-  //   // remove listeners & clear
-  //   try {
-  //     _razorpay.clear();
-  //   } catch (e) {
-  //     debugPrint("Error clearing Razorpay: $e");
-  //   }
-  //   _pageController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _razorpay.clear();
+    _pageController.dispose();
+    super.dispose();
+  }
 
-  /// Open Razorpay checkout (safe option building + error handling)
+  /// Open Razorpay checkout
   void _openCheckout(Map sub) {
-    print("my whole data is :::::: $sub");
+    if (_isProcessingPayment) return;
+
     try {
       final price = num.tryParse(sub['discounted_price'].toString()) ?? 0;
       final amountInPaise = (price * 100).round();
@@ -70,37 +65,28 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
       }
 
       final options = {
-        'key': 'rzp_test_R5aav0MP84trbb', // replace with your key (test/live)
-        'amount': amountInPaise, // in paise
+        'key': 'rzp_test_R5aav0MP84trbb',
+        'amount': amountInPaise,
         'name': "Laundry App",
         'description': sub['name'] ?? 'Subscription',
-        // optional prefill
-        // 'prefill': {
-        //   'contact': controller.us ?? '',
-        //   'email': controller.userEmail ?? '',
-        // },
-        // optional: pass a receipt/order id if you created an order on server
-        // 'order_id': '<order_id_from_backend>',
       };
 
+      _isProcessingPayment = true;
       _razorpay.open(options);
     } catch (e) {
       debugPrint("Razorpay open error: $e");
+      _isProcessingPayment = false;
       Get.snackbar("Payment Error", "Could not start payment. Try again.");
     }
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    debugPrint("Payment Success ID: ${response.paymentId}");
-    debugPrint("Order ID: ${response.orderId}");
-    debugPrint("Signature: ${response.signature}");
-    debugPrint("Full Response: $response");
-
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     try {
       final sub = controller.subscriptions[_current];
+      final userId = "${storage.read('userId')}";
 
       final subscriptionData = {
-        'user_id': profileController.dbUserId.value,
+        'user_id': userId,
         'payment_method': 0,
         'amount': sub['discounted_price'],
         'transaction_id': response.paymentId,
@@ -109,24 +95,30 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
         "status": 1,
       };
 
-      // Insert subscription into Supabase
-      final result = await controller.supabase
-          .from('transactions')
-          .insert(subscriptionData)
-          .select();
+      // Save transaction
+      await controller.supabase.from('transactions').insert(subscriptionData);
 
-      debugPrint("Subscription saved successfully: $result");
-
-      bool success = await controller.subscribeUser(sub);
+      // Update subscription in Supabase
+      final success = await controller.subscribeUser(sub);
 
       if (success) {
-        controller.subscribedStatus[sub['id']] = true;
-        controller.subscribedStatus.refresh();
+        // Update the subscription status without triggering multiple rebuilds
+        final updatedSubscriptions = List<Map<String, dynamic>>.from(
+          controller.subscriptions,
+        );
+        final index = updatedSubscriptions.indexWhere(
+          (s) => s['id'] == sub['id'],
+        );
 
-        if (mounted) {
-          setState(() {
-            sub['isSubscribed'] = true;
-          });
+        if (index != -1) {
+          updatedSubscriptions[index] = {
+            ...updatedSubscriptions[index],
+            'isSubscribed': true,
+          };
+
+          // Update both states in a single operation
+          controller.subscribedStatus[sub['id']] = true;
+          controller.subscriptions.value = updatedSubscriptions;
         }
 
         Get.snackbar(
@@ -154,18 +146,18 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+    } finally {
+      _isProcessingPayment = false;
     }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    debugPrint(
-      "Razorpay payment error: ${response.code} - ${response.message}",
-    );
+    _isProcessingPayment = false;
     Get.snackbar("Payment Failed", response.message ?? "Something went wrong");
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    debugPrint("Razorpay external wallet: ${response.walletName}");
+    _isProcessingPayment = false;
     Get.snackbar("External Wallet", response.walletName ?? "");
   }
 
@@ -184,9 +176,7 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
             child: PageView.builder(
               controller: _pageController,
               itemCount: controller.subscriptions.length,
-              onPageChanged: (index) {
-                if (mounted) setState(() => _current = index);
-              },
+              onPageChanged: (index) => setState(() => _current = index),
               itemBuilder: (context, index) {
                 final sub = controller.subscriptions[index];
                 final isSubscribed =
@@ -205,7 +195,13 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
                       }
                       return Transform.scale(scale: value, child: child);
                     },
-                    child: _buildCard(sub, isSubscribed),
+                    child: SubscriptionCard(
+                      sub: sub,
+                      isSubscribed: isSubscribed,
+                      onSubscribe: _isProcessingPayment
+                          ? null
+                          : () => _openCheckout(sub),
+                    ),
                   ),
                 );
               },
@@ -214,7 +210,7 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
 
           const SizedBox(height: 10),
 
-          // Dots Indicator
+          // Dots indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(controller.subscriptions.length, (index) {
@@ -235,139 +231,6 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
         ],
       );
     });
-  }
-
-  Widget _buildCard(Map sub, bool isSubscribed) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 30, right: 10),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Background Card
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                image: const DecorationImage(
-                  image: AssetImage("assets/icons/special.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                      child: Container(color: Colors.black.withOpacity(0.25)),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          sub['name'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Spacer(),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "₹${sub['discounted_price']}",
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "₹${sub['original_price']}",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.white70,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "${sub['pieces']} pcs • ${sub['validity_days']} days",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color.fromARGB(223, 255, 255, 255),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Floating Subscribe Button
-          Positioned(
-            right: 20,
-            bottom: -18,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isSubscribed ? Colors.white70 : Colors.white,
-                foregroundColor: AppTheme.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 22,
-                  vertical: 12,
-                ),
-                elevation: 6,
-              ),
-              onPressed: isSubscribed
-                  ? () {
-                      Get.snackbar('Subscribed', 'Already Subscribed');
-                    }
-                  : () async {
-                      try {
-                        final alreadyHasSub = await controller
-                            .hasAnyActiveSubscription();
-                        if (alreadyHasSub) {
-                          Get.snackbar(
-                            "Not Allowed",
-                            "You already have an active subscription.",
-                            snackPosition: SnackPosition.TOP,
-                          );
-                          return;
-                        }
-                        _openCheckout(sub);
-                      } catch (e) {
-                        Get.snackbar(
-                          "Error",
-                          "Could not start subscription: $e",
-                        );
-                      }
-                    },
-              child: Text(
-                isSubscribed ? "Subscribed" : "Subscribe",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showSubscriptionDetail(
@@ -425,39 +288,153 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
                 style: const TextStyle(fontSize: 15),
               ),
               const SizedBox(height: 18),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 14,
-                  ),
-                ),
-                onPressed: isSubscribed
-                    ? null
-                    : () async {
-                        final alreadyHasSub = await controller
-                            .hasAnyActiveSubscription();
-                        if (alreadyHasSub) {
-                          Get.snackbar(
-                            "Not Allowed",
-                            "You already have an active subscription.",
-                            snackPosition: SnackPosition.TOP,
-                          );
-                          return;
-                        }
-                        _openCheckout(sub);
-                      },
-                child: Text(isSubscribed ? "Subscribed" : "Subscribe"),
+              SubscribeButton(
+                isSubscribed: isSubscribed,
+                onSubscribe:
+                    _isProcessingPayment ? null : () => _openCheckout(sub),
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+/// Card widget
+class SubscriptionCard extends StatelessWidget {
+  final Map sub;
+  final bool isSubscribed;
+  final VoidCallback? onSubscribe;
+
+  const SubscriptionCard({
+    super.key,
+    required this.sub,
+    required this.isSubscribed,
+    required this.onSubscribe,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 30, right: 10),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Background
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                image: const DecorationImage(
+                  image: AssetImage("assets/icons/special.png"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                      child: Container(color: Colors.black.withOpacity(0.25)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          sub['name'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const Spacer(),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "₹${sub['discounted_price']}",
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "₹${sub['original_price']}",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white70,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "${sub['pieces']} pcs • ${sub['validity_days']} days",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(223, 255, 255, 255),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Floating button
+          Positioned(
+            right: 20,
+            bottom: -18,
+            child: SubscribeButton(
+              isSubscribed: isSubscribed,
+              onSubscribe: onSubscribe,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Reusable Subscribe Button
+class SubscribeButton extends StatelessWidget {
+  final bool isSubscribed;
+  final VoidCallback? onSubscribe;
+
+  const SubscribeButton({
+    super.key,
+    required this.isSubscribed,
+    required this.onSubscribe,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSubscribed ? Colors.white70 : Colors.white,
+        foregroundColor: AppTheme.primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        elevation: 6,
+      ),
+      onPressed: isSubscribed
+          ? () => Get.snackbar('Subscribed', 'Already Subscribed')
+          : onSubscribe,
+      child: Text(
+        isSubscribed ? "Subscribed" : "Subscribe",
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+      ),
     );
   }
 }

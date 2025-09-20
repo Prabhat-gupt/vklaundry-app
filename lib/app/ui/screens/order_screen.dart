@@ -179,8 +179,8 @@ class OrdersScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color:
                             ((order["action"] as String?) ?? "") == "Get Help"
-                            ? Colors.indigo
-                            : Colors.green,
+                                ? Colors.indigo
+                                : Colors.green,
                       ),
                     ),
                   ),

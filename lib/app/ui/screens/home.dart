@@ -28,18 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Future.microtask(() async {
-    //   int userId = await controller.fetchUserDetails();
-    //   await orderTrackController.fetchOrderDetails(userId);
-
-    //   if (orderTrackController.order.value['orders'] != null &&
-    //       orderTrackController.order.value['orders'].isNotEmpty) {
-    //     for (var order in orderTrackController.order.value['orders']) {
-    //       final orderId = order['id'] as int;
-    //       orderTrackController.subscribeToOrderChanges(orderId);
-    //     }
-    //   }
-    // });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       dynamic userId = await controller.fetchUserDetails();
@@ -164,14 +152,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Container(
                           padding: const EdgeInsets.only(left: 16),
                           child: Row(
-                            children: List.generate(controller.services.length, (
+                            children:
+                                List.generate(controller.services.length, (
                               index,
                             ) {
                               final service = controller.services[index];
                               final iconPath =
                                   index < controller.serviceIcons.length
-                                  ? controller.serviceIcons[index]
-                                  : 'assets/icons/others.png';
+                                      ? controller.serviceIcons[index]
+                                      : 'assets/icons/others.png';
 
                               return Padding(
                                 padding: const EdgeInsets.only(right: 12.0),
@@ -261,7 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       floatingActionButton: Obx(
         () => productListController.getTotalCartItems() > 0
             ? Container(
@@ -274,8 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: InkWell(
                   onTap: () {
-                    final selectedItems = productListController
-                        .getSelectedCartItems();
+                    final selectedItems =
+                        productListController.getSelectedCartItems();
                     Navigator.pushNamed(
                       context,
                       '/checkout_page',
