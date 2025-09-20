@@ -78,7 +78,7 @@ class _GetStartedState extends State<GetStarted> {
                               Color.fromRGBO(35, 42, 69, 1),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(50),
                         ),
                         child: const Center(
                           child: Text(

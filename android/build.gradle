@@ -1,3 +1,16 @@
+buildscript {
+    ext.kotlin_version = '1.9.22' // <-- Updated Kotlin version
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+
+        classpath "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    }
+}
 allprojects {
     repositories {
         google()
@@ -14,7 +27,7 @@ subprojects {
 }
 subprojects {
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 }
 
@@ -23,7 +36,7 @@ tasks.register("clean", Delete) {
 }
 
 buildscript {
-    ext.kotlin_version = "1.8.22"
+    ext.kotlin_version = "1.9.22"
     repositories {
         google()
         mavenCentral()

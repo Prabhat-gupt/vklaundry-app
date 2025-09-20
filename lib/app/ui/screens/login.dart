@@ -109,6 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
                                     decoration: const InputDecoration(
+                                      fillColor:Colors.white,
                                       hintText: 'Enter Phone Number',
                                       border: InputBorder.none,
                                     ),
