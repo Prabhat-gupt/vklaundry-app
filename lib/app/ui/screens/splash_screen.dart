@@ -139,13 +139,13 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Add delay for better UX
       Timer(const Duration(seconds: 3), () {
-        // if (mounted) {
-        //   if (isLoggedIn) {
-        //     Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
-        //   } else {
-        //     Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
-        //   }
-        // }
+        if (mounted) {
+          if (isLoggedIn) {
+            Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
+          } else {
+            Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
+          }
+        }
       });
     });
   }

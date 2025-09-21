@@ -45,44 +45,94 @@ class _RootPageState extends State<RootPage> {
       },
       child: Scaffold(
         body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Color.fromRGBO(35, 42, 69, 1), width: 1.0),
-            ),
-          ),
-          child: Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.shifting,
-              elevation: 0,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                  backgroundColor: Colors.white,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.category_outlined),
-                  label: 'Services',
-                  backgroundColor: Colors.white,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.receipt_long_outlined),
-                  label: 'Booking',
-                  backgroundColor: Colors.white,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Setting',
-                  backgroundColor: Colors.white,
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
               ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: Color.fromRGBO(35, 42, 69, 1),
-              unselectedItemColor: Colors.grey,
-              onTap: _onItemTapped,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                elevation: 0,
+                backgroundColor: Colors.white,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.home_outlined,
+                      color: _selectedIndex == 0 ? Colors.white : Colors.grey,
+                    ),
+                    label: 'Home',
+                    activeIcon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(35, 42, 69, 1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.home, color: Colors.white),
+                    ),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.category_outlined,
+                      color: _selectedIndex == 1 ? Colors.white : Colors.grey,
+                    ),
+                    label: 'Services',
+                    activeIcon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(35, 42, 69, 1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.category, color: Colors.white),
+                    ),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.receipt_long_outlined,
+                      color: _selectedIndex == 2 ? Colors.white : Colors.grey,
+                    ),
+                    label: 'Booking',
+                    activeIcon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(35, 42, 69, 1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.receipt_long, color: Colors.white),
+                    ),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: _selectedIndex == 3 ? Colors.white : Colors.grey,
+                    ),
+                    label: 'Setting',
+                    activeIcon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color.fromRGBO(35, 42, 69, 1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.settings, color: Colors.white),
+                    ),
+                  ),
+                ],
+                currentIndex: _selectedIndex,
+                selectedItemColor: const Color.fromRGBO(35, 42, 69, 1),
+                unselectedItemColor: Colors.grey,
+                showUnselectedLabels: true,
+                onTap: _onItemTapped,
+              ),
             ),
           ),
         ),

@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -7,6 +6,7 @@ import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'dart:math' show sin, cos, pi;
 
 class SpecialCarousel extends StatefulWidget {
   const SpecialCarousel({super.key});
@@ -15,7 +15,8 @@ class SpecialCarousel extends StatefulWidget {
   State<SpecialCarousel> createState() => _SpecialCarouselState();
 }
 
-class _SpecialCarouselState extends State<SpecialCarousel> {
+class _SpecialCarouselState extends State<SpecialCarousel>
+    with TickerProviderStateMixin {
   final HomePageController controller = Get.find<HomePageController>();
   final ProfileController profileController = Get.find<ProfileController>();
   final PageController _pageController = PageController(viewportFraction: 0.88);
@@ -23,16 +24,22 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
   late final Razorpay _razorpay;
   int _current = 0;
   final storage = GetStorage();
-  bool _isProcessingPayment = false;
+  final RxBool _isProcessingPayment = false.obs; // Made this an RxBool to be passed to other widgets
+
+  late final AnimationController _cardAnimationController;
 
   @override
   void initState() {
     super.initState();
-
     _razorpay = Razorpay()
       ..on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess)
       ..on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError)
       ..on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+
+    _cardAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
 
     once(controller.subscriptions, (_) async {
       try {
@@ -48,12 +55,12 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
   void dispose() {
     _razorpay.clear();
     _pageController.dispose();
+    _cardAnimationController.dispose();
     super.dispose();
   }
 
-  /// Open Razorpay checkout
   void _openCheckout(Map sub) {
-    if (_isProcessingPayment) return;
+    if (_isProcessingPayment.value) return;
 
     try {
       final price = num.tryParse(sub['discounted_price'].toString()) ?? 0;
@@ -71,11 +78,11 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
         'description': sub['name'] ?? 'Subscription',
       };
 
-      _isProcessingPayment = true;
+      _isProcessingPayment.value = true;
       _razorpay.open(options);
     } catch (e) {
       debugPrint("Razorpay open error: $e");
-      _isProcessingPayment = false;
+      _isProcessingPayment.value = false;
       Get.snackbar("Payment Error", "Could not start payment. Try again.");
     }
   }
@@ -95,19 +102,15 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
         "status": 1,
       };
 
-      // Save transaction
       await controller.supabase.from('transactions').insert(subscriptionData);
-
-      // Update subscription in Supabase
       final success = await controller.subscribeUser(sub);
 
       if (success) {
-        // Update the subscription status without triggering multiple rebuilds
         final updatedSubscriptions = List<Map<String, dynamic>>.from(
           controller.subscriptions,
         );
         final index = updatedSubscriptions.indexWhere(
-          (s) => s['id'] == sub['id'],
+              (s) => s['id'] == sub['id'],
         );
 
         if (index != -1) {
@@ -115,8 +118,6 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
             ...updatedSubscriptions[index],
             'isSubscribed': true,
           };
-
-          // Update both states in a single operation
           controller.subscribedStatus[sub['id']] = true;
           controller.subscriptions.value = updatedSubscriptions;
         }
@@ -147,17 +148,17 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
         colorText: Colors.white,
       );
     } finally {
-      _isProcessingPayment = false;
+      _isProcessingPayment.value = false;
     }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    _isProcessingPayment = false;
+    _isProcessingPayment.value = false;
     Get.snackbar("Payment Failed", response.message ?? "Something went wrong");
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    _isProcessingPayment = false;
+    _isProcessingPayment.value = false;
     Get.snackbar("External Wallet", response.walletName ?? "");
   }
 
@@ -165,14 +166,19 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.subscriptions.isEmpty) {
-        return const Center(child: Text("No subscriptions available"));
+        return const Center(
+          child: Text(
+            "No special offers available",
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
       }
 
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            height: 180,
+            height: 200,
             child: PageView.builder(
               controller: _pageController,
               itemCount: controller.subscriptions.length,
@@ -184,33 +190,35 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
 
                 return GestureDetector(
                   onTap: () =>
-                      _showSubscriptionDetail(context, sub, isSubscribed),
-                  child: AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (context, child) {
-                      double value = 1.0;
-                      if (_pageController.position.haveDimensions) {
-                        value = (_pageController.page! - index).abs();
-                        value = (1 - (value * 0.2)).clamp(0.8, 1.0);
-                      }
-                      return Transform.scale(scale: value, child: child);
-                    },
-                    child: SubscriptionCard(
-                      sub: sub,
-                      isSubscribed: isSubscribed,
-                      onSubscribe: _isProcessingPayment
-                          ? null
-                          : () => _openCheckout(sub),
+                      _showSubscriptionDetail(context, sub, isSubscribed, _openCheckout, _isProcessingPayment),
+                  child: Hero(
+                    tag: 'subscription-card-${sub['id']}',
+                    child: AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, child) {
+                        double value = 1.0;
+                        if (_pageController.position.haveDimensions) {
+                          value = (_pageController.page! - index).abs();
+                          value = (1 - (value * 0.2)).clamp(0.8, 1.0);
+                        }
+                        return Transform.scale(scale: value, child: child);
+                      },
+                      child: SubscriptionCard(
+                        sub: sub,
+                        isSubscribed: isSubscribed,
+                        onSubscribe: _isProcessingPayment.value
+                            ? null
+                            : () => _openCheckout(sub),
+                      ),
                     ),
                   ),
                 );
               },
             ),
           ),
-
           const SizedBox(height: 10),
 
-          // Dots indicator
+          // Dots indicator with dynamic animation
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(controller.subscriptions.length, (index) {
@@ -232,76 +240,239 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
       );
     });
   }
+}
 
-  void _showSubscriptionDetail(
+// Global function and widgets must be defined outside the class
+void _showSubscriptionDetail(
     BuildContext context,
     Map sub,
     bool isSubscribed,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+    Function(Map) openCheckout,
+    RxBool isProcessingPayment,
+    ) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: Stack(
             children: [
-              Text(
-                sub['name'] ?? '',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              // Animated Background Layer
+              const Positioned.fill(
+                child: _AnimatedBackground(),
+              ),
+              // Main Content Layer
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Draggable handle
+                    Container(
+                      height: 4,
+                      width: 60,
+                      margin: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                      child: Hero(
+                        tag: 'subscription-card-${sub['id']}',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppTheme.primaryColor,
+                                  const Color(0xFF232F46),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primaryColor.withOpacity(0.4),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        sub['name'] ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.star_rounded,
+                                      color: Color(0xFFFFD700),
+                                      size: 36,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                if (sub['description'] != null)
+                                  Text(
+                                    sub['description'],
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "₹${sub['discounted_price']}",
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFFB5FFC8),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      "₹${sub['original_price']}",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white54,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  "${sub['pieces']} pcs • ${sub['validity_days']} days",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Separated button section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                      child: Obx(() => SubscribeButton(
+                        isSubscribed: isSubscribed,
+                        onSubscribe: isProcessingPayment.value
+                            ? null
+                            : () {
+                          openCheckout(sub);
+                        },
+                      ),),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              if (sub['description'] != null)
-                Text(sub['description'], style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Text(
-                    "₹${sub['discounted_price']}",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "₹${sub['original_price']}",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      decoration: TextDecoration.lineThrough,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "${sub['pieces']} pcs • ${sub['validity_days']} days",
-                style: const TextStyle(fontSize: 15),
-              ),
-              const SizedBox(height: 18),
-              SubscribeButton(
-                isSubscribed: isSubscribed,
-                onSubscribe:
-                    _isProcessingPayment ? null : () => _openCheckout(sub),
               ),
             ],
           ),
+        ),
+      );
+    },
+  );
+}
+
+// Custom widget for the animated background
+class _AnimatedBackground extends StatefulWidget {
+  const _AnimatedBackground();
+
+  @override
+  _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
+}
+
+class _AnimatedBackgroundState extends State<_AnimatedBackground> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 15),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _WavyDotsPainter(
+            animationValue: _controller.value,
+          ),
+          child: Container(),
         );
       },
     );
   }
 }
 
-/// Card widget
+class _WavyDotsPainter extends CustomPainter {
+  final double animationValue;
+
+  _WavyDotsPainter({required this.animationValue});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppTheme.primaryColor.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    for (double i = 0; i <= size.width; i += 40) {
+      for (double j = 0; j <= size.height; j += 40) {
+        final xOffset = i + 10 * sin(animationValue * 2 * pi + j / 100);
+        final yOffset = j + 10 * cos(animationValue * 2 * pi + i / 100);
+
+        canvas.drawCircle(Offset(xOffset, yOffset), 2.0, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    final old = oldDelegate as _WavyDotsPainter;
+    return old.animationValue != animationValue;
+  }
+}
+
 class SubscriptionCard extends StatelessWidget {
   final Map sub;
   final bool isSubscribed;
@@ -317,38 +488,52 @@ class SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 30, right: 10),
+      margin: const EdgeInsets.only(bottom: 30, right: 15, left: 5),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Background
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                image: const DecorationImage(
-                  image: AssetImage("assets/icons/special.png"),
-                  fit: BoxFit.cover,
-                ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor.withOpacity(0.9),
+                  const Color(0xFF232F46).withOpacity(0.9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                      child: Container(color: Colors.black.withOpacity(0.25)),
+                    child: Transform.scale(
+                      scale: 1.2,
+                      child: Image.asset(
+                        "assets/icons/special.png",
+                        fit: BoxFit.cover,
+                        opacity: const AlwaysStoppedAnimation(0.2),
+                      ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           sub['name'] ?? '',
                           style: const TextStyle(
-                            fontSize: 22,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -360,16 +545,16 @@ class SubscriptionCard extends StatelessWidget {
                             Text(
                               "₹${sub['discounted_price']}",
                               style: const TextStyle(
-                                fontSize: 24,
+                                fontSize: 26,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: Color(0xFFB5FFC8),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 12),
                             Text(
                               "₹${sub['original_price']}",
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                                 color: Colors.white70,
                                 decoration: TextDecoration.lineThrough,
                               ),
@@ -391,11 +576,9 @@ class SubscriptionCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Floating button
           Positioned(
-            right: 20,
-            bottom: -18,
+            right: 25,
+            bottom: -20,
             child: SubscribeButton(
               isSubscribed: isSubscribed,
               onSubscribe: onSubscribe,
@@ -407,8 +590,7 @@ class SubscriptionCard extends StatelessWidget {
   }
 }
 
-/// Reusable Subscribe Button
-class SubscribeButton extends StatelessWidget {
+class SubscribeButton extends StatefulWidget {
   final bool isSubscribed;
   final VoidCallback? onSubscribe;
 
@@ -419,21 +601,78 @@ class SubscribeButton extends StatelessWidget {
   });
 
   @override
+  State<SubscribeButton> createState() => _SubscribeButtonState();
+}
+
+class _SubscribeButtonState extends State<SubscribeButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+      lowerBound: 0.9,
+      upperBound: 1.0,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSubscribed ? Colors.white70 : Colors.white,
-        foregroundColor: AppTheme.primaryColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-        elevation: 6,
-      ),
-      onPressed: isSubscribed
-          ? () => Get.snackbar('Subscribed', 'Already Subscribed')
-          : onSubscribe,
-      child: Text(
-        isSubscribed ? "Subscribed" : "Subscribe",
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+    return GestureDetector(
+      onTapDown: (_) {
+        if (!widget.isSubscribed) _controller.forward();
+      },
+      onTapUp: (_) {
+        if (!widget.isSubscribed) _controller.reverse();
+      },
+      onTapCancel: () {
+        if (!widget.isSubscribed) _controller.reverse();
+      },
+      onTap: widget.isSubscribed ? () => Get.snackbar('Subscribed', 'Already Subscribed') : widget.onSubscribe,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+          decoration: BoxDecoration(
+            color: widget.isSubscribed ? Colors.grey[400] : Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Text(
+            widget.isSubscribed ? "Subscribed" : "Subscribe",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: widget.isSubscribed ? Colors.white : AppTheme.primaryColor,
+            ),
+          ),
+        ),
       ),
     );
   }
