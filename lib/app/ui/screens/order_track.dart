@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:laundry_app/app/controllers/order_track_controller.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 /// Status mapping (reused)
@@ -21,6 +22,8 @@ class TrackOrderPage extends StatefulWidget {
 
 class _TrackOrderPageState extends State<TrackOrderPage>
     with TickerProviderStateMixin {
+  final orderTrackController = Get.find<TrackOrderController>();
+  
   late final AnimationController _pageLoadController;
   late final AnimationController _headerController;
   late final AnimationController _summaryController;
@@ -40,6 +43,12 @@ class _TrackOrderPageState extends State<TrackOrderPage>
     super.initState();
     _initializeAnimations();
     _startAnimationSequence();
+    
+    // Subscribe to real-time updates for this specific order
+    final orderId = Get.arguments['order']?['id'];
+    if (orderId != null) {
+      orderTrackController.subscribeToOrderChanges(orderId);
+    }
   }
 
   void _initializeAnimations() {
@@ -134,6 +143,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
 
   @override
   void dispose() {
+    orderTrackController.unsubscribeFromOrderChanges();
     _pageLoadController.dispose();
     _headerController.dispose();
     _summaryController.dispose();
@@ -141,11 +151,26 @@ class _TrackOrderPageState extends State<TrackOrderPage>
     super.dispose();
   }
 
+  Map<String, dynamic>? _getCurrentOrder() {
+    final orderId = Get.arguments['order']?['id'];
+    if (orderId == null) return null;
+    
+    final orders = orderTrackController.order.value['orders'] as List?;
+    if (orders == null) return null;
+    
+    try {
+      return orders.firstWhere((o) => o['id'] == orderId);
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> orderData = Get.arguments['order'];
-    final int status = orderData['status'] ?? 0;
-    final statusText = _getStatusText(status);
+    return Obx(() {
+      final orderData = _getCurrentOrder() ?? Get.arguments['order'];
+      final int status = orderData['status'] ?? 0;
+      final statusText = _getStatusText(status);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F2F5),
@@ -164,6 +189,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
         ),
       ),
     );
+    });
   }
 
   PreferredSizeWidget _buildAnimatedAppBar() {

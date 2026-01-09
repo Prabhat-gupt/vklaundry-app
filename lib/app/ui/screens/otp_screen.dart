@@ -46,8 +46,12 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   void dispose() {
-    _otpController.dispose();
     _timer?.cancel();
+    try {
+      _otpController.dispose();
+    } catch (e) {
+      // Controller already disposed
+    }
     super.dispose();
   }
 
@@ -136,12 +140,17 @@ class _OtpScreenState extends State<OtpScreen> {
                                   backgroundColor: Colors.transparent,
                                   onChanged: (value) {
                                     if (value.length == 6) {
+                                      // Cancel timer before navigation to prevent setState after dispose
+                                      _timer?.cancel();
+                                      
                                       loginController.verifyOtp(
                                         phoneNumber,
                                         value,
                                         onWrongOtp: () {
                                           if (mounted) {
                                             _otpController.clear();
+                                            // Restart timer if OTP was wrong
+                                            _startTimer();
                                           }
                                         },
                                       );

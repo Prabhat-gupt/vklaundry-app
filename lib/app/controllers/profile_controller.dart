@@ -1,14 +1,15 @@
 // profile_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+// Removed get_storage import - using SharedPreferences instead
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
   // final ProductListController controller = Get.find<ProductListController>();
 
-  var storages = GetStorage();
+  // Removed GetStorage - using SharedPreferences throughout
 
   var name = ''.obs;
   var email = ''.obs;
@@ -62,13 +63,15 @@ class ProfileController extends GetxController {
     print("my dbuservcaielues is :::::: ${dbUserId.value}");
     try {
       isLoading.value = true;
-      // final user = supabase.auth.currentUser;
-      // if (user != null && dbUserId.value > 0) {
-      if (storages.read('userId') != null && dbUserId.value > 0) {
-        await supabase
-            .from('users')
-            .update({'name': newName, 'email': newEmail, 'phone': newNumber})
-            .eq('id', dbUserId.value);
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId != null && dbUserId.value > 0) {
+        await supabase.from('users').update({
+          'name': newName,
+          'email': newEmail,
+          'phone': newNumber
+        }).eq('id', dbUserId.value);
 
         name.value = newName;
         email.value = newEmail;
@@ -132,8 +135,11 @@ class ProfileController extends GetxController {
       final endDateStr = userSub['end_date'];
       currentCount = userSub['count'] ?? 0;
       print("i am getting my status is ::::::: ${userSub['status']}");
-      storages.write('subscriptionCheck', userSub['status']);
-      storages.write('currentCount', currentCount);
+
+      // Save to SharedPreferences instead of GetStorage
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('subscriptionCheck', userSub['status'] ?? 0);
+      await prefs.setInt('currentCount', currentCount);
 
       return userSub['status'] as int?;
     } catch (e) {
@@ -246,8 +252,7 @@ class ProfileController extends GetxController {
       print("my new count is displaying ::::::: $newitem");
       await supabase
           .from('user_subscriptions')
-          .update({'count': newCount})
-          .eq('id', userSub['id']);
+          .update({'count': newCount}).eq('id', userSub['id']);
 
       final updatedSub = await supabase
           .from('user_subscriptions')
@@ -295,8 +300,11 @@ class ProfileController extends GetxController {
   // update the data in the table transaction
   updateAmountTransactionTable(amount, transactionId) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
       final subscriptionData = {
-        'user_id': "${storages.read('userId')}",
+        'user_id': "$userId",
         'payment_method': 0,
         'amount': amount,
         'transaction_id': transactionId,

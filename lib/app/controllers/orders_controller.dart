@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:laundry_app/app/controllers/productlist_controller.dart';
 
 class OrderController extends GetxController {
   final supabase = Supabase.instance.client;
@@ -59,6 +60,15 @@ class OrderController extends GetxController {
             'Your order has been placed successfully. Order ID: $orderId',
         'user_id': userId,
       });
+
+      // Clear cart after successful order
+      try {
+        final productListController = Get.find<ProductListController>();
+        await productListController.clearCart();
+      } catch (e) {
+        print('Could not clear cart: $e');
+      }
+
       print('Order placed successfully');
       return orderId; // Return order ID on success
     } catch (e) {

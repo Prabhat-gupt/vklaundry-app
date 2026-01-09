@@ -155,6 +155,52 @@ class TrackOrderController extends GetxController {
     }
   }
 
+  void subscribeToAllUserOrders(int userId) {
+    unsubscribeFromOrderChanges();
+
+    _orderChannel = supabase
+      .channel('all_orders_$userId')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'orders',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'user_id',
+          value: userId,
+        ),
+        callback: (payload) async {
+          print("Order list update received: ${payload.toString()}");
+          try {
+            final updatedOrderId = payload.newRecord['id'] as int;
+            
+            // Fetch updated order details
+            final response = await supabase
+                .from('orders')
+                .select('*, order_items(*, product:item_id(*))')
+                .eq('id', updatedOrderId)
+                .single();
+
+            if (response != null) {
+              final updatedOrder = _processOrder(response);
+              
+              // Update order in list
+              final ordersList = List<Map<String, dynamic>>.from(order.value['orders'] ?? []);
+              final index = ordersList.indexWhere((o) => o['id'] == updatedOrderId);
+              
+              if (index != -1) {
+                ordersList[index] = updatedOrder;
+                order.value = {"orders": ordersList};
+              }
+            }
+          } catch (e) {
+            print("Error refreshing order list: $e");
+          }
+        },
+      )
+      ..subscribe();
+  }
+
   String _getStatusText(int? statusCode) {
     switch (statusCode) {
       case 0:

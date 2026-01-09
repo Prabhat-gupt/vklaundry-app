@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/order_track_controller.dart';
 import 'package:laundry_app/app/ui/widgets/order_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AllOrdersPage extends StatefulWidget {
   const AllOrdersPage({super.key});
@@ -32,6 +33,20 @@ class _AllOrdersPageState extends State<AllOrdersPage>
     super.initState();
     _initializeAnimations();
     _startAnimationSequence();
+    _setupRealtimeUpdates();
+  }
+
+  Future<void> _setupRealtimeUpdates() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+      
+      if (userId != null) {
+        orderTrackController.subscribeToAllUserOrders(userId);
+      }
+    } catch (e) {
+      print("Error setting up real-time updates: $e");
+    }
   }
 
   void _initializeAnimations() {
@@ -111,6 +126,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
 
   @override
   void dispose() {
+    orderTrackController.unsubscribeFromOrderChanges();
     _pageLoadController.dispose();
     _headerController.dispose();
     _contentController.dispose();

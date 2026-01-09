@@ -14,6 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController phoneController = TextEditingController();
   final LoginController loginController = Get.put(LoginController());
+  final FocusNode phoneFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -24,6 +25,18 @@ class _LoginPageState extends State<LoginPage> {
       loginController.isPhoneValid.value =
           phoneController.text.trim().length == 10;
     });
+
+    // Auto-focus on phone field to open keyboard
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      phoneFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    phoneFocusNode.dispose();
+    phoneController.dispose();
+    super.dispose();
   }
 
   @override
@@ -103,13 +116,15 @@ class _LoginPageState extends State<LoginPage> {
                                 Expanded(
                                   child: TextField(
                                     controller: phoneController,
+                                    focusNode: phoneFocusNode,
+                                    autofocus: true,
                                     keyboardType: TextInputType.phone,
                                     inputFormatters: [
                                       LengthLimitingTextInputFormatter(10),
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
                                     decoration: const InputDecoration(
-                                      fillColor:Colors.white,
+                                      fillColor: Colors.white,
                                       hintText: 'Enter Phone Number',
                                       border: InputBorder.none,
                                     ),

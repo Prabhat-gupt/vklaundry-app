@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:laundry_app/app/ui/widgets/terms_conditions.dart';
 
@@ -14,7 +15,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen>
     with TickerProviderStateMixin {
-  final controller = Get.put(ProfileController());
+  final controller = Get.find<ProfileController>();
 
   late final AnimationController _pageLoadController;
   late final AnimationController _profileCardController;
@@ -114,8 +115,13 @@ class _SettingsScreenState extends State<SettingsScreen>
         // Start page load animation
         _pageLoadController.forward();
 
-        // Fetch user data
-        await controller.fetchUserProfile(controller.storages.read('userId'));
+        // Fetch user data using SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        final userId = prefs.getInt('user_id');
+
+        if (userId != null) {
+          await controller.fetchUserProfile(userId);
+        }
 
         if (!mounted) return;
 
@@ -128,7 +134,6 @@ class _SettingsScreenState extends State<SettingsScreen>
 
         await Future.delayed(const Duration(milliseconds: 300));
         if (mounted) _logoutButtonController.forward();
-
       } catch (e) {
         // Handle any animation errors gracefully
         if (mounted) {
@@ -156,69 +161,70 @@ class _SettingsScreenState extends State<SettingsScreen>
       backgroundColor: const Color(0xFFF1F2F5),
       appBar: _buildAppBar(),
       body: Obx(
-            () => controller.isLoading.value
+        () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
             : FadeTransition(
-          opacity: _pageOpacityAnimation,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 24,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAnimatedProfileCard(),
-                const SizedBox(height: 32),
-                _buildAnimatedSection(
-                  "Your Information",
-                  [
-                    _EnhancedListTile(
-                      icon: Icons.location_on_rounded,
-                      title: "Saved Address",
-                      subtitle: "Manage your delivery locations",
-                      onTap: () => Get.toNamed('/address_screen'),
-                      delay: 0,
-                    ),
-                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                    _EnhancedListTile(
-                      icon: Icons.person_rounded,
-                      title: "Profile",
-                      subtitle: "Edit your personal information",
-                      onTap: () => Get.toNamed('/profile_screen'),
-                      delay: 100,
-                    ),
-                  ],
+                opacity: _pageOpacityAnimation,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 24,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildAnimatedProfileCard(),
+                      const SizedBox(height: 32),
+                      _buildAnimatedSection(
+                        "Your Information",
+                        [
+                          _EnhancedListTile(
+                            icon: Icons.location_on_rounded,
+                            title: "Saved Address",
+                            subtitle: "Manage your delivery locations",
+                            onTap: () => Get.toNamed('/address_screen'),
+                            delay: 0,
+                          ),
+                          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                          _EnhancedListTile(
+                            icon: Icons.person_rounded,
+                            title: "Profile",
+                            subtitle: "Edit your personal information",
+                            onTap: () => Get.toNamed('/profile_screen'),
+                            delay: 100,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      _buildAnimatedSection(
+                        "Other Information",
+                        [
+                          _EnhancedListTile(
+                            icon: Icons.support_agent_rounded,
+                            title: "Support",
+                            subtitle: "Get help and contact us",
+                            onTap: () => Get.toNamed('/support_screen'),
+                            delay: 200,
+                          ),
+                          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                          _EnhancedListTile(
+                            icon: Icons.article_rounded,
+                            title: "Terms & Conditions",
+                            subtitle: "Read our terms and policies",
+                            onTap: () =>
+                                Get.to(() => const TermsAndConditionsPage()),
+                            delay: 300,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+                      _buildAnimatedLogoutButton(),
+                      const SizedBox(height: 20),
+                      // _buildVersionInfo(),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 32),
-                _buildAnimatedSection(
-                  "Other Information",
-                  [
-                    _EnhancedListTile(
-                      icon: Icons.support_agent_rounded,
-                      title: "Support",
-                      subtitle: "Get help and contact us",
-                      onTap: () => Get.toNamed('/support_screen'),
-                      delay: 200,
-                    ),
-                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                    _EnhancedListTile(
-                      icon: Icons.article_rounded,
-                      title: "Terms & Conditions",
-                      subtitle: "Read our terms and policies",
-                      onTap: () => Get.to(() => const TermsAndConditionsPage()),
-                      delay: 300,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                _buildAnimatedLogoutButton(),
-                const SizedBox(height: 20),
-                // _buildVersionInfo(),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }
@@ -314,7 +320,9 @@ class _SettingsScreenState extends State<SettingsScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          controller.name.value.isNotEmpty ? controller.name.value : "Loading...",
+          controller.name.value.isNotEmpty
+              ? controller.name.value
+              : "Loading...",
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22,
@@ -332,7 +340,9 @@ class _SettingsScreenState extends State<SettingsScreen>
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            controller.phone.value.isNotEmpty ? controller.phone.value : "Loading...",
+            controller.phone.value.isNotEmpty
+                ? controller.phone.value
+                : "Loading...",
             style: TextStyle(
               color: AppTheme.primaryColor,
               fontSize: 16,
@@ -371,7 +381,11 @@ class _SettingsScreenState extends State<SettingsScreen>
             onPressed: () async {
               try {
                 await Supabase.instance.client.auth.signOut();
-                controller.storages.erase();
+
+                // Clear all SharedPreferences data on logout
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+
                 Get.offAllNamed('/login');
               } catch (e) {
                 // Handle logout error
@@ -525,22 +539,22 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
                 borderRadius: BorderRadius.circular(16),
                 gradient: _isHovering
                     ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppTheme.primaryColor.withOpacity(0.1),
-                    AppTheme.primaryColor.withOpacity(0.05),
-                  ],
-                )
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppTheme.primaryColor.withOpacity(0.1),
+                          AppTheme.primaryColor.withOpacity(0.05),
+                        ],
+                      )
                     : null,
                 boxShadow: _isHovering
                     ? [
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: AppTheme.primaryColor.withOpacity(0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : [],
               ),
               child: Material(
@@ -728,12 +742,12 @@ class _AnimatedButtonState extends State<_AnimatedButton>
                   ),
                   boxShadow: _isHovering
                       ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
                       : [],
                 ),
                 child: Material(

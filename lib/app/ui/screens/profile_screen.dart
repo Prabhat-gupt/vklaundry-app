@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,17 +24,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      print("hjhjhjhjhjhjhjhjhjhjjhh ${controller.storages.read('userId')}");
+      // Use SharedPreferences instead of GetStorage
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
 
-      await controller.fetchUserProfile(controller.storages.read('userId'));
-      nameController.text = controller.name.value;
-      phoneController.text = controller.phone.value;
-      emailController.text = controller.email.value;
+      print("hjhjhjhjhjhjhjhjhjhjjhh $userId");
 
-      // nameController = TextEditingController(text: controller.name.value);
-      // phoneController = TextEditingController(text: controller.phone.value);
-      // print("my namecontroller is ::::::: ${nameController.text}");
-      // emailController = TextEditingController(text: controller.email.value);
+      if (userId != null) {
+        await controller.fetchUserProfile(userId);
+        nameController.text = controller.name.value;
+        phoneController.text = controller.phone.value;
+        emailController.text = controller.email.value;
+      }
     });
 
     // nameController = TextEditingController(text: controller.name.value);

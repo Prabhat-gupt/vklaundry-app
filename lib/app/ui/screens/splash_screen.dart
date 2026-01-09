@@ -2,10 +2,14 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
-import 'package:animated_text_kit/animated_text_kit.dart'; // Add this line
+import 'package:laundry_app/app/ui/screens/service_not_available_screen.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool? isLoggedIn;
@@ -127,27 +131,137 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeController.forward();
   }
 
-  void _handleNavigation() {
-    final storages = GetStorage();
+  void _handleNavigation() async {
+    // Use SharedPreferences instead of GetStorage to match login_controller
+    final prefs = await SharedPreferences.getInstance();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_navigated) return;
       _navigated = true;
 
-      final isLoggedIn = storages.read('isLoggedIn') ?? false;
-      print("my login status is ::::::: $isLoggedIn");
+      final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-      // Add delay for better UX
-      Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          if (isLoggedIn) {
+      // Add delay for better UX and to let Supabase session restore
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        if (isLoggedIn) {
+          // Reload prefs after delay to get updated userId
+          final updatedPrefs = await SharedPreferences.getInstance();
+          
+          // Check service availability before navigating
+          final isServiceAvailable = await _checkServiceAvailability(updatedPrefs);
+          
+          if (isServiceAvailable['available'] == true) {
             Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
           } else {
-            Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
+            // Navigate to service not available screen
+            Get.off(() => ServiceNotAvailableScreen(
+              distance: isServiceAvailable['distance'] ?? 0.0,
+            ));
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
+        }
+      }
+    });
+  }
+
+  Future<Map<String, dynamic>> _checkServiceAvailability(SharedPreferences prefs) async {
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // Try to get user ID from SharedPreferences (key is 'user_id' with underscore)
+      int? numericUserId = prefs.getInt('user_id');
+      
+      // If not in SharedPreferences, try to get from Supabase auth
+      if (numericUserId == null) {
+        final userId = supabase.auth.currentUser?.id;
+        
+        if (userId != null) {
+          // Fetch numeric user ID from database
+          try {
+            final userResponse = await supabase
+                .from('users')
+                .select('id')
+                .eq('uuid', userId)
+                .single();
+            
+            numericUserId = userResponse['id'] as int;
+          } catch (e) {
+            // Error fetching user ID
           }
         }
-      });
-    });
+      }
+      
+      if (numericUserId == null) {
+        return {'available': true, 'distance': 0.0};
+      }
+      
+      // Fetch user address with coordinates directly using numeric user ID
+      final addressResponse = await supabase
+          .from('addresses')
+          .select('latitude, longitude')
+          .eq('id', numericUserId)
+          .limit(1);
+      
+      if (addressResponse.isEmpty) {
+        return {'available': true, 'distance': 0.0};
+      }
+      
+      final address = addressResponse.first;
+      final latValue = address['latitude'];
+      final lonValue = address['longitude'];
+      
+      if (latValue == null || lonValue == null) {
+        return {'available': true, 'distance': 0.0};
+      }
+      
+      final lat = (latValue as num).toDouble();
+      final lon = (lonValue as num).toDouble();
+      
+      // Service center coordinates
+      const centerLat = 17.608400;
+      const centerLon = 78.466200;
+      const serviceRadiusKm = 10.0;
+      
+      // Calculate distance using Haversine formula
+      final distance = _calculateDistance(centerLat, centerLon, lat, lon);
+      
+      final isAvailable = distance <= serviceRadiusKm;
+      
+      print('🎯 Is service available: $isAvailable (distance: ${distance.toStringAsFixed(2)} km)');
+      
+      if (!isAvailable) {
+        print('⚠️ Splash: Service not available - ${distance.toStringAsFixed(2)} km away');
+      } else {
+        print('✅ Splash: Service available - within ${serviceRadiusKm} km radius');
+      }
+      
+      return {'available': isAvailable, 'distance': distance};
+    } catch (e, stackTrace) {
+      print('❌ Error checking service availability: $e');
+      print('Stack trace: $stackTrace');
+      return {'available': true, 'distance': 0.0}; // Default to available on error
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadiusKm = 6371.0;
+    
+    double dLat = _degreesToRadians(lat2 - lat1);
+    double dLon = _degreesToRadians(lon2 - lon1);
+    
+    double a = (sin(dLat / 2) * sin(dLat / 2)) +
+        (cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2));
+    
+    double c = 2 * asin(sqrt(a));
+    return earthRadiusKm * c;
+  }
+  
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180;
   }
 
   void _startImageSlideshow() {
@@ -265,14 +379,17 @@ class _SplashScreenState extends State<SplashScreen>
                                 child: AnimatedSwitcher(
                                   duration: const Duration(milliseconds: 500),
                                   switchInCurve: Curves.easeOutCubic,
-                                  transitionBuilder: (Widget child, Animation<double> animation) {
+                                  transitionBuilder: (Widget child,
+                                      Animation<double> animation) {
                                     final slideIn = Tween<Offset>(
                                       begin: const Offset(0.3, 0),
                                       end: Offset.zero,
                                     ).animate(animation);
 
-                                    if (child.key == ValueKey<int>(_currentIndex)) {
-                                      return SlideTransition(position: slideIn, child: child);
+                                    if (child.key ==
+                                        ValueKey<int>(_currentIndex)) {
+                                      return SlideTransition(
+                                          position: slideIn, child: child);
                                     } else {
                                       return const SizedBox.shrink();
                                     }
@@ -345,9 +462,6 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
 
                             //
-
-
-
                           ],
                         ),
                       ),
@@ -400,7 +514,9 @@ class _SplashScreenState extends State<SplashScreen>
                   return AnimatedBuilder(
                     animation: _rotationController,
                     builder: (context, child) {
-                      final angle = _rotationAnimation.value * (index.isEven ? 1 : -1) + (index * pi / 4);
+                      final angle =
+                          _rotationAnimation.value * (index.isEven ? 1 : -1) +
+                              (index * pi / 4);
                       final radius = (size.width * 0.6) + (index * 10);
                       final x = size.width / 2 + cos(angle) * radius;
                       final y = size.height / 2 + sin(angle) * radius;

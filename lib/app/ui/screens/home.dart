@@ -6,6 +6,7 @@ import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/testimonials_controller.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
 import 'package:laundry_app/app/ui/screens/product_list.dart';
+import 'package:laundry_app/app/ui/screens/service_not_available_screen.dart';
 import 'package:laundry_app/app/ui/widgets/order_card.dart';
 import 'package:laundry_app/app/ui/widgets/special_carousel.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -18,13 +19,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final HomePageController controller = Get.put(HomePageController());
   final TrackOrderController orderTrackController = Get.put(
     TrackOrderController(),
   );
   final productListController = Get.find<ProductListController>();
   final testimonialsController = Get.put(TestimonialsController());
+
+  @override
+  bool get wantKeepAlive => true;
 
   // Animation controllers
   late final AnimationController _headerController;
@@ -81,8 +85,7 @@ class _HomeScreenState extends State<HomeScreen>
     _fabController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )
-      ..repeat(reverse: true);
+    )..repeat(reverse: true);
     _fabPulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _fabController,
@@ -95,20 +98,18 @@ class _HomeScreenState extends State<HomeScreen>
       _servicesController.forward();
       _bodyController.forward();
 
+      // Wait for user details to be fetched, then get orders
       dynamic userId = await controller.fetchUserDetails();
       await orderTrackController.fetchOrderDetails(userId);
-      if (orderTrackController.order.value['orders'] != null &&
-          orderTrackController.order.value['orders'].isNotEmpty) {
-        for (var order in orderTrackController.order.value['orders']) {
-          final orderId = order['id'] as int;
-          orderTrackController.subscribeToOrderChanges(orderId);
-        }
-      }
+
+      // Setup real-time updates for all orders
+      orderTrackController.subscribeToAllUserOrders(userId);
     });
   }
 
   @override
   void dispose() {
+    orderTrackController.unsubscribeFromOrderChanges();
     _headerController.dispose();
     _servicesController.dispose();
     _bodyController.dispose();
@@ -122,8 +123,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
       body: Obx(() {
@@ -178,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     final address = controller.userAddress[0];
                                     return Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           address['address_line'] ?? '',
@@ -189,9 +190,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           maxLines: 1,
                                         ),
                                         Text(
-                                          '${address['city'] ??
-                                              ''}, ${address['landmark_pincode'] ??
-                                              ''}',
+                                          '${address['city'] ?? ''}, ${address['landmark_pincode'] ?? ''}',
                                           style: const TextStyle(
                                             color: Colors.white70,
                                             fontSize: 12,
@@ -245,14 +244,14 @@ class _HomeScreenState extends State<HomeScreen>
                             child: Row(
                               children: List.generate(
                                 controller.services.length,
-                                    (index) {
+                                (index) {
                                   final service = controller.services[index];
                                   return Padding(
                                     padding: const EdgeInsets.only(right: 12.0),
                                     child: GestureDetector(
                                       onTap: () {
                                         Get.to(
-                                              () => const ProductListScreen(),
+                                          () => const ProductListScreen(),
                                           arguments: {
                                             'serviceName': service['name'],
                                             'service_id': service['id'],
@@ -321,12 +320,73 @@ class _HomeScreenState extends State<HomeScreen>
                           end: Offset.zero,
                         ).animate(CurvedAnimation(
                           parent: _bodyController,
-                          curve: const Interval(
-                              0.0, 0.8, curve: Curves.easeOut),
+                          curve:
+                              const Interval(0.0, 0.8, curve: Curves.easeOut),
                         )),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Service availability warning
+                            Obx(() {
+                              if (!controller.isServiceAvailable.value) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.orange.shade400,
+                                          Colors.deepOrange.shade500,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.orange.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.warning_amber_rounded,
+                                          color: Colors.white,
+                                          size: 28,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Service Not Available',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Sorry, we currently don\'t serve in your area. We\'re available within 10km radius from our center.',
+                                                style: TextStyle(
+                                                  color: Colors.white.withOpacity(0.95),
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }),
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 18.0),
                               child: Text(
@@ -347,10 +407,10 @@ class _HomeScreenState extends State<HomeScreen>
                                 return Opacity(
                                   opacity: Tween<double>(begin: 0.0, end: 1.0)
                                       .animate(CurvedAnimation(
-                                    parent: _bodyController,
-                                    curve: const Interval(0.3, 1.0,
-                                        curve: Curves.easeIn),
-                                  ))
+                                        parent: _bodyController,
+                                        curve: const Interval(0.3, 1.0,
+                                            curve: Curves.easeIn),
+                                      ))
                                       .value,
                                   child: SlideTransition(
                                     position: Tween<Offset>(
@@ -374,10 +434,10 @@ class _HomeScreenState extends State<HomeScreen>
                                 return Opacity(
                                   opacity: Tween<double>(begin: 0.0, end: 1.0)
                                       .animate(CurvedAnimation(
-                                    parent: _bodyController,
-                                    curve: const Interval(0.5, 1.0,
-                                        curve: Curves.easeIn),
-                                  ))
+                                        parent: _bodyController,
+                                        curve: const Interval(0.5, 1.0,
+                                            curve: Curves.easeIn),
+                                      ))
                                       .value,
                                   child: SlideTransition(
                                     position: Tween<Offset>(
@@ -407,59 +467,58 @@ class _HomeScreenState extends State<HomeScreen>
       }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Obx(
-            () =>
-        productListController.getTotalCartItems() > 0
+        () => productListController.getTotalCartItems() > 0
             ? Container(
-              margin: const EdgeInsets.all(16),
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                color: Colors.indigo,
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.indigo.withOpacity(0.4),
-                    blurRadius: 10.0,
-                    spreadRadius: 2.0,
-                  )
-                ],
-              ),
-              child: InkWell(
-                onTap: () {
-                  final selectedItems =
-                  productListController.getSelectedCartItems();
-                  Navigator.pushNamed(
-                    context,
-                    '/checkout_page',
-                    arguments: {'selectedItems': selectedItems},
-                  );
-                },
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.shopping_cart, color: Colors.white),
-                      const SizedBox(width: 8),
-                      const Text(
-                        "View Cart",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(width: 8),
-                      CircleAvatar(
-                        radius: 10,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          productListController
-                              .getTotalCartItems()
-                              .toString(),
-                          style: const TextStyle(fontSize: 12),
+                margin: const EdgeInsets.all(16),
+                height: 50,
+                width: 250,
+                decoration: BoxDecoration(
+                  color: Colors.indigo,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.indigo.withOpacity(0.4),
+                      blurRadius: 10.0,
+                      spreadRadius: 2.0,
+                    )
+                  ],
+                ),
+                child: InkWell(
+                  onTap: () {
+                    final selectedItems =
+                        productListController.getSelectedCartItems();
+                    Navigator.pushNamed(
+                      context,
+                      '/checkout_page',
+                      arguments: {'selectedItems': selectedItems},
+                    );
+                  },
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.shopping_cart, color: Colors.white),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "View Cart",
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            productListController
+                                .getTotalCartItems()
+                                .toString(),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            )
+              )
             : const SizedBox.shrink(),
       ),
     );
@@ -487,8 +546,8 @@ class _HomeScreenState extends State<HomeScreen>
                 final testimonial = testimonialsController.testimonials[index];
                 return Container(
                   width: 260,
-                  margin: const EdgeInsets.only(
-                      left: 16, right: 16, bottom: 16),
+                  margin:
+                      const EdgeInsets.only(left: 16, right: 16, bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -521,8 +580,10 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildActiveOrdersSection(BuildContext context,
-      TrackOrderController orderTrackController,) {
+  Widget _buildActiveOrdersSection(
+    BuildContext context,
+    TrackOrderController orderTrackController,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

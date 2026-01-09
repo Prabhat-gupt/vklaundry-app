@@ -1,11 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+// Removed get_storage import - using SharedPreferences instead
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' show sin, cos, pi;
 
 class SpecialCarousel extends StatefulWidget {
@@ -23,10 +25,14 @@ class _SpecialCarouselState extends State<SpecialCarousel>
 
   late final Razorpay _razorpay;
   int _current = 0;
-  final storage = GetStorage();
-  final RxBool _isProcessingPayment = false.obs; // Made this an RxBool to be passed to other widgets
+  // Removed GetStorage - using SharedPreferences instead
+  final RxBool _isProcessingPayment =
+      false.obs; // Made this an RxBool to be passed to other widgets
 
   late final AnimationController _cardAnimationController;
+  
+  // Add loading state for subscription status
+  final RxBool _isLoadingStatus = true.obs;
 
   @override
   void initState() {
@@ -41,14 +47,26 @@ class _SpecialCarouselState extends State<SpecialCarousel>
       duration: const Duration(milliseconds: 600),
     );
 
-    once(controller.subscriptions, (_) async {
-      try {
-        int userId = await controller.fetchUserDetails();
-        await controller.preloadSubscribedStatus(userId);
-      } catch (e) {
-        debugPrint("Error preloading subscription status: $e");
+    // Load subscription status on widget initialization
+    _loadSubscriptionStatus();
+  }
+
+  Future<void> _loadSubscriptionStatus() async {
+    try {
+      _isLoadingStatus.value = true;
+      
+      // Wait for subscriptions to be loaded if not already
+      if (controller.subscriptions.isEmpty) {
+        await Future.delayed(const Duration(milliseconds: 500));
       }
-    });
+      
+      int userId = await controller.fetchUserDetails();
+      await controller.preloadSubscribedStatus(userId);
+    } catch (e) {
+      debugPrint("Error loading subscription status: $e");
+    } finally {
+      _isLoadingStatus.value = false;
+    }
   }
 
   @override
@@ -62,6 +80,21 @@ class _SpecialCarouselState extends State<SpecialCarousel>
   void _openCheckout(Map sub) {
     if (_isProcessingPayment.value) return;
 
+    // Check if user already has any active subscription (force reactive read)
+    final hasActiveSubscription =
+        controller.subscribedStatus.value.values.any((status) => status == true);
+
+    if (hasActiveSubscription) {
+      Get.snackbar(
+        "Already Subscribed",
+        "You already have an active subscription. Please complete or cancel it before subscribing to another plan.",
+        backgroundColor: Colors.transparent,
+        colorText: Colors.black,
+        duration: const Duration(seconds: 2),
+      );
+      return;
+    }
+
     try {
       final price = num.tryParse(sub['discounted_price'].toString()) ?? 0;
       final amountInPaise = (price * 100).round();
@@ -72,7 +105,7 @@ class _SpecialCarouselState extends State<SpecialCarousel>
       }
 
       final options = {
-        'key': 'rzp_test_R5aav0MP84trbb',
+        'key': dotenv.env['RAZORPAY_KEY_ID'] ?? '',
         'amount': amountInPaise,
         'name': "Laundry App",
         'description': sub['name'] ?? 'Subscription',
@@ -90,10 +123,17 @@ class _SpecialCarouselState extends State<SpecialCarousel>
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     try {
       final sub = controller.subscriptions[_current];
-      final userId = "${storage.read('userId')}";
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId == null) {
+        Get.snackbar('Error', 'User not logged in');
+        _isProcessingPayment.value = false;
+        return;
+      }
 
       final subscriptionData = {
-        'user_id': userId,
+        'user_id': '$userId',
         'payment_method': 0,
         'amount': sub['discounted_price'],
         'transaction_id': response.paymentId,
@@ -106,11 +146,15 @@ class _SpecialCarouselState extends State<SpecialCarousel>
       final success = await controller.subscribeUser(sub);
 
       if (success) {
+        // Refresh subscription status from database after successful subscription
+        int userId = await controller.fetchUserDetails();
+        await controller.preloadSubscribedStatus(userId);
+        
         final updatedSubscriptions = List<Map<String, dynamic>>.from(
           controller.subscriptions,
         );
         final index = updatedSubscriptions.indexWhere(
-              (s) => s['id'] == sub['id'],
+          (s) => s['id'] == sub['id'],
         );
 
         if (index != -1) {
@@ -118,7 +162,6 @@ class _SpecialCarouselState extends State<SpecialCarousel>
             ...updatedSubscriptions[index],
             'isSubscribed': true,
           };
-          controller.subscribedStatus[sub['id']] = true;
           controller.subscriptions.value = updatedSubscriptions;
         }
 
@@ -174,6 +217,16 @@ class _SpecialCarouselState extends State<SpecialCarousel>
         );
       }
 
+      // Show loading while subscription status is being fetched
+      if (_isLoadingStatus.value) {
+        return const SizedBox(
+          height: 200,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -185,12 +238,12 @@ class _SpecialCarouselState extends State<SpecialCarousel>
               onPageChanged: (index) => setState(() => _current = index),
               itemBuilder: (context, index) {
                 final sub = controller.subscriptions[index];
-                final isSubscribed =
-                    controller.subscribedStatus[sub['id']] ?? false;
 
                 return GestureDetector(
-                  onTap: () =>
-                      _showSubscriptionDetail(context, sub, isSubscribed, _openCheckout, _isProcessingPayment),
+                  onTap: () {
+                    final isSubscribed = controller.subscribedStatus.value[sub['id']] ?? false;
+                    _showSubscriptionDetail(context, sub, isSubscribed, _openCheckout, _isProcessingPayment);
+                  },
                   child: Hero(
                     tag: 'subscription-card-${sub['id']}',
                     child: AnimatedBuilder(
@@ -203,13 +256,18 @@ class _SpecialCarouselState extends State<SpecialCarousel>
                         }
                         return Transform.scale(scale: value, child: child);
                       },
-                      child: SubscriptionCard(
-                        sub: sub,
-                        isSubscribed: isSubscribed,
-                        onSubscribe: _isProcessingPayment.value
-                            ? null
-                            : () => _openCheckout(sub),
-                      ),
+                      child: Obx(() {
+                        // Reactive read of subscription status for this specific card
+                        final isSubscribed = controller.subscribedStatus.value[sub['id']] ?? false;
+                        
+                        return SubscriptionCard(
+                          sub: sub,
+                          isSubscribed: isSubscribed,
+                          onSubscribe: _isProcessingPayment.value
+                              ? null
+                              : () => _openCheckout(sub),
+                        );
+                      }),
                     ),
                   ),
                 );
@@ -244,12 +302,12 @@ class _SpecialCarouselState extends State<SpecialCarousel>
 
 // Global function and widgets must be defined outside the class
 void _showSubscriptionDetail(
-    BuildContext context,
-    Map sub,
-    bool isSubscribed,
-    Function(Map) openCheckout,
-    RxBool isProcessingPayment,
-    ) {
+  BuildContext context,
+  Map sub,
+  bool isSubscribed,
+  Function(Map) openCheckout,
+  RxBool isProcessingPayment,
+) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -315,7 +373,8 @@ void _showSubscriptionDetail(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
                                       child: Text(
@@ -382,15 +441,18 @@ void _showSubscriptionDetail(
                     ),
                     // Separated button section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                      child: Obx(() => SubscribeButton(
-                        isSubscribed: isSubscribed,
-                        onSubscribe: isProcessingPayment.value
-                            ? null
-                            : () {
-                          openCheckout(sub);
-                        },
-                      ),),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 16.0),
+                      child: Obx(
+                        () => SubscribeButton(
+                          isSubscribed: isSubscribed,
+                          onSubscribe: isProcessingPayment.value
+                              ? null
+                              : () {
+                                  openCheckout(sub);
+                                },
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -411,7 +473,8 @@ class _AnimatedBackground extends StatefulWidget {
   _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
 }
 
-class _AnimatedBackgroundState extends State<_AnimatedBackground> with SingleTickerProviderStateMixin {
+class _AnimatedBackgroundState extends State<_AnimatedBackground>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -642,7 +705,9 @@ class _SubscribeButtonState extends State<SubscribeButton>
       onTapCancel: () {
         if (!widget.isSubscribed) _controller.reverse();
       },
-      onTap: widget.isSubscribed ? () => Get.snackbar('Subscribed', 'Already Subscribed') : widget.onSubscribe,
+      onTap: widget.isSubscribed
+          ? () => Get.snackbar('Subscribed', 'Already Subscribed')
+          : widget.onSubscribe,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {

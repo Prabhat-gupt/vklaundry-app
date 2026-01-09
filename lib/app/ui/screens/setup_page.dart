@@ -1,7 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:geocoding/geocoding.dart';
+// Removed get_storage import - using SharedPreferences instead
 import 'package:laundry_app/app/constants/app_theme.dart';
+import 'package:laundry_app/app/ui/screens/service_not_available_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -19,7 +23,7 @@ class _SetupScreenState extends State<SetupScreen> {
   final houseController = TextEditingController();
   final buildingController = TextEditingController();
   final landmarkController = TextEditingController();
-  var storage = GetStorage();
+  // Removed GetStorage - using SharedPreferences instead
 
   bool isLoading = false;
   bool isFormValid = false;
@@ -49,43 +53,153 @@ class _SetupScreenState extends State<SetupScreen> {
     });
   }
 
+  Future<Map<String, dynamic>?> _getCoordinatesFromAddress() async {
+    final pincode = landmarkController.text.trim();
+    
+    if (pincode.isEmpty) {
+      return null;
+    }
+
+    try {
+      List<Location> locations = await locationFromAddress('$pincode, India');
+      
+      if (locations.isNotEmpty) {
+        final location = locations.first;
+        
+        // Get city name using reverse geocoding
+        String cityName = 'Hyderabad'; // default fallback
+        try {
+          List<Placemark> placemarks = await placemarkFromCoordinates(
+            location.latitude,
+            location.longitude,
+          );
+          
+          if (placemarks.isNotEmpty) {
+            final placemark = placemarks.first;
+            // Try to get city from locality or subAdministrativeArea
+            cityName = placemark.locality ?? 
+                      placemark.subAdministrativeArea ?? 
+                      'Hyderabad';
+          }
+        } catch (e) {
+          // If reverse geocoding fails, use default
+        }
+        
+        return {
+          'latitude': location.latitude,
+          'longitude': location.longitude,
+          'city': cityName,
+        };
+      }
+    } catch (e) {
+      // Geocoding failed
+    }
+    
+    return null;
+  }
+
+  bool _checkServiceAvailability(double lat, double lon) {
+    // Service center coordinates
+    const centerLat = 17.608400;
+    const centerLon = 78.466200;
+    const serviceRadiusKm = 10.0;
+    
+    // Calculate distance using Haversine formula
+    final distance = _calculateDistance(centerLat, centerLon, lat, lon);
+    
+    return distance <= serviceRadiusKm;
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double earthRadiusKm = 6371.0;
+    
+    double dLat = _degreesToRadians(lat2 - lat1);
+    double dLon = _degreesToRadians(lon2 - lon1);
+    
+    double a = (sin(dLat / 2) * sin(dLat / 2)) +
+        (cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2));
+    
+    double c = 2 * asin(sqrt(a));
+    return earthRadiusKm * c;
+  }
+
+  double _degreesToRadians(double degrees) {
+    return degrees * pi / 180;
+  }
+
   Future<void> _saveUserData() async {
     setState(() => isLoading = true);
     try {
-      // final user = supabase.auth.currentUser;
-      if (storage.read('userId') == null) throw Exception('User not logged in');
+      // Get userId from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId == null) throw Exception('User not logged in');
+
+      // Get coordinates from address
+      final locationData = await _getCoordinatesFromAddress();
 
       await supabase.from('users').update({
         'name': nameController.text.trim(),
         'email': emailController.text.trim(),
-      }).eq('id', storage.read('userId'));
+      }).eq('id', userId);
 
-      int id = await supabase
-          .from('users')
-          .select('id')
-          .eq('id', storage.read('userId'))
-          .single()
-          .then((data) => data['id']);
-
-      await supabase.from('addresses').upsert({
-        'id': id, // foreign key to users table
-        'address_line': '${houseController.text.trim()}'
+      // Prepare address data with coordinates and city if available
+      final addressData = {
+        'id': userId, // foreign key to users table
+        'address_line': '${houseController.text.trim()} '
             '${buildingController.text.trim()}',
-        'city': 'Hyderabad',
+        'city': locationData?['city'] ?? 'Hyderabad', // Use city from geocoding or default
         'state': 'Telangana',
         'landmark_pincode': landmarkController.text.trim(),
-      }, onConflict: 'id');
+      };
 
+      // Add coordinates if geocoding was successful
+      if (locationData != null && 
+          locationData['latitude'] != null && 
+          locationData['longitude'] != null) {
+        addressData['latitude'] = locationData['latitude'] as Object;
+        addressData['longitude'] = locationData['longitude'] as Object;
+      }
+
+      await supabase.from('addresses').upsert(addressData, onConflict: 'id');
+
+      // Stop loading before navigation
+      setState(() => isLoading = false);
+
+      // Check service availability before navigation
+      if (locationData != null && 
+          locationData['latitude'] != null && 
+          locationData['longitude'] != null) {
+        final lat = (locationData['latitude'] as num).toDouble();
+        final lon = (locationData['longitude'] as num).toDouble();
+        
+        final isServiceAvailable = _checkServiceAvailability(lat, lon);
+        
+        if (!isServiceAvailable) {
+          // Calculate distance for display
+          const centerLat = 17.608400;
+          const centerLon = 78.466200;
+          final distance = _calculateDistance(centerLat, centerLon, lat, lon);
+          
+          Get.off(
+            () => ServiceNotAvailableScreen(distance: distance),
+          );
+          return;
+        }
+      }
+
+      // Navigate to home screen
       Get.offAllNamed('/root');
     } catch (e) {
+      setState(() => isLoading = false);
       print("Error saving user data: $e");
       Get.snackbar(
         'Error: ',
         "Please try in sometime",
         snackPosition: SnackPosition.BOTTOM,
       );
-    } finally {
-      setState(() => isLoading = false);
     }
   }
 

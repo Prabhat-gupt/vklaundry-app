@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:laundry_app/app/ui/screens/all_orders.dart';
 import 'package:laundry_app/app/ui/screens/home.dart';
+import 'package:laundry_app/app/ui/screens/service_not_available_screen.dart';
 import 'package:laundry_app/app/ui/screens/services.dart';
 import 'package:laundry_app/app/ui/screens/setting_screen.dart';
 
@@ -17,6 +19,7 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   final ProfileController profileController = Get.put(ProfileController());
   final controller = Get.put(ProductListController());
+  final HomePageController homeController = Get.put(HomePageController());
   int _selectedIndex = 0;
 
   static final List<Widget> _widgetOptions = <Widget>[
@@ -44,7 +47,10 @@ class _RootPageState extends State<RootPage> {
         }
       },
       child: Scaffold(
-        body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _widgetOptions,
+        ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           child: Container(

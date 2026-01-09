@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+// Removed get_storage import - using SharedPreferences instead
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -19,10 +19,10 @@ import 'app/routes/app_pages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GetStorage.init();
+  // Removed GetStorage.init() - using SharedPreferences instead
 
   await dotenv.load(fileName: ".env");
-  final storages = GetStorage();
+  // Removed GetStorage - using SharedPreferences instead
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

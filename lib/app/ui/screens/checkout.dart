@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+// Removed get_storage import - using SharedPreferences instead
 import 'package:intl/intl.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
@@ -11,6 +12,7 @@ import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:laundry_app/app/controllers/razorpay_payment_controller.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
 import 'package:laundry_app/app/ui/screens/myOffers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -30,7 +32,7 @@ class _CheckoutPageState extends State<CheckoutPage>
   String? paymentMethod;
   DateTime? selectedPickupDate;
   String? selectedPickupSlot;
-  var storage = GetStorage();
+  // Removed GetStorage - using SharedPreferences instead
   final List<String> pickupSlots = ["7AM to 10AM", "5PM to 8PM"];
 
   late RazorpayPaymentController razorpayController;
@@ -63,7 +65,9 @@ class _CheckoutPageState extends State<CheckoutPage>
     _initializeAnimations();
 
     razorpayController = Get.put(
-      RazorpayPaymentController(razorpayKeyId: 'RAZORPAY_KEY_ID_HERE'),
+      RazorpayPaymentController(
+        razorpayKeyId: dotenv.env['RAZORPAY_KEY_ID'] ?? '',
+      ),
       permanent: true,
     );
 
@@ -71,14 +75,24 @@ class _CheckoutPageState extends State<CheckoutPage>
       final selectedItems = controller.getSelectedCartItems();
       final totalItemsCount = selectedItems.fold<int>(0, (sum, item) {
         final quantity = controller.cartQuantities[
-        '${item['service']}_${item['product']['id']}'] ??
+                '${item['service']}_${item['product']['id']}'] ??
             0;
         return sum + quantity;
       });
 
-      hasSubscription = await profileController.validateAndUpdateSubscription(
-        storage.read('userId'),
-      );
+      // Get userId from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      print("my subscription is checking here is ::::: $userId");
+
+      if (userId != null) {
+        hasSubscription =
+            await profileController.validateAndUpdateSubscription(userId);
+      } else {
+        hasSubscription = 0; // Default to no subscription if userId is null
+      }
+
       setState(() {});
       print("has subscrition is ::::::::: $hasSubscription");
 
@@ -195,12 +209,10 @@ class _CheckoutPageState extends State<CheckoutPage>
 
   @override
   Widget build(BuildContext context) {
-    print(
-      "my subscription is checking here is ::::: ${storage.read('subscriptionCheck')}",
-    );
+    // Removed GetStorage check - using SharedPreferences
     final selectedItems = controller.getSelectedCartItems().where((item) {
       final quantity = controller
-          .cartQuantities['${item['service']}_${item['product']['id']}'] ??
+              .cartQuantities['${item['service']}_${item['product']['id']}'] ??
           0;
       return quantity > 0;
     }).toList();
@@ -231,7 +243,7 @@ class _CheckoutPageState extends State<CheckoutPage>
         } else if (offer['discount_type'] == 'fixed') {
           discount = (offer['discount_value'] ?? 0).toDouble();
           discountLabel =
-          "${offer['title']} (₹${discount.toStringAsFixed(2)} off)";
+              "${offer['title']} (₹${discount.toStringAsFixed(2)} off)";
         }
       }
     }
@@ -274,7 +286,8 @@ class _CheckoutPageState extends State<CheckoutPage>
           ),
         ),
       ),
-      bottomNavigationBar: _buildAnimatedBottomBar(context, finalTotal, paymentMethod),
+      bottomNavigationBar:
+          _buildAnimatedBottomBar(context, finalTotal, paymentMethod),
     );
   }
 
@@ -412,23 +425,29 @@ class _CheckoutPageState extends State<CheckoutPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline,
-                color: AppTheme.primaryColor,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                "Missed something?",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
+          Flexible(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: AppTheme.primaryColor,
+                  size: 20,
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                const Flexible(
+                  child: Text(
+                    "Missed something?",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -454,12 +473,14 @@ class _CheckoutPageState extends State<CheckoutPage>
                 onTap: () => Get.back(),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: const Text(
-                    "+ Add More Items",
+                    "+ Add More",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -624,7 +645,8 @@ class _CheckoutPageState extends State<CheckoutPage>
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                DateFormat('EEEE, MMM d, yyyy  |  hh:mm a').format(deliveryDate),
+                DateFormat('EEEE, MMM d, yyyy  |  hh:mm a')
+                    .format(deliveryDate),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -644,118 +666,119 @@ class _CheckoutPageState extends State<CheckoutPage>
       child: hasSubscription == 1
           ? const SizedBox.shrink()
           : Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.orange.withOpacity(0.1),
-              Colors.orange.withOpacity(0.05),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.orange.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              showOffersBottomSheet(
-                context,
-                controller.activeOffer,
-                grandTotal,
-                    (selectedOffer) {
-                  setState(() {
-                    if (selectedOffer != null) {
-                      controller.activeOfferselected.value = selectedOffer;
-                      discountApplied = true;
-                    } else {
-                      controller.activeOfferselected.value = {};
-                      discountApplied = false;
-                    }
-                  });
-                },
-                alreadyAppliedOffer: controller.activeOfferselected,
-              );
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.local_offer_rounded,
-                      color: Colors.orange,
-                      size: 24,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.orange.withOpacity(0.1),
+                    Colors.orange.withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    showOffersBottomSheet(
+                      context,
+                      controller.activeOffer,
+                      grandTotal,
+                      (selectedOffer) {
+                        setState(() {
+                          if (selectedOffer != null) {
+                            controller.activeOfferselected.value =
+                                selectedOffer;
+                            discountApplied = true;
+                          } else {
+                            controller.activeOfferselected.value = {};
+                            discountApplied = false;
+                          }
+                        });
+                      },
+                      alreadyAppliedOffer: controller.activeOfferselected,
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.local_offer_rounded,
+                            color: Colors.orange,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        const Expanded(
+                          child: Text(
+                            "View Available Offers",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.orange,
+                          size: 18,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      "View Available Offers",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Color(0xFF1F2937),
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.orange,
-                    size: 18,
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
   Widget _buildAnimatedBillDetails(
-      double itemsTotal,
-      double deliveryCharge,
-      double handlingCharge,
-      double grandTotal,
-      double discount,
-      String discountLabel,
-      ) {
+    double itemsTotal,
+    double deliveryCharge,
+    double handlingCharge,
+    double grandTotal,
+    double discount,
+    String discountLabel,
+  ) {
     return FadeTransition(
       opacity: _billFadeAnimation,
       child: hasSubscription == 1
           ? _buildBillDetailWithoutSubscription(
-        itemsTotal,
-        profileController.totalPreviousCount,
-      )
+              itemsTotal,
+              profileController.totalPreviousCount,
+            )
           : _buildBillDetails(
-        itemsTotal,
-        deliveryCharge,
-        handlingCharge,
-        grandTotal,
-        discount,
-        discountLabel,
-      ),
+              itemsTotal,
+              deliveryCharge,
+              handlingCharge,
+              grandTotal,
+              discount,
+              discountLabel,
+            ),
     );
   }
 
   Widget _buildBillDetails(
-      double itemsTotal,
-      double deliveryCharge,
-      double handlingCharge,
-      double grandTotal,
-      double discount,
-      String discountLabel,
-      ) {
+    double itemsTotal,
+    double deliveryCharge,
+    double handlingCharge,
+    double grandTotal,
+    double discount,
+    String discountLabel,
+  ) {
     final double finalTotal = grandTotal - discount;
 
     return Container(
@@ -807,9 +830,11 @@ class _CheckoutPageState extends State<CheckoutPage>
           const SizedBox(height: 20),
           _billRow("Items total", "\u20B9${itemsTotal.toStringAsFixed(2)}"),
           const SizedBox(height: 12),
-          _billRow("Delivery charge", "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
+          _billRow(
+              "Delivery charge", "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
           const SizedBox(height: 12),
-          _billRow("Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
+          _billRow(
+              "Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
           if (discount > 0) ...[
             const SizedBox(height: 12),
             _billRow(
@@ -853,9 +878,9 @@ class _CheckoutPageState extends State<CheckoutPage>
   }
 
   Widget _buildBillDetailWithoutSubscription(
-      double itemsTotal,
-      int? totalItemDelivered,
-      ) {
+    double itemsTotal,
+    int? totalItemDelivered,
+  ) {
     final int totalSubscriptionItems = 30;
     final int delivered = totalItemDelivered ?? 0;
     final int newItems = controller.getTotalCartItems();
@@ -908,16 +933,21 @@ class _CheckoutPageState extends State<CheckoutPage>
             ],
           ),
           const SizedBox(height: 20),
-          _buildSubscriptionRow("Total Subscription Items", "$totalSubscriptionItems", Icons.inventory_2),
-          _buildSubscriptionRow("New Items Added", "$newItems", Icons.add_circle_outline, Colors.blue),
-          _buildSubscriptionRow("Previous Items", "$delivered", Icons.check_circle_outline, Colors.green),
-          _buildSubscriptionRow("Remaining Items", "$remaining", Icons.pending_actions, Colors.orange, true),
+          _buildSubscriptionRow("Total Subscription Items",
+              "$totalSubscriptionItems", Icons.inventory_2),
+          _buildSubscriptionRow("New Items Added", "$newItems",
+              Icons.add_circle_outline, Colors.blue),
+          _buildSubscriptionRow("Previous Items", "$delivered",
+              Icons.check_circle_outline, Colors.green),
+          _buildSubscriptionRow("Remaining Items", "$remaining",
+              Icons.pending_actions, Colors.orange, true),
         ],
       ),
     );
   }
 
-  Widget _buildSubscriptionRow(String label, String value, IconData icon, [Color? color, bool isBold = false]) {
+  Widget _buildSubscriptionRow(String label, String value, IconData icon,
+      [Color? color, bool isBold = false]) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -930,7 +960,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           Icon(icon, color: color ?? AppTheme.primaryColor, size: 20),
           const SizedBox(width: 12),
           Expanded(
-            child:           Text(
+            child: Text(
               label,
               style: TextStyle(
                 fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
@@ -951,7 +981,8 @@ class _CheckoutPageState extends State<CheckoutPage>
     );
   }
 
-  Widget _billRow(String label, String value, {bool isBold = false, bool isDiscount = false}) {
+  Widget _billRow(String label, String value,
+      {bool isBold = false, bool isDiscount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -971,8 +1002,8 @@ class _CheckoutPageState extends State<CheckoutPage>
             color: isDiscount
                 ? Colors.green
                 : isBold
-                ? AppTheme.primaryColor
-                : const Color(0xFF1F2937),
+                    ? AppTheme.primaryColor
+                    : const Color(0xFF1F2937),
           ),
         ),
       ],
@@ -980,10 +1011,10 @@ class _CheckoutPageState extends State<CheckoutPage>
   }
 
   Widget _buildAnimatedBottomBar(
-      BuildContext context,
-      double grandTotal,
-      String? paymentMethod,
-      ) {
+    BuildContext context,
+    double finalTotal,
+    String? paymentMethod,
+  ) {
     return SlideTransition(
       position: _bottomBarSlideAnimation,
       child: Container(
@@ -999,14 +1030,15 @@ class _CheckoutPageState extends State<CheckoutPage>
           ],
         ),
         child: SafeArea(
-          child: _buildPlaceOrderButton(grandTotal),
+          child: _buildPlaceOrderButton(finalTotal),
         ),
       ),
     );
   }
 
-  Widget _buildPlaceOrderButton(double grandTotal) {
-    final bool canPlaceOrder = selectedPickupDate != null && selectedPickupSlot != null;
+  Widget _buildPlaceOrderButton(double finalTotal) {
+    final bool canPlaceOrder =
+        selectedPickupDate != null && selectedPickupSlot != null;
 
     return Container(
       width: double.infinity,
@@ -1020,18 +1052,18 @@ class _CheckoutPageState extends State<CheckoutPage>
         borderRadius: BorderRadius.circular(16),
         boxShadow: canPlaceOrder
             ? [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.4),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ]
+                BoxShadow(
+                  color: Colors.green.withOpacity(0.4),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ]
             : [],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: canPlaceOrder ? () => _handlePlaceOrder(grandTotal) : null,
+          onTap: canPlaceOrder ? () => _handlePlaceOrder(finalTotal) : null,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1044,7 +1076,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "\u20B9${grandTotal.toStringAsFixed(2)}",
+                        "\u20B9${finalTotal.toStringAsFixed(2)}",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -1091,8 +1123,16 @@ class _CheckoutPageState extends State<CheckoutPage>
     );
   }
 
-  Future<void> _handlePlaceOrder(double grandTotal) async {
-    final userIdMy = profileController.storages.read('userId');
+  Future<void> _handlePlaceOrder(double finalTotal) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userIdMy = prefs.getInt('user_id');
+
+    if (userIdMy == null) {
+      Get.snackbar('Error', 'User not logged in. Please login again.');
+      Get.offAllNamed(AppRoutes.LOGIN);
+      return;
+    }
+
     final checkUserScreen = await profileController.checkUserPincode(userIdMy);
 
     print("check user screen here is :::::: $checkUserScreen");
@@ -1108,16 +1148,19 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     final int totalSubscriptionItems = 30;
     final int newItems = controller.getTotalCartItems();
-    final num remaining = totalSubscriptionItems - (profileController.currentCount);
+    final num remaining =
+        totalSubscriptionItems - (profileController.currentCount);
 
     final String? backendOrderId = null;
     print("my hasSubscription is ::::::: $hasSubscription");
 
     if (hasSubscription == 1) {
-      print("my remaining is :::: ${profileController.currentCount} ad ${remaining}");
+      print(
+          "my remaining is :::: ${profileController.currentCount} ad ${remaining}");
       int total = profileController.currentCount + newItems;
 
-      print("my item toal $total and $totalSubscriptionItems is ::::: ${total == totalSubscriptionItems}");
+      print(
+          "my item toal $total and $totalSubscriptionItems is ::::: ${total == totalSubscriptionItems}");
 
       if (total > totalSubscriptionItems) {
         Get.snackbar(
@@ -1126,14 +1169,17 @@ class _CheckoutPageState extends State<CheckoutPage>
           backgroundColor: Colors.green.shade600,
           colorText: Colors.white,
         );
-      } else if (total < totalSubscriptionItems || total == totalSubscriptionItems) {
+      } else if (total < totalSubscriptionItems ||
+          total == totalSubscriptionItems) {
         await orderController.placeOrder(
           selectedItems: controller.getSelectedCartItems(),
-          totalAmount: grandTotal,
+          totalAmount: finalTotal,
           paymentMethod: 'Subscription',
           paymentStatus: 'paid',
-          pickupDateTime: "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
-          deliveryDateTime: "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+          pickupDateTime:
+              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+          deliveryDateTime:
+              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
           userId: userIdMy,
           addressId: userIdMy,
         );
@@ -1145,11 +1191,18 @@ class _CheckoutPageState extends State<CheckoutPage>
           colorText: Colors.white,
         );
 
-        await profileController.UpdateSubscription(
-          storage.read('userId'),
-          profileController.currentCount,
-          newItems,
-        );
+        // Get userId from SharedPreferences for UpdateSubscription
+        final prefsForUpdate = await SharedPreferences.getInstance();
+        final userIdForUpdate = prefsForUpdate.getInt('user_id');
+
+        if (userIdForUpdate != null) {
+          await profileController.UpdateSubscription(
+            userIdForUpdate,
+            profileController.currentCount,
+            newItems,
+          );
+        }
+
         Get.offAllNamed(
           AppRoutes.SUCCESS,
           arguments: {'order_id': 58},
@@ -1159,7 +1212,7 @@ class _CheckoutPageState extends State<CheckoutPage>
       await controllersHome.fetchSubscriptions();
 
       razorpayController.payNow(
-        amount: grandTotal,
+        amount: finalTotal,
         orderId: backendOrderId,
         customerName: customerName.isNotEmpty ? customerName : 'Laundry User',
         description: 'Laundry order payment',
@@ -1167,24 +1220,28 @@ class _CheckoutPageState extends State<CheckoutPage>
         prefillEmail: customerEmail.isNotEmpty ? customerEmail : null,
         notes: {
           'user_id': '$userIdMy',
-          'pickup': "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} $selectedPickupSlot",
+          'pickup':
+              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} $selectedPickupSlot",
         },
         onSuccess: (paymentId, orderId, signature) async {
           print("gjgjgjgjggjgjgj onSuccess is ::::::::: $paymentId");
           try {
             await orderController.placeOrder(
               selectedItems: controller.getSelectedCartItems(),
-              totalAmount: grandTotal,
+              totalAmount: finalTotal,
               paymentMethod: 'Razorpay',
               paymentStatus: 'paid',
-              pickupDateTime: "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
-              deliveryDateTime: "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+              pickupDateTime:
+                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+              deliveryDateTime:
+                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
               userId: userIdMy,
               addressId: userIdMy,
               transactionId: paymentId,
             );
 
-            await profileController.updateAmountTransactionTable(grandTotal, paymentId);
+            await profileController.updateAmountTransactionTable(
+                finalTotal, paymentId);
 
             Get.snackbar(
               "Payment successful",
@@ -1208,7 +1265,8 @@ class _CheckoutPageState extends State<CheckoutPage>
           }
         },
         onFailure: (code, message) {
-          final isCancelled = code == 2 || message.toLowerCase().contains('cancel');
+          final isCancelled =
+              code == 2 || message.toLowerCase().contains('cancel');
           Get.snackbar(
             isCancelled ? "Payment cancelled" : "Payment failed",
             isCancelled ? "You cancelled the payment." : "($code) $message",
@@ -1275,7 +1333,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
         return Transform.translate(
           offset: Offset((1 - _slideAnimation.value) * 300, 0),
           child: Opacity(
-            opacity: _slideAnimation.value,
+            opacity: _slideAnimation.value.clamp(0.0, 1.0),
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
@@ -1465,7 +1523,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Obx(() {
               final quantity = widget.controller.cartQuantities[
-              '${widget.item['service']}_${widget.item['product']['id']}'] ??
+                      '${widget.item['service']}_${widget.item['product']['id']}'] ??
                   0;
               return Text(
                 "$quantity",
@@ -1506,7 +1564,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
   Widget _buildPriceDisplay() {
     return Obx(() {
       final quantity = widget.controller.cartQuantities[
-      '${widget.item['service']}_${widget.item['product']['id']}'] ??
+              '${widget.item['service']}_${widget.item['product']['id']}'] ??
           0;
       final totalPrice = quantity * widget.item['product']['price'];
       return Container(
@@ -1555,8 +1613,11 @@ class _EnhancedDateCard extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
-            colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8)],
-          )
+                  colors: [
+                    AppTheme.primaryColor,
+                    AppTheme.primaryColor.withOpacity(0.8)
+                  ],
+                )
               : null,
           color: !isSelected ? Colors.grey.shade100 : null,
           borderRadius: BorderRadius.circular(16),
@@ -1566,12 +1627,12 @@ class _EnhancedDateCard extends StatelessWidget {
           ),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: AppTheme.primaryColor.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ]
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ]
               : [],
         ),
         child: Column(
@@ -1622,8 +1683,11 @@ class _EnhancedTimeSlot extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
-            colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8)],
-          )
+                  colors: [
+                    AppTheme.primaryColor,
+                    AppTheme.primaryColor.withOpacity(0.8)
+                  ],
+                )
               : null,
           color: !isSelected ? Colors.grey.shade100 : null,
           borderRadius: BorderRadius.circular(25),
@@ -1633,12 +1697,12 @@ class _EnhancedTimeSlot extends StatelessWidget {
           ),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: AppTheme.primaryColor.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ]
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
               : [],
         ),
         child: Row(
