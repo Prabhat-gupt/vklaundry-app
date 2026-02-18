@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
+import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/order_track_controller.dart';
 import 'package:laundry_app/app/ui/widgets/order_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +41,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
-      
+
       if (userId != null) {
         orderTrackController.subscribeToAllUserOrders(userId);
       }
@@ -136,7 +137,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Colors.white,
+      backgroundColor: Colors.white,
       appBar: _buildAnimatedAppBar(),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
@@ -155,6 +156,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.white,
+      automaticallyImplyLeading: false,
       title: SlideTransition(
         position: _headerSlideAnimation,
         child: ScaleTransition(
@@ -170,24 +172,6 @@ class _AllOrdersPageState extends State<AllOrdersPage>
         ),
       ),
       centerTitle: true,
-      leading: SlideTransition(
-        position: _headerSlideAnimation,
-        child: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
-          ),
-          onPressed: () => Get.back(),
-        ),
-      ),
     );
   }
 
@@ -258,7 +242,8 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                     ),
                     const SizedBox(height: 4),
                     Obx(() {
-                      final ordersData = orderTrackController.order['orders'] ?? [];
+                      final ordersData =
+                          orderTrackController.order['orders'] ?? [];
                       return Text(
                         ordersData.isEmpty
                             ? 'No orders found'
@@ -313,7 +298,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
               return Transform.scale(
                 scale: value,
                 child: Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -330,14 +315,11 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                       ),
                     ],
                   ),
-                  child: Image.network(
-                    "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",
-                    height: 100,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.shopping_bag_outlined,
-                      size: 100,
-                      color: AppTheme.primaryColor.withOpacity(0.5),
-                    ),
+                  child: Image.asset(
+                    "assets/icons/empty_basket.png",
+                    height: 200,
+                    width: 200,
+                    fit: BoxFit.contain,
                   ),
                 ),
               );
@@ -406,7 +388,11 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => Get.back(),
+          onTap: () {
+            // Switch bottom nav to Services tab (index 1)
+            final homeController = Get.find<HomePageController>();
+            homeController.currentNavIndex.value = 1;
+          },
           borderRadius: BorderRadius.circular(25),
           child: Container(
             padding: const EdgeInsets.symmetric(

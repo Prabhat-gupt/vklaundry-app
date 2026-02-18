@@ -8,6 +8,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class HomePageController extends GetxController {
   final supabase = Supabase.instance.client;
 
+  // Bottom nav index — any page can switch tabs by setting this
+  var currentNavIndex = 0.obs;
+
   var userAddress = <Map<String, dynamic>>[].obs;
   var userLocationDetails = ''.obs;
 
@@ -17,7 +20,7 @@ class HomePageController extends GetxController {
   var isLoading = false.obs;
   var isServiceAvailable = true.obs;
   var userDistanceFromCenter = 0.0.obs;
-  
+
   // Service center coordinates
   static const double centerLatitude = 17.608400;
   static const double centerLongitude = 78.466200;
@@ -25,7 +28,7 @@ class HomePageController extends GetxController {
 
   // Cache userId to avoid repeated SharedPreferences calls
   int? _cachedUserId;
-  
+
   // Public getter for cached userId
   int? get cachedUserId => _cachedUserId;
 
@@ -48,10 +51,10 @@ class HomePageController extends GetxController {
   Future<void> _initializeData() async {
     try {
       isLoading.value = true;
-      
+
       // Fetch user details first (sets _cachedUserId)
       await fetchUserDetails();
-      
+
       // Then fetch other data using cached userId
       await Future.wait([
         Future(() => fetchServices()),
@@ -71,12 +74,12 @@ class HomePageController extends GetxController {
     // Query user_subscriptions table for this user
     // Create a new map to trigger reactive update
     final Map<int, bool> newStatus = {};
-    
+
     for (var sub in subscriptions) {
       final planId = sub['id'];
       newStatus[planId] = await isUserSubscribedTo(planId);
     }
-    
+
     // Update the entire map to trigger reactive listeners
     subscribedStatus.value = newStatus;
     print("Preloaded subscribedStatus: $subscribedStatus");
@@ -117,16 +120,13 @@ class HomePageController extends GetxController {
 
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
-      
+
       print("my userId from SharedPreferences: $userId");
       if (userId == null) throw Exception('User not logged in');
 
-      final response = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', userId)
-          .single();
-      
+      final response =
+          await supabase.from('users').select('*').eq('id', userId).single();
+
       print("my userdetails: $response");
 
       if (response != null && response['id'] != null) {
@@ -154,44 +154,46 @@ class HomePageController extends GetxController {
   /// Calculate distance between two coordinates using Haversine formula
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const double earthRadiusKm = 6371.0;
-    
+
     double dLat = _degreesToRadians(lat2 - lat1);
     double dLon = _degreesToRadians(lon2 - lon1);
-    
+
     double a = (sin(dLat / 2) * sin(dLat / 2)) +
-        (cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2));
-    
+        (cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2));
+
     double c = 2 * asin(sqrt(a));
     return earthRadiusKm * c;
   }
-  
+
   double _degreesToRadians(double degrees) {
     return degrees * pi / 180;
   }
-  
+
   void _checkServiceAvailability(double? userLat, double? userLon) {
-    print('🔍 Checking service availability - userLat: $userLat, userLon: $userLon');
-    
+    print(
+        '🔍 Checking service availability - userLat: $userLat, userLon: $userLon');
+
     if (userLat == null || userLon == null) {
       print('⚠️ Missing coordinates - assuming service is available');
       isServiceAvailable.value = true; // Assume available if no coordinates
       return;
     }
-    
-    double distance = calculateDistance(
-      centerLatitude, centerLongitude,
-      userLat, userLon
-    );
-    
+
+    double distance =
+        calculateDistance(centerLatitude, centerLongitude, userLat, userLon);
+
     userDistanceFromCenter.value = distance;
-    
+
     print('📍 Distance from service center: ${distance.toStringAsFixed(2)} km');
     print('📍 Service radius: $serviceRadiusKm km');
     isServiceAvailable.value = distance <= serviceRadiusKm;
-    
+
     if (!isServiceAvailable.value) {
-      print('⚠️ Service not available - user is ${distance.toStringAsFixed(2)} km away (max: $serviceRadiusKm km)');
+      print(
+          '⚠️ Service not available - user is ${distance.toStringAsFixed(2)} km away (max: $serviceRadiusKm km)');
     } else {
       print('✅ Service available - user is within service area');
     }
@@ -202,28 +204,29 @@ class HomePageController extends GetxController {
     try {
       // Use cached userId if available, otherwise fetch
       int userId = _cachedUserId ?? await fetchUserDetails();
-      
+
       final response = await supabase
           .from('addresses')
           .select('*')
           .eq('id', userId)
           .limit(1);
       userAddress.value = response;
-      
+
       // Check service availability if coordinates exist
       if (response.isNotEmpty) {
         final address = response.first;
         print('🏠 Fetched address: $address');
-        
+
         // Handle different numeric types from Supabase
         final latValue = address['latitude'];
         final lonValue = address['longitude'];
-        
-        print('📍 Raw coordinates - lat: $latValue (${latValue.runtimeType}), lon: $lonValue (${lonValue.runtimeType})');
-        
+
+        print(
+            '📍 Raw coordinates - lat: $latValue (${latValue.runtimeType}), lon: $lonValue (${lonValue.runtimeType})');
+
         final lat = latValue != null ? (latValue as num).toDouble() : null;
         final lon = lonValue != null ? (lonValue as num).toDouble() : null;
-        
+
         if (lat != null && lon != null) {
           print('📍 Converted coordinates - lat: $lat, lon: $lon');
           _checkServiceAvailability(lat, lon);
@@ -240,10 +243,8 @@ class HomePageController extends GetxController {
 
   Future<void> fetchSubscriptions() async {
     try {
-      final response = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('active', true);
+      final response =
+          await supabase.from('subscriptions').select('*').eq('active', true);
       subscriptions.value = response;
     } catch (e) {
       Get.snackbar('Error', 'Failed to load subscriptions');

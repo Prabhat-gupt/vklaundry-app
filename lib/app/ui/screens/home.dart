@@ -390,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen>
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 18.0),
                               child: Text(
-                                '#SpecialForYou',
+                                '#Subscriptions',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,

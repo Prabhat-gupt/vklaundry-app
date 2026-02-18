@@ -232,6 +232,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       elevation: 0,
+      automaticallyImplyLeading: false,
       backgroundColor: Colors.white,
       title: Text(
         "Settings",
@@ -241,10 +242,6 @@ class _SettingsScreenState extends State<SettingsScreen>
         ),
       ),
       centerTitle: true,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios, color: AppTheme.primaryColor),
-        onPressed: () => Get.back(),
-      ),
     );
   }
 

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-// Removed get_storage import - using SharedPreferences instead
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'app/routes/app_pages.dart';
 
@@ -46,10 +46,28 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'VK Laundry',
       theme: AppTheme.lightTheme,
-      // initialRoute: isLoggedIn AppPages.Homepage,
       initialRoute: AppRoutes.SPLASHSCREEN,
-
       getPages: AppPages.routes,
+      builder: (context, child) {
+        return UpgradeAlert(
+          dialogStyle: UpgradeDialogStyle.material,
+          showIgnore: false,
+          showLater: true,
+          showReleaseNotes: true,
+          upgrader: Upgrader(
+            durationUntilAlertAgain: const Duration(days: 1),
+          ),
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return child ?? const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,8 @@ class _OtpScreenState extends State<OtpScreen> {
   late String phoneNumber;
   final LoginController loginController = Get.put(LoginController());
   final TextEditingController _otpController = TextEditingController();
+  final StreamController<ErrorAnimationType> _errorController =
+      StreamController<ErrorAnimationType>();
 
   @override
   void initState() {
@@ -44,9 +47,55 @@ class _OtpScreenState extends State<OtpScreen> {
     });
   }
 
+  void _verifyOtp() {
+    final otp = _otpController.text.trim();
+    if (otp.isEmpty) {
+      Get.snackbar(
+        '⚠️ OTP Required',
+        'Please enter the OTP sent to your phone.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFF57C00),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+      );
+      return;
+    }
+    if (otp.length < 6) {
+      _errorController.add(ErrorAnimationType.shake);
+      Get.snackbar(
+        '⚠️ Incomplete OTP',
+        'Please enter all 6 digits of the OTP.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFF57C00),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+      );
+      return;
+    }
+    _timer?.cancel();
+    loginController.verifyOtp(
+      phoneNumber,
+      otp,
+      onWrongOtp: () {
+        if (mounted) {
+          _errorController.add(ErrorAnimationType.shake);
+          _otpController.clear();
+          _startTimer();
+        }
+      },
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _errorController.close();
     try {
       _otpController.dispose();
     } catch (e) {
@@ -124,6 +173,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                   keyboardType: TextInputType.number,
                                   cursorColor: AppTheme.primaryColor,
                                   animationType: AnimationType.fade,
+                                  errorAnimationController: _errorController,
+                                  errorAnimationDuration: 300,
                                   pinTheme: PinTheme(
                                     shape: PinCodeFieldShape.box,
                                     borderRadius: BorderRadius.circular(8),
@@ -135,27 +186,12 @@ class _OtpScreenState extends State<OtpScreen> {
                                     activeColor: Colors.blue,
                                     selectedColor: Colors.blue,
                                     inactiveColor: Colors.grey,
+                                    errorBorderColor: Colors.red,
                                   ),
                                   enableActiveFill: true,
                                   backgroundColor: Colors.transparent,
-                                  onChanged: (value) {
-                                    if (value.length == 6) {
-                                      // Cancel timer before navigation to prevent setState after dispose
-                                      _timer?.cancel();
-                                      
-                                      loginController.verifyOtp(
-                                        phoneNumber,
-                                        value,
-                                        onWrongOtp: () {
-                                          if (mounted) {
-                                            _otpController.clear();
-                                            // Restart timer if OTP was wrong
-                                            _startTimer();
-                                          }
-                                        },
-                                      );
-                                    }
-                                  },
+                                  onChanged: (value) {},
+                                  onCompleted: (value) => _verifyOtp(),
                                 ),
 
                                 const SizedBox(height: 20),
