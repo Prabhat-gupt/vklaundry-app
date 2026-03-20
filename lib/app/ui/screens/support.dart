@@ -31,10 +31,7 @@ class SupportPage extends StatelessWidget {
     // Remove spaces and ensure correct format
     final cleanNumber = phoneNumber.replaceAll(' ', '');
 
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: cleanNumber,
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: cleanNumber);
 
     if (await canLaunchUrl(launchUri)) {
       await launchUrl(launchUri, mode: LaunchMode.externalApplication);
@@ -43,8 +40,10 @@ class SupportPage extends StatelessWidget {
     }
   }
 
-  Future<void> _launchWhatsApp(
-      {required String phoneNumber, String message = ''}) async {
+  Future<void> _launchWhatsApp({
+    required String phoneNumber,
+    String message = '',
+  }) async {
     String whatsappUrl;
 
     if (Platform.isIOS) {
@@ -66,9 +65,11 @@ class SupportPage extends StatelessWidget {
       print('Could not launch WhatsApp. Make sure WhatsApp is installed.');
       // Optionally, launch WhatsApp Web or show an error message
       await launchUrl(
-          Uri.parse(
-              "https://api.whatsapp.com/send/?phone=$phoneNumber&text=${Uri.encodeComponent(message)}"),
-          mode: LaunchMode.externalApplication);
+        Uri.parse(
+          "https://api.whatsapp.com/send/?phone=$phoneNumber&text=${Uri.encodeComponent(message)}",
+        ),
+        mode: LaunchMode.externalApplication,
+      );
     }
   }
 
@@ -89,11 +90,13 @@ class SupportPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Support',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            )),
+        title: Text(
+          'Support',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.white,
@@ -156,28 +159,27 @@ class SupportPage extends StatelessWidget {
             ? const Icon(Icons.arrow_forward_ios, size: 16)
             : null,
         onTap: () async {
-        // Copy to clipboard
-        if(label == 'Phone') {
-          await Clipboard.setData(ClipboardData(text: value));
-          Get.snackbar(
-          'Copied',
-          '$label copied to clipboard',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppTheme.primaryColor,
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(8),
-          duration: const Duration(seconds: 1),
-        );
-        }
+          // Copy to clipboard
+          if (label == 'Phone') {
+            await Clipboard.setData(ClipboardData(text: value));
+            Get.snackbar(
+              'Copied',
+              '$label copied to clipboard',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: AppTheme.primaryColor,
+              colorText: Colors.white,
+              margin: const EdgeInsets.all(8),
+              duration: const Duration(seconds: 1),
+            );
+          }
 
-        // Optional: Launch call if onTap provided
-        if (onTap != null) {
-          onTap();
-        }
+          // Optional: Launch call if onTap provided
+          if (onTap != null) {
+            onTap();
+          }
 
-        // Show snackbar confirmation
-        
-        }
+          // Show snackbar confirmation
+        },
       ),
     );
   }

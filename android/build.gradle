@@ -1,3 +1,17 @@
+buildscript {
+    ext.kotlin_version = '2.1.0'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.7.3"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -7,29 +21,32 @@ allprojects {
 
 rootProject.buildDir = "../build"
 subprojects {
-    // Only set buildDir for subprojects that are inside the root project directory
     if (project.projectDir.absolutePath.startsWith(rootProject.projectDir.absolutePath)) {
         project.buildDir = "${rootProject.buildDir}/${project.name}"
     }
 }
+
+// Force consistent JVM target across ALL subprojects including third-party plugins
 subprojects {
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-        kotlinOptions.jvmTarget = "1.8"
+    afterEvaluate { project ->
+        // Force Kotlin JVM target to 17 to match system Java
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
+            }
+        }
+        // Force Java compile to 17 as well
+        if (project.hasProperty('android')) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+            }
+        }
     }
 }
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
-}
-
-buildscript {
-    ext.kotlin_version = "1.8.22"
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:8.6.0"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0"
-    }
 }

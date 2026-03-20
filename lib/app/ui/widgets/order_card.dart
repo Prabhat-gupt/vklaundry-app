@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
+import 'package:laundry_app/app/controllers/order_track_controller.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
 
 /// 🔹 Status mapping
@@ -25,87 +26,88 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(numbersOrders, (index) {
-        final order = orders[index];
-        final int status = order['status'] ?? 0;
-        final String statusText = _getStatusText(status);
-
-        return GestureDetector(
-          onTap: () => _showOrderDetail(context, order),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // 🔹 Left side
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Booking Details',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDateTime(order['created_at']),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-                // 🔹 Right side
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '₹${order['amount']?.toString() ?? '0'}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(status).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        statusText,
+    return SingleChildScrollView(
+      child: Column(
+        children: List.generate(numbersOrders, (index) {
+          final order = orders[index];
+          final int status = order['status'] ?? 0;
+          final String statusText = _getStatusText(status);
+          print("my order is rejected here :::::: ${orders[index]}");
+          return GestureDetector(
+            onTap: () => _showOrderDetail(context, order),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // 🔹 Left side
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Booking Details',
                         style: TextStyle(
-                          color: _getStatusColor(status),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDateTime(order['created_at']),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                  // 🔹 Right side
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '₹${order['amount']?.toString() ?? '0'}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(status).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          statusText,
+                          style: TextStyle(
+                            color: _getStatusColor(status),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
@@ -124,15 +126,16 @@ String _formatDateTime(String? dateString) {
   if (dateString == null || dateString.isEmpty) return '';
   try {
     final date = DateTime.parse(dateString);
-    return DateFormat('yyyy-MM-dd HH:mm').format(date);
+    // return DateFormat('yyyy-MM-dd HH:mm').format(date);
+    return DateFormat('yyyy-MM-dd').format(date);
   } catch (e) {
     return '';
   }
 }
 
 void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
-  final int status = order['status'] ?? 0;
-  final String statusText = _getStatusText(status);
+  final orderTrackController = Get.find<TrackOrderController>();
+  final int orderId = order['id'];
 
   showModalBottomSheet(
     context: context,
@@ -149,163 +152,197 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 🔹 Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Order #${order['id']?.toString() ?? ''}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(status).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          statusText,
-                          style: TextStyle(
-                            color: _getStatusColor(status),
-                            fontWeight: FontWeight.w500,
+            child: Obx(() {
+              // Get updated order data from controller
+              final ordersData = orderTrackController.order['orders'] ?? [];
+              final currentOrder = ordersData.firstWhere(
+                (o) => o['id'] == orderId,
+                orElse: () => order,
+              );
+
+              final int status = currentOrder['status'] ?? 0;
+              final String statusText = _getStatusText(status);
+
+              return SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 🔹 Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Order #${currentOrder['id']?.toString() ?? ''}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
+                            color: _getStatusColor(status).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Pickup Date & Time',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
-                              const SizedBox(height: 4),
-                              Text(
-                                order['pickup_datetime'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          child: Text(
+                            statusText,
+                            style: TextStyle(
+                              color: _getStatusColor(status),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Delivery Date & Time',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
-                              const SizedBox(height: 4),
-                              Text(
-                                order['delivery_datetime'],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // 🔹 Pickup Info
-                  const SizedBox(height: 16),
-                  // 🔹 Items
-                  const Text('Items',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  ...List.generate(order['items']?.length ?? 0, (i) {
-                    final item = order['items'][i];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item['product']?['name']?.toString() ?? '',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              Text(item['service_name']?.toString() ?? '',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text('${item['quantity']} item'),
-                              Text(
-                                '₹${item['price']}',
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 16),
-                  Divider(color: Colors.grey.shade300),
-
-                  // 🔹 Price Summary
-                  _priceRow('Subtotal',
-                      '₹${(order['amount'] - 2)?.toString() ?? '0'}'),
-                  _priceRow('Delivery Fee', '₹2'),
-                  _priceRow('Total', '₹${order['amount']?.toString() ?? '0'}',
-                      isBold: true, isTotal: true),
-
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        backgroundColor: AppTheme.primaryColor,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      icon: const Icon(Icons.location_on, color: Colors.white),
-                      label: const Text('Track Order',
-                          style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        Get.toNamed(AppRoutes.TRACKING, arguments: {
-                          'order': order,
-                        });
-                      },
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ),
+                    const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Pickup Date & Time',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 12)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  currentOrder['pickup_datetime'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Delivery Date & Time',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 12)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  currentOrder['delivery_datetime'],
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Items',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    ...List.generate(currentOrder['items']?.length ?? 0, (i) {
+                      final item = currentOrder['items'][i];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['product']?['name']?.toString() ?? '',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  item['service_name']?.toString() ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('${item['quantity']} item'),
+                                Text(
+                                  '₹${item['price']}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 16),
+                    Divider(color: Colors.grey.shade300),
+
+                    // 🔹 Price Summary
+                    _priceRow(
+                      'Subtotal',
+                      '₹${(currentOrder['amount'] - 2)?.toString() ?? '0'}',
+                    ),
+                    _priceRow('Delivery Fee', '₹5'),
+                    _priceRow(
+                      'Total',
+                      '₹${currentOrder['amount']?.toString() ?? '0'}',
+                      isBold: true,
+                      isTotal: true,
+                    ),
+
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          backgroundColor: AppTheme.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        icon:
+                            const Icon(Icons.location_on, color: Colors.white),
+                        label: const Text(
+                          'Track Order',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          Get.toNamed(
+                            AppRoutes.TRACKING,
+                            arguments: {'order': currentOrder},
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           );
         },
       );
@@ -313,8 +350,12 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
   );
 }
 
-Widget _priceRow(String title, String price,
-    {bool isBold = false, bool isTotal = false}) {
+Widget _priceRow(
+  String title,
+  String price, {
+  bool isBold = false,
+  bool isTotal = false,
+}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
     child: Row(

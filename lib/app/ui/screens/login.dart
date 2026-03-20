@@ -14,6 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController phoneController = TextEditingController();
   final LoginController loginController = Get.put(LoginController());
+  final FocusNode phoneFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -24,6 +25,18 @@ class _LoginPageState extends State<LoginPage> {
       loginController.isPhoneValid.value =
           phoneController.text.trim().length == 10;
     });
+
+    // Auto-focus on phone field to open keyboard
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      phoneFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    phoneFocusNode.dispose();
+    phoneController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,7 +63,9 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 40),
+                        horizontal: 24,
+                        vertical: 40,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -58,8 +73,9 @@ class _LoginPageState extends State<LoginPage> {
                           const CircleAvatar(
                             backgroundColor: Colors.white,
                             radius: 28,
-                            backgroundImage:
-                                AssetImage('assets/icons/app_logo.png'),
+                            backgroundImage: AssetImage(
+                              'assets/icons/app_logo.png',
+                            ),
                           ),
                           const SizedBox(height: 30),
                           const Text(
@@ -79,29 +95,36 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(30),
                             ),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             child: Row(
                               children: [
                                 const Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
                                   child: Text(
                                     '+91',
                                     style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                                 const VerticalDivider(color: Colors.black54),
                                 Expanded(
                                   child: TextField(
                                     controller: phoneController,
+                                    focusNode: phoneFocusNode,
+                                    autofocus: true,
                                     keyboardType: TextInputType.phone,
                                     inputFormatters: [
                                       LengthLimitingTextInputFormatter(10),
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
                                     decoration: const InputDecoration(
+                                      fillColor: Colors.white,
                                       hintText: 'Enter Phone Number',
                                       border: InputBorder.none,
                                     ),
@@ -127,15 +150,16 @@ class _LoginPageState extends State<LoginPage> {
                                       : null,
                               child: Container(
                                 width: double.infinity,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 decoration: BoxDecoration(
                                   gradient: isEnabled
                                       ? const LinearGradient(
                                           colors: [
                                             Color.fromRGBO(89, 168, 146, 1),
                                             Color.fromRGBO(60, 113, 98, 1),
-                                            Color.fromRGBO(35, 66, 57, 1)
+                                            Color.fromRGBO(35, 66, 57, 1),
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
@@ -154,7 +178,8 @@ class _LoginPageState extends State<LoginPage> {
                                             strokeWidth: 2,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                    Colors.white),
+                                              Colors.white,
+                                            ),
                                           ),
                                         )
                                       : const Text(

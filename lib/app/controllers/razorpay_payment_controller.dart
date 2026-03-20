@@ -101,6 +101,7 @@ class RazorpayPaymentController extends GetxController {
   void Function(int code, String message)? _pendingFailure;
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    print("my success callback is LLLLLLl $response");
     isPaying.value = false;
     lastPaymentId.value = response.paymentId;
     lastOrderId.value = response.orderId;

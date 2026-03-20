@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,19 +14,33 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final controller = Get.find<ProfileController>();
 
-  late TextEditingController nameController;
-  late TextEditingController phoneController;
-  late TextEditingController emailController;
-
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   bool isButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
 
-    nameController = TextEditingController(text: controller.name.value);
-    phoneController = TextEditingController(text: controller.phone.value);
-    emailController = TextEditingController(text: controller.email.value);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Use SharedPreferences instead of GetStorage
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      print("hjhjhjhjhjhjhjhjhjhjjhh $userId");
+
+      if (userId != null) {
+        await controller.fetchUserProfile(userId);
+        nameController.text = controller.name.value;
+        phoneController.text = controller.phone.value;
+        emailController.text = controller.email.value;
+      }
+    });
+
+    // nameController = TextEditingController(text: controller.name.value);
+    // phoneController = TextEditingController(text: controller.phone.value);
+    // emailController = TextEditingController(text: controller.email.value);
 
     nameController.addListener(_onFieldChanged);
     phoneController.addListener(_onFieldChanged);
@@ -70,8 +85,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Profile",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Profile",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -83,18 +100,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 45,
-                  backgroundImage:
-                      AssetImage("assets/icons/setting_profile.png"),
+                  backgroundImage: AssetImage(
+                    "assets/icons/setting_profile.png",
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             _buildTextField("Name*", nameController),
-            _buildTextField("Mobile Number*", phoneController,
-                keyboardType: TextInputType.phone),
-            _buildTextField("Email Address*", emailController,
-                hint: "Enter your email",
-                keyboardType: TextInputType.emailAddress),
+            _buildTextField(
+              "Mobile Number*",
+              phoneController,
+              keyboardType: TextInputType.phone,
+            ),
+            _buildTextField(
+              "Email Address*",
+              emailController,
+              hint: "Enter your email",
+              keyboardType: TextInputType.emailAddress,
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -102,8 +126,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ElevatedButton(
                 onPressed: isButtonEnabled
                     ? () async {
-                        final phoneNumber =
-                            int.tryParse(phoneController.text.trim());
+                        final phoneNumber = int.tryParse(
+                          phoneController.text.trim(),
+                        );
                         if (phoneNumber == null) {
                           Get.snackbar(
                             'Invalid number',
@@ -126,8 +151,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           'Success',
                           'Profile Updated',
                           snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor:
-                              const Color.fromARGB(147, 76, 175, 79),
+                          backgroundColor: const Color.fromARGB(
+                            147,
+                            76,
+                            175,
+                            79,
+                          ),
                           colorText: Colors.white,
                           duration: const Duration(seconds: 2),
                         );
@@ -145,27 +174,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text("Submit",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  "Submit",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             const SizedBox(height: 40),
             const Divider(height: 24),
             GestureDetector(
               onTap: () {
-                Get.snackbar("Delete Account", "Please contact support to delete your account.",
-                    snackPosition: SnackPosition.BOTTOM);
+                Get.snackbar(
+                  "Delete Account",
+                  "Please contact support to delete your account.",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
               },
               child: Column(
                 children: [
                   const Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("Delete Account",
-                        style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20)),
+                    child: Text(
+                      "Delete Account",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   const Align(
@@ -184,21 +220,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {String? hint, TextInputType? keyboardType}) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    String? hint,
+    TextInputType? keyboardType,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
             filled: true,
             fillColor: const Color(0xFFE2E8F0),
             border: OutlineInputBorder(

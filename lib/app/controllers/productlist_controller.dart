@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ProductListController extends GetxController {
   final supabase = Supabase.instance.client;
@@ -25,24 +27,26 @@ class ProductListController extends GetxController {
     loadCategoriesFromSupabase();
     preloadServiceNames();
     fetchActiveOffer();
+    _loadCartFromStorage();
   }
 
   void setService(String service) {
     currentService.value = service;
   }
 
-  RxMap<String, dynamic> activeOffer = <String, dynamic>{}.obs;
+  RxList activeOffer = [].obs;
 
+  var activeOfferselected = <String, dynamic>{}.obs;
   Future<void> fetchActiveOffer() async {
     final response = await Supabase.instance.client
         .from('offers')
         .select()
-        .eq('active', true)
-        .limit(1)
-        .single();
-    print("Fetched active offer: $response");
+        .eq('active', true);
+
+    print("Fetched active offers: $response");
+
     if (response != null) {
-      activeOffer.value = response;
+      activeOffer.value = List<Map<String, dynamic>>.from(response);
     }
   }
 
@@ -55,8 +59,9 @@ class ProductListController extends GetxController {
           .select('*, item_id')
           .eq('service_id', serviceId);
 
-      final List<Map<String, dynamic>> prices =
-          List<Map<String, dynamic>>.from(pricesResponse);
+      final List<Map<String, dynamic>> prices = List<Map<String, dynamic>>.from(
+        pricesResponse,
+      );
 
       if (prices.isEmpty) {
         products.value = [];
@@ -69,8 +74,9 @@ class ProductListController extends GetxController {
       final itemsResponse =
           await supabase.from('items').select('*').inFilter('id', itemIds);
 
-      final List<Map<String, dynamic>> items =
-          List<Map<String, dynamic>>.from(itemsResponse);
+      final List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(
+        itemsResponse,
+      );
 
       final enrichedProducts = items.map((item) {
         final itemId = item['id'];
@@ -111,9 +117,11 @@ class ProductListController extends GetxController {
     filteredProducts.value = categoryId == null
         ? originalList
         : originalList
-            .where((product) =>
-                product['category_id'] == categoryId &&
-                product['service_id'] == serviceId)
+            .where(
+              (product) =>
+                  product['category_id'] == categoryId &&
+                  product['service_id'] == serviceId,
+            )
             .toList();
   }
 
@@ -126,6 +134,7 @@ class ProductListController extends GetxController {
 
     // ✅ Store full product details so cart works after service switch
     cartProductDetails[key] = product;
+    _saveCartToStorage();
   }
 
   void removeFromCart(Map<String, dynamic> product) {
@@ -140,6 +149,7 @@ class ProductListController extends GetxController {
         cartQuantities.remove(key);
         cartProductDetails.remove(key); // remove details too
       }
+      _saveCartToStorage();
     }
   }
 
@@ -155,7 +165,7 @@ class ProductListController extends GetxController {
           'product': product,
           'quantity': quantity,
           'service': service,
-          'service_name': serviceName
+          'service_name': serviceName,
         });
       }
     });
@@ -191,6 +201,7 @@ class ProductListController extends GetxController {
     final key = '${serviceId}_$productId';
     if (cartQuantities.containsKey(key)) {
       cartQuantities[key] = (cartQuantities[key] ?? 1) + 1;
+      _saveCartToStorage();
     }
   }
 
@@ -198,7 +209,57 @@ class ProductListController extends GetxController {
     final key = '${serviceId}_$productId';
     if (cartQuantities.containsKey(key) && cartQuantities[key]! > 1) {
       cartQuantities[key] = cartQuantities[key]! - 1;
+      _saveCartToStorage();
     }
+  }
+
+  // Cart persistence methods
+  Future<void> _saveCartToStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Save cart quantities
+      final quantitiesJson = jsonEncode(cartQuantities);
+      await prefs.setString('cart_quantities', quantitiesJson);
+
+      // Save cart product details
+      final detailsJson = jsonEncode(cartProductDetails);
+      await prefs.setString('cart_product_details', detailsJson);
+    } catch (e) {
+      print('Error saving cart to storage: $e');
+    }
+  }
+
+  Future<void> _loadCartFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Load cart quantities
+      final quantitiesJson = prefs.getString('cart_quantities');
+      if (quantitiesJson != null) {
+        final decoded = jsonDecode(quantitiesJson) as Map<String, dynamic>;
+        cartQuantities.value =
+            decoded.map((key, value) => MapEntry(key, value as int));
+      }
+
+      // Load cart product details
+      final detailsJson = prefs.getString('cart_product_details');
+      if (detailsJson != null) {
+        final decoded = jsonDecode(detailsJson) as Map<String, dynamic>;
+        cartProductDetails.value = decoded
+            .map((key, value) => MapEntry(key, value as Map<String, dynamic>));
+      }
+    } catch (e) {
+      print('Error loading cart from storage: $e');
+    }
+  }
+
+  Future<void> clearCart() async {
+    cartQuantities.clear();
+    cartProductDetails.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('cart_quantities');
+    await prefs.remove('cart_product_details');
   }
 }
 

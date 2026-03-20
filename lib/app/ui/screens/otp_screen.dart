@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,8 @@ class _OtpScreenState extends State<OtpScreen> {
   late String phoneNumber;
   final LoginController loginController = Get.put(LoginController());
   final TextEditingController _otpController = TextEditingController();
+  final StreamController<ErrorAnimationType> _errorController =
+      StreamController<ErrorAnimationType>();
 
   @override
   void initState() {
@@ -44,10 +47,60 @@ class _OtpScreenState extends State<OtpScreen> {
     });
   }
 
+  void _verifyOtp() {
+    final otp = _otpController.text.trim();
+    if (otp.isEmpty) {
+      Get.snackbar(
+        '⚠️ OTP Required',
+        'Please enter the OTP sent to your phone.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFF57C00),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+      );
+      return;
+    }
+    if (otp.length < 6) {
+      _errorController.add(ErrorAnimationType.shake);
+      Get.snackbar(
+        '⚠️ Incomplete OTP',
+        'Please enter all 6 digits of the OTP.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFF57C00),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+      );
+      return;
+    }
+    _timer?.cancel();
+    loginController.verifyOtp(
+      phoneNumber,
+      otp,
+      onWrongOtp: () {
+        if (mounted) {
+          _errorController.add(ErrorAnimationType.shake);
+          _otpController.clear();
+          _startTimer();
+        }
+      },
+    );
+  }
+
   @override
   void dispose() {
-    _otpController.dispose();
     _timer?.cancel();
+    _errorController.close();
+    try {
+      _otpController.dispose();
+    } catch (e) {
+      // Controller already disposed
+    }
     super.dispose();
   }
 
@@ -78,13 +131,17 @@ class _OtpScreenState extends State<OtpScreen> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 20),
+                              horizontal: 24,
+                              vertical: 20,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.arrow_back,
-                                      color: Colors.white),
+                                  icon: const Icon(
+                                    Icons.arrow_back,
+                                    color: Colors.white,
+                                  ),
                                   onPressed: () => Get.back(),
                                 ),
                                 const SizedBox(height: 40),
@@ -116,6 +173,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                   keyboardType: TextInputType.number,
                                   cursorColor: AppTheme.primaryColor,
                                   animationType: AnimationType.fade,
+                                  errorAnimationController: _errorController,
+                                  errorAnimationDuration: 300,
                                   pinTheme: PinTheme(
                                     shape: PinCodeFieldShape.box,
                                     borderRadius: BorderRadius.circular(8),
@@ -127,22 +186,12 @@ class _OtpScreenState extends State<OtpScreen> {
                                     activeColor: Colors.blue,
                                     selectedColor: Colors.blue,
                                     inactiveColor: Colors.grey,
+                                    errorBorderColor: Colors.red,
                                   ),
                                   enableActiveFill: true,
                                   backgroundColor: Colors.transparent,
-                                  onChanged: (value) {
-                                    if (value.length == 6) {
-                                      loginController.verifyOtp(
-                                        phoneNumber,
-                                        value,
-                                        onWrongOtp: () {
-                                          if (mounted) {
-                                            _otpController.clear();
-                                          }
-                                        },
-                                      );
-                                    }
-                                  },
+                                  onChanged: (value) {},
+                                  onCompleted: (value) => _verifyOtp(),
                                 ),
 
                                 const SizedBox(height: 20),
@@ -154,30 +203,41 @@ class _OtpScreenState extends State<OtpScreen> {
                                       Text(
                                         '00:${_seconds.toString().padLeft(2, '0')}',
                                         style: const TextStyle(
-                                            color: Colors.white, fontSize: 25),
+                                          color: Colors.white,
+                                          fontSize: 25,
+                                        ),
                                       ),
                                       const SizedBox(height: 14),
                                       const Text(
                                         "Didn't get it?",
                                         style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                       const SizedBox(height: 18),
                                       TextButton(
                                         onPressed: _seconds == 0
                                             ? () {
-                                                loginController
-                                                    .sendOtp(phoneNumber);
+                                                loginController.sendOtp(
+                                                  phoneNumber,
+                                                );
                                                 _startTimer();
                                               }
                                             : null,
                                         child: const Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.sms_outlined,
-                                                color: Color.fromRGBO(
-                                                    89, 168, 146, 1),
-                                                size: 20),
+                                            Icon(
+                                              Icons.sms_outlined,
+                                              color: Color.fromRGBO(
+                                                89,
+                                                168,
+                                                146,
+                                                1,
+                                              ),
+                                              size: 20,
+                                            ),
                                             SizedBox(width: 6),
                                             Text(
                                               'Send OTP(SMS)',
@@ -218,23 +278,27 @@ class _OtpScreenState extends State<OtpScreen> {
                             textAlign: TextAlign.center,
                             text: const TextSpan(
                               text: 'By continuing, you agree to our \n',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
                               children: [
                                 TextSpan(
                                   text: 'Terms of Use',
                                   style: TextStyle(
-                                      color: Color.fromRGBO(89, 168, 146, 1),
-                                      decoration: TextDecoration.underline,
-                                      fontSize: 14),
+                                    color: Color.fromRGBO(89, 168, 146, 1),
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 14,
+                                  ),
                                 ),
                                 TextSpan(text: ' & '),
                                 TextSpan(
                                   text: 'Privacy Policy',
                                   style: TextStyle(
-                                      color: Color.fromRGBO(89, 168, 146, 1),
-                                      decoration: TextDecoration.underline,
-                                      fontSize: 14),
+                                    color: Color.fromRGBO(89, 168, 146, 1),
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ],
                             ),
@@ -253,9 +317,7 @@ class _OtpScreenState extends State<OtpScreen> {
             Container(
               color: Colors.black54,
               child: const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                ),
+                child: CircularProgressIndicator(color: Colors.white),
               ),
             ),
         ],
