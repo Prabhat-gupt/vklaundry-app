@@ -63,7 +63,7 @@ class RazorpayPaymentController extends GetxController {
     final int amountInPaise = (amount * 100).round();
 
     final options = {
-      'key': 'rzp_test_R5aav0MP84trbb',
+      'key': razorpayKeyId,
       'amount': amountInPaise,
       'currency': 'INR',
       if (orderId != null) 'order_id': orderId,

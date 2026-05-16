@@ -140,111 +140,166 @@ class _ProductListScreenState extends State<ProductListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
-      appBar: _buildAnimatedAppBar(),
+      backgroundColor: const Color(0xFFF0F2F8),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAnimatedCategories(),
-              const SizedBox(height: 16),
-              _buildAnimatedProductGrid(),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAnimatedHeader(context),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: _buildAnimatedCategories(),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: _buildAnimatedProductGrid(),
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: _buildAnimatedCartButton(),
     );
   }
 
-  PreferredSizeWidget _buildAnimatedAppBar() {
-    return AppBar(
-      elevation: 1,
-      shadowColor: Colors.grey,
-      backgroundColor: Colors.white,
-      leading: SlideTransition(
-        position: _headerSlideAnimation,
-        child: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.arrow_back,
-              color: AppTheme.primaryColor,
-              size: 20,
-            ),
-          ),
-          onPressed: () => Navigator.of(context).maybePop(),
+  Widget _buildAnimatedHeader(BuildContext context) {
+    return SlideTransition(
+      position: _headerSlideAnimation,
+      child: Container(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 14,
+          bottom: 22,
+          left: 16,
+          right: 16,
         ),
-      ),
-      title: SlideTransition(
-        position: _headerSlideAnimation,
-        child: Column(
-          children: [
-            Text(
-              serviceName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-                fontSize: 18,
-              ),
-            ),
-            Text(
-              'Choose your items',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppTheme.primaryColor.withOpacity(0.7),
-                fontWeight: FontWeight.normal,
-              ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
+          ),
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(28),
+            bottomRight: Radius.circular(28),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x553D52A0),
+              blurRadius: 16,
+              offset: Offset(0, 8),
             ),
           ],
         ),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.of(context).maybePop(),
+              child: Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.25), width: 1),
+                ),
+                child: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white, size: 18),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    serviceName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Choose your items',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white60,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Cart count badge in header
+            Obx(() {
+              final count = controller.getTotalCartItems();
+              if (count == 0) return const SizedBox.shrink();
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.3), width: 1),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.shopping_cart_rounded,
+                        color: Colors.white, size: 16),
+                    const SizedBox(width: 5),
+                    Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
       ),
-      centerTitle: true,
     );
   }
 
   Widget _buildAnimatedCategories() {
-    return SlideTransition(
-      position: _headerSlideAnimation,
-      child: ScaleTransition(
-        scale: _categoryScaleAnimation,
-        child: Container(
-          height: 50,
-          child: Obx(
-                () => Skeletonizer(
-              enabled: controller.isLoading.value,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: controller.categories.isEmpty
-                      ? List.generate(4, (index) => _buildCategorySkeleton())
-                      : controller.categories.map((category) {
-                    final categoryId = category['id'];
-                    final isSelected =
-                        controller.selectedCategoryId.value == categoryId;
-                    return _EnhancedCategoryChip(
-                      label: category['name'].toString(),
-                      iconUrl: category['image_url'],
-                      isSelected: isSelected,
-                      onTap: () {
-                        if (isSelected) {
-                          controller.filterProductsByCategory(null, null);
-                        } else {
-                          controller.filterProductsByCategory(
-                              categoryId, serviceId);
-                        }
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
+    return ScaleTransition(
+      scale: _categoryScaleAnimation,
+      child: SizedBox(
+        height: 44,
+        child: Obx(
+          () => Skeletonizer(
+            enabled: controller.isLoading.value,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: controller.categories.isEmpty
+                  ? List.generate(4, (index) => _buildCategorySkeleton())
+                  : controller.categories.map((category) {
+                      final categoryId = category['id'];
+                      final isSelected =
+                          controller.selectedCategoryId.value == categoryId;
+                      return _EnhancedCategoryChip(
+                        label: category['name'].toString(),
+                        iconUrl: category['image_url'],
+                        isSelected: isSelected,
+                        onTap: () {
+                          if (isSelected) {
+                            controller.filterProductsByCategory(null, null);
+                          } else {
+                            controller.filterProductsByCategory(
+                                categoryId, serviceId);
+                          }
+                        },
+                      );
+                    }).toList(),
             ),
           ),
         ),
@@ -253,53 +308,49 @@ class _ProductListScreenState extends State<ProductListScreen>
   }
 
   Widget _buildAnimatedProductGrid() {
-    return Expanded(
-      child: Obx(() {
-        if (!controller.isLoading.value && controller.filteredProducts.isEmpty) {
-          return _buildEmptyState();
-        }
+    return Obx(() {
+      if (!controller.isLoading.value && controller.filteredProducts.isEmpty) {
+        return _buildEmptyState();
+      }
 
-        return AnimatedBuilder(
-          animation: _gridController,
-          builder: (context, child) {
-            return Skeletonizer(
-              enabled: controller.isLoading.value,
-              child: GridView.builder(
-                itemCount: controller.isLoading.value
-                    ? 6
-                    : controller.filteredProducts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.46,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 2,
-                ),
-                itemBuilder: (context, index) {
-                  if (controller.isLoading.value) {
-                    return _buildProductSkeleton();
-                  }
-
-                  final item = controller.filteredProducts[index];
-                  final serviceId =
-                      item['service_id'] ?? controller.currentService.value;
-                  final productId = item['id'];
-                  final key = '${serviceId}_$productId';
-
-                  return _EnhancedProductCard(
-                    item: item,
-                    key: ValueKey(key),
-                    cartKey: key,
-                    index: index,
-                    controller: controller,
-                    gridAnimation: _gridController,
-                  );
-                },
+      return AnimatedBuilder(
+        animation: _gridController,
+        builder: (context, child) {
+          return Skeletonizer(
+            enabled: controller.isLoading.value,
+            child: GridView.builder(
+              itemCount: controller.isLoading.value
+                  ? 6
+                  : controller.filteredProducts.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.66,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
               ),
-            );
-          },
-        );
-      }),
-    );
+              itemBuilder: (context, index) {
+                if (controller.isLoading.value) {
+                  return _buildProductSkeleton();
+                }
+
+                final item = controller.filteredProducts[index];
+                final key =
+                    '${item['service_id'] ?? controller.currentService.value}_${item['id']}';
+
+                return _EnhancedProductCard(
+                  item: item,
+                  key: ValueKey(key),
+                  cartKey: key,
+                  index: index,
+                  controller: controller,
+                  gridAnimation: _gridController,
+                );
+              },
+            ),
+          );
+        },
+      );
+    });
   }
 
   Widget _buildEmptyState() {
@@ -351,90 +402,88 @@ class _ProductListScreenState extends State<ProductListScreen>
   Widget _buildAnimatedCartButton() {
     return Obx(() => controller.getTotalCartItems() > 0
         ? SlideTransition(
-      position: _cartSlideAnimation,
-      child: Container(
-        margin: const EdgeInsets.all(16),
-        height: 60,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.indigo.shade600, Colors.indigo.shade700],
-          ),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.indigo.withOpacity(0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              final selectedItems = controller.getSelectedCartItems();
-              Navigator.pushNamed(
-                context,
-                '/checkout_page',
-                arguments: {
-                  'selectedItems': selectedItems,
-                  'serviceName': serviceName,
-                },
-              );
-            },
-            borderRadius: BorderRadius.circular(30),
+            position: _cartSlideAnimation,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.white24,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.shopping_cart,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    "View Cart",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      controller.getTotalCartItems().toString(),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.indigo.shade700,
-                      ),
-                    ),
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF4B5EAA), Color(0xFF1A2340)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF3D52A0).withOpacity(0.5),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    final selectedItems = controller.getSelectedCartItems();
+                    Navigator.pushNamed(
+                      context,
+                      '/checkout_page',
+                      arguments: {
+                        'selectedItems': selectedItems,
+                        'serviceName': serviceName,
+                      },
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.shopping_cart_checkout_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        const Text(
+                          "Proceed to Checkout",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            controller.getTotalCartItems().toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    )
+          )
         : const SizedBox.shrink());
   }
 
@@ -482,7 +531,6 @@ class _EnhancedCategoryChip extends StatefulWidget {
 
 class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
     with SingleTickerProviderStateMixin {
-  bool _isHovering = false;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -508,78 +556,81 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 10.0),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovering = true),
-        onExit: (_) => setState(() => _isHovering = false),
-        child: GestureDetector(
-          onTapDown: (_) => _animationController.forward(),
-          onTapUp: (_) => _animationController.reverse(),
-          onTapCancel: () => _animationController.reverse(),
-          onTap: widget.onTap,
-          child: AnimatedBuilder(
-            animation: _scaleAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _scaleAnimation.value,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: widget.isSelected
-                        ? LinearGradient(
-                      colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8)],
-                    )
-                        : null,
-                    color: !widget.isSelected ? Colors.white : null,
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: widget.isSelected
-                          ? AppTheme.primaryColor
-                          : Colors.grey.shade300,
-                      width: 2,
-                    ),
-                    boxShadow: widget.isSelected || _isHovering
-                        ? [
-                      BoxShadow(
-                        color: AppTheme.primaryColor.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                        : [],
+      padding: const EdgeInsets.only(right: 8.0),
+      child: GestureDetector(
+        onTapDown: (_) => _animationController.forward(),
+        onTapUp: (_) => _animationController.reverse(),
+        onTapCancel: () => _animationController.reverse(),
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: widget.isSelected
+                      ? const LinearGradient(
+                          colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
+                        )
+                      : null,
+                  color: !widget.isSelected ? Colors.white : null,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: widget.isSelected
+                        ? const Color(0xFF3D52A0)
+                        : Colors.grey.shade300,
+                    width: 1.5,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty)
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: NetworkImage(widget.iconUrl!),
-                              fit: BoxFit.cover,
-                            ),
+                  boxShadow: widget.isSelected
+                      ? [
+                          const BoxShadow(
+                            color: Color(0x443D52A0),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
                           ),
-                        ),
-                      if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty)
-                        const SizedBox(width: 8),
-                      Text(
-                        widget.label,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: widget.isSelected ? Colors.white : AppTheme.primaryColor,
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty)
+                      ClipOval(
+                        child: Image.network(
+                          widget.iconUrl!,
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                         ),
                       ),
-                    ],
-                  ),
+                    if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty)
+                      const SizedBox(width: 7),
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: widget.isSelected
+                            ? Colors.white
+                            : const Color(0xFF374151),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -609,7 +660,6 @@ class _EnhancedProductCard extends StatefulWidget {
 
 class _EnhancedProductCardState extends State<_EnhancedProductCard>
     with SingleTickerProviderStateMixin {
-  bool _isHovering = false;
   late AnimationController _hoverController;
   late Animation<double> _hoverAnimation;
   late Animation<double> _scaleAnimation;
@@ -660,53 +710,47 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               begin: const Offset(0, 0.5),
               end: Offset.zero,
             ).animate(animationValue),
-            child: MouseRegion(
-              onEnter: (_) {
-                setState(() => _isHovering = true);
-                _hoverController.forward();
-              },
-              onExit: (_) {
-                setState(() => _isHovering = false);
-                _hoverController.reverse();
-              },
+            child: GestureDetector(
+              onTapDown: (_) => _hoverController.forward(),
+              onTapUp: (_) => _hoverController.reverse(),
+              onTapCancel: () => _hoverController.reverse(),
               child: AnimatedBuilder(
                 animation: _hoverController,
                 builder: (context, child) {
                   return Transform.scale(
                     scale: _scaleAnimation.value,
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 18),
+                      margin: const EdgeInsets.only(bottom: 0),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08 + (_hoverAnimation.value * 0.05)),
-                            blurRadius: 6 + (_hoverAnimation.value * 10),
-                            offset: Offset(0, 2 + (_hoverAnimation.value * 4)),
+                            color: Colors.black
+                                .withOpacity(0.07 + (_hoverAnimation.value * 0.04)),
+                            blurRadius: 8 + (_hoverAnimation.value * 8),
+                            offset: Offset(0, 3 + (_hoverAnimation.value * 4)),
                           ),
-                          if (_isHovering)
-                            BoxShadow(
-                              color: AppTheme.primaryColor.withOpacity(0.2),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
                         ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildProductImage(),
-                            const SizedBox(height: 12),
-                            _buildProductInfo(),
-                            const SizedBox(height: 12),
-                            _buildRatingRow(),
-                            const SizedBox(height: 16),
-                            _buildActionButton(),
-                          ],
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildProductImage(),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildProductInfo(),
+                                const SizedBox(height: 6),
+                                _buildRatingRow(),
+                                const SizedBox(height: 8),
+                                _buildActionButton(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -720,42 +764,50 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
   }
 
   Widget _buildProductImage() {
-    return Container(
-      height: 120,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor.withOpacity(0.05),
-            AppTheme.primaryColor.withOpacity(0.02),
-          ],
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          widget.item['image'] ?? '',
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.primaryColor.withOpacity(0.1),
-                  AppTheme.primaryColor.withOpacity(0.05),
-                ],
+    final discount = widget.item['discount']?.toString() ?? '';
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          child: SizedBox(
+            height: 115,
+            width: double.infinity,
+            child: Image.network(
+              widget.item['image'] ?? '',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: const Color(0xFFEEF0F8),
+                child: const Icon(
+                  Icons.local_laundry_service_rounded,
+                  size: 44,
+                  color: Color(0xFF3D52A0),
+                ),
               ),
-            ),
-            child: Icon(
-              Icons.local_laundry_service,
-              size: 40,
-              color: AppTheme.primaryColor,
             ),
           ),
         ),
-      ),
+        // Discount badge
+        if (discount.isNotEmpty)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.green.shade600,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                discount,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -767,49 +819,35 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
           widget.item['name'] ?? '',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: Color(0xFF1F2937),
+            fontSize: 14,
+            color: Color(0xFF1A2340),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
-        const Text(
-          "All shirts (eg. cotton, denim)",
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 5),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              "\u20B9${widget.item['oldPrice']}",
-              style: const TextStyle(
-                decoration: TextDecoration.lineThrough,
-                color: Colors.grey,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
               "\u20B9${widget.item['price']}",
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-                fontSize: 16,
+                color: Color(0xFF3D52A0),
+                fontSize: 17,
               ),
             ),
+            const SizedBox(width: 5),
+            if ((widget.item['oldPrice']?.toString() ?? '').isNotEmpty)
+              Text(
+                "\u20B9${widget.item['oldPrice']}",
+                style: const TextStyle(
+                  decoration: TextDecoration.lineThrough,
+                  color: Colors.grey,
+                  fontSize: 11,
+                ),
+              ),
           ],
-        ),
-        Text(
-          widget.item['discount'] ?? '',
-          style: const TextStyle(
-            color: Colors.green,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
         ),
       ],
     );

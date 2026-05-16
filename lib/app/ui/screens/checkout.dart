@@ -32,8 +32,11 @@ class _CheckoutPageState extends State<CheckoutPage>
   String? paymentMethod;
   DateTime? selectedPickupDate;
   String? selectedPickupSlot;
-  // Removed GetStorage - using SharedPreferences instead
-  final List<String> pickupSlots = ["7AM to 10AM", "5PM to 8PM"];
+  List<String> dynamicPickupSlots = [];
+  List<DateTime> availableDates = [];
+  bool isLoadingSlots = false;
+  bool isLoadingDates = false;
+  List<Map<String, dynamic>> _allAvailability = [];
 
   late RazorpayPaymentController razorpayController;
   int? hasSubscription;
@@ -97,6 +100,10 @@ class _CheckoutPageState extends State<CheckoutPage>
       print("has subscrition is ::::::::: $hasSubscription");
 
       _startAnimationSequence();
+      
+      _startAnimationSequence();
+      
+      _calculateAvailableDates();
     });
   }
 
@@ -205,6 +212,133 @@ class _CheckoutPageState extends State<CheckoutPage>
     _billController.dispose();
     _bottomBarController.dispose();
     super.dispose();
+  }
+
+  Future<void> _calculateAvailableDates() async {
+    if (!mounted) return;
+    setState(() => isLoadingDates = true);
+
+    try {
+      final response = await controllersHome.supabase
+          .from('availability')
+          .select()
+          .eq('is_active', true);
+
+      _allAvailability = List<Map<String, dynamic>>.from(response);
+      final List<DateTime> dates = [];
+      final DateTime now = DateTime.now();
+
+      for (int i = 0; i < 7; i++) {
+        DateTime date = now.add(Duration(days: i));
+        String dayName = DateFormat('EEEE').format(date);
+        bool isToday = i == 0;
+
+        final daySlots = _allAvailability.where((row) => row['day_of_week'] == dayName).toList();
+        
+        bool hasValidSlots = false;
+        if (isToday) {
+          for (var row in daySlots) {
+            final timeParts = row['start_time'].split(':');
+            final slotHour = int.parse(timeParts[0]);
+            final slotMinute = int.parse(timeParts[1]);
+            DateTime slotStartTime = DateTime(now.year, now.month, now.day, slotHour, slotMinute);
+            if (slotStartTime.isAfter(now)) {
+              hasValidSlots = true;
+              break;
+            }
+          }
+        } else {
+          hasValidSlots = daySlots.isNotEmpty;
+        }
+
+        if (hasValidSlots) {
+          dates.add(date);
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          availableDates = dates;
+          if (availableDates.isNotEmpty) {
+            selectedPickupDate = availableDates.first;
+            _updateSlotsForSelectedDate();
+          }
+        });
+      }
+    } catch (e) {
+      print("Error calculating available dates: $e");
+    } finally {
+      if (mounted) setState(() => isLoadingDates = false);
+    }
+  }
+
+  void _updateSlotsForSelectedDate() {
+    if (selectedPickupDate == null) return;
+    
+    String dayName = DateFormat('EEEE').format(selectedPickupDate!);
+    final daySlots = _allAvailability
+        .where((row) => row['day_of_week'] == dayName)
+        .toList();
+    
+    // Sort by start_time
+    daySlots.sort((a, b) => (a['start_time'] as String).compareTo(b['start_time'] as String));
+
+    List<String> slots = [];
+    DateTime now = DateTime.now();
+    bool isToday = DateUtils.isSameDay(selectedPickupDate!, now);
+
+    for (var row in daySlots) {
+      String startTimeStr = row['start_time'];
+      String endTimeStr = row['end_time'];
+      
+      if (isToday) {
+         final timeParts = startTimeStr.split(':');
+         final slotHour = int.parse(timeParts[0]);
+         final slotMinute = int.parse(timeParts[1]);
+         DateTime slotStartTime = DateTime(now.year, now.month, now.day, slotHour, slotMinute);
+         
+         if (slotStartTime.isAfter(now)) {
+           slots.add(_formatSlot(startTimeStr, endTimeStr));
+         }
+      } else {
+        slots.add(_formatSlot(startTimeStr, endTimeStr));
+      }
+    }
+
+    setState(() {
+      dynamicPickupSlots = slots;
+      if (selectedPickupSlot != null && !dynamicPickupSlots.contains(selectedPickupSlot)) {
+        selectedPickupSlot = null;
+      }
+    });
+  }
+
+  Future<void> _fetchSlotsForDate(DateTime date) async {
+     // This is now handled by _updateSlotsForSelectedDate after _allAvailability is loaded
+     _updateSlotsForSelectedDate();
+  }
+
+  String _formatSlot(String start, String end) {
+    try {
+      final startParts = start.split(':');
+      final endParts = end.split(':');
+      
+      final startTime = TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1]));
+      final endTime = TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1]));
+      
+      final startStr = _formatTimeOfDay(startTime);
+      final endStr = _formatTimeOfDay(endTime);
+      
+      return "$startStr to $endStr";
+    } catch (e) {
+      return "$start to $end";
+    }
+  }
+
+  String _formatTimeOfDay(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final period = time.period == DayPeriod.am ? "AM" : "PM";
+    return "$hour $period";
   }
 
   @override
@@ -545,16 +679,24 @@ class _CheckoutPageState extends State<CheckoutPage>
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: List.generate(7, (index) {
-                  DateTime date = DateTime.now().add(Duration(days: index));
-                  bool isSelected = selectedPickupDate != null &&
-                      DateUtils.isSameDay(selectedPickupDate, date);
-                  return _EnhancedDateCard(
-                    date: date,
-                    isSelected: isSelected,
-                    onTap: () => setState(() => selectedPickupDate = date),
-                  );
-                }),
+                children: isLoadingDates 
+                  ? [const CircularProgressIndicator()]
+                  : availableDates.map((date) {
+                      bool isSelected = selectedPickupDate != null &&
+                          DateUtils.isSameDay(selectedPickupDate, date);
+                      return _EnhancedDateCard(
+                        date: date,
+                        isSelected: isSelected,
+                        onTap: () {
+                          if (isSelected) return;
+                          setState(() {
+                            selectedPickupDate = date;
+                            selectedPickupSlot = null;
+                          });
+                          _updateSlotsForSelectedDate();
+                        },
+                      );
+                    }).toList(),
               ),
             ),
             const SizedBox(height: 20),
@@ -567,17 +709,50 @@ class _CheckoutPageState extends State<CheckoutPage>
               ),
             ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              children: pickupSlots.map((slot) {
-                bool isSelected = slot == selectedPickupSlot;
-                return _EnhancedTimeSlot(
-                  slot: slot,
-                  isSelected: isSelected,
-                  onTap: () => setState(() => selectedPickupSlot = slot),
-                );
-              }).toList(),
-            ),
+            if (isLoadingSlots || isLoadingDates)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (dynamicPickupSlots.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.1)),
+                ),
+                child: const Column(
+                  children: [
+                    Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 30),
+                    SizedBox(height: 8),
+                    Text(
+                      "No slots available for this date",
+                      style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              )
+            else
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: dynamicPickupSlots.map((slot) {
+                    bool isSelected = slot == selectedPickupSlot;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _EnhancedTimeSlot(
+                        slot: slot,
+                        isSelected: isSelected,
+                        onTap: () => setState(() => selectedPickupSlot = slot),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
           ],
         ),
       ),

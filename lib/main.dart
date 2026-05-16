@@ -57,15 +57,7 @@ class MyApp extends StatelessWidget {
           upgrader: Upgrader(
             durationUntilAlertAgain: const Duration(days: 1),
           ),
-          child: Overlay(
-            initialEntries: [
-              OverlayEntry(
-                builder: (context) {
-                  return child ?? const SizedBox.shrink();
-                },
-              ),
-            ],
-          ),
+          child: child,
         );
       },
     );
