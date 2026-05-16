@@ -158,121 +158,191 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
-      appBar: _buildAppBar(),
+      backgroundColor: const Color(0xFFF0F2F8),
       body: Obx(
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
             : FadeTransition(
                 opacity: _pageOpacityAnimation,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 24,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildAnimatedProfileCard(),
-                      const SizedBox(height: 32),
-                      _buildAnimatedSection(
-                        "Your Information",
-                        [
-                          _EnhancedListTile(
-                            icon: Icons.location_on_rounded,
-                            title: "Saved Address",
-                            subtitle: "Manage your delivery locations",
-                            onTap: () => Get.toNamed('/address_screen'),
-                            delay: 0,
-                          ),
-                          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                          _EnhancedListTile(
-                            icon: Icons.person_rounded,
-                            title: "Profile",
-                            subtitle: "Edit your personal information",
-                            onTap: () => Get.toNamed('/profile_screen'),
-                            delay: 100,
-                          ),
-                        ],
+                child: Column(
+                  children: [
+                    _buildGradientHeader(context),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 20,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildAnimatedSection(
+                              icon: Icons.person_pin_rounded,
+                              iconColor: const Color(0xFF3D52A0),
+                              "Your Information",
+                              [
+                                _EnhancedListTile(
+                                  icon: Icons.location_on_rounded,
+                                  iconColor: const Color(0xFF2DC9B7),
+                                  title: "Saved Address",
+                                  subtitle: "Manage your delivery locations",
+                                  onTap: () => Get.toNamed('/address_screen'),
+                                  delay: 0,
+                                ),
+                                const Divider(height: 1, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
+                                _EnhancedListTile(
+                                  icon: Icons.manage_accounts_rounded,
+                                  iconColor: const Color(0xFF9C6FFF),
+                                  title: "Profile",
+                                  subtitle: "Edit your personal information",
+                                  onTap: () => Get.toNamed('/profile_screen'),
+                                  delay: 100,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            _buildAnimatedSection(
+                              icon: Icons.info_outline_rounded,
+                              iconColor: const Color(0xFFFF8C42),
+                              "Other Information",
+                              [
+                                _EnhancedListTile(
+                                  icon: Icons.support_agent_rounded,
+                                  iconColor: const Color(0xFF2DC9B7),
+                                  title: "Support",
+                                  subtitle: "Get help and contact us",
+                                  onTap: () => Get.toNamed('/support_screen'),
+                                  delay: 200,
+                                ),
+                                const Divider(height: 1, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
+                                _EnhancedListTile(
+                                  icon: Icons.article_rounded,
+                                  iconColor: const Color(0xFFFFB800),
+                                  title: "Terms & Conditions",
+                                  subtitle: "Read our terms and policies",
+                                  onTap: () =>
+                                      Get.to(() => const TermsAndConditionsPage()),
+                                  delay: 300,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 28),
+                            _buildAnimatedLogoutButton(),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 32),
-                      _buildAnimatedSection(
-                        "Other Information",
-                        [
-                          _EnhancedListTile(
-                            icon: Icons.support_agent_rounded,
-                            title: "Support",
-                            subtitle: "Get help and contact us",
-                            onTap: () => Get.toNamed('/support_screen'),
-                            delay: 200,
-                          ),
-                          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                          _EnhancedListTile(
-                            icon: Icons.article_rounded,
-                            title: "Terms & Conditions",
-                            subtitle: "Read our terms and policies",
-                            onTap: () =>
-                                Get.to(() => const TermsAndConditionsPage()),
-                            delay: 300,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
-                      _buildAnimatedLogoutButton(),
-                      const SizedBox(height: 20),
-                      // _buildVersionInfo(),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
-      title: Text(
-        "Settings",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppTheme.primaryColor,
-        ),
-      ),
-      centerTitle: true,
-    );
-  }
-
-  Widget _buildAnimatedProfileCard() {
+  Widget _buildGradientHeader(BuildContext context) {
     return SlideTransition(
       position: _profileSlideAnimation,
       child: ScaleTransition(
         scale: _profileScaleAnimation,
         child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top + 16,
+            bottom: 28,
+            left: 20,
+            right: 20,
+          ),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
+            ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(32),
+              bottomRight: Radius.circular(32),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Color(0x553D52A0),
                 blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-              BoxShadow(
-                color: AppTheme.primaryColor.withOpacity(0.1),
-                blurRadius: 30,
-                offset: const Offset(0, 5),
+                offset: Offset(0, 10),
               ),
             ],
           ),
           child: Row(
             children: [
-              _buildProfileAvatar(),
-              const SizedBox(width: 24),
-              Expanded(child: _buildProfileInfo()),
+              // Avatar circle
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.15),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.4), width: 2),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: Colors.white,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(width: 18),
+              // Name + phone
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Obx(() => Text(
+                          controller.name.value.isNotEmpty
+                              ? controller.name.value
+                              : 'Loading...',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.3,
+                          ),
+                        )),
+                    const SizedBox(height: 6),
+                    Obx(() => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.25)),
+                          ),
+                          child: Text(
+                            controller.phone.value.isNotEmpty
+                                ? controller.phone.value
+                                : 'Loading...',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+              // Edit icon
+              GestureDetector(
+                onTap: () => Get.toNamed('/profile_screen'),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: Colors.white.withOpacity(0.25), width: 1),
+                  ),
+                  child: const Icon(Icons.edit_rounded,
+                      color: Colors.white, size: 20),
+                ),
+              ),
             ],
           ),
         ),
@@ -280,78 +350,12 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildProfileAvatar() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor.withOpacity(0.15),
-            AppTheme.primaryColor.withOpacity(0.1),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.2),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: 42,
-        backgroundColor: Colors.transparent,
-        child: Icon(
-          Icons.person_rounded,
-          size: 44,
-          color: AppTheme.primaryColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          controller.name.value.isNotEmpty
-              ? controller.name.value
-              : "Loading...",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Color(0xFF111827),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
-          ),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            controller.phone.value.isNotEmpty
-                ? controller.phone.value
-                : "Loading...",
-            style: TextStyle(
-              color: AppTheme.primaryColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAnimatedSection(String title, List<Widget> children) {
+  Widget _buildAnimatedSection(
+    String title,
+    List<Widget> children, {
+    required IconData icon,
+    required Color iconColor,
+  }) {
     return SlideTransition(
       position: _sectionsSlideAnimation,
       child: FadeTransition(
@@ -359,9 +363,44 @@ class _SettingsScreenState extends State<SettingsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader(title),
-            const SizedBox(height: 16),
-            _buildInfoCard(children),
+            // Section header row
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: iconColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 16),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A2340),
+                    fontSize: 15,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(children: children),
+            ),
           ],
         ),
       ),
@@ -371,91 +410,60 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget _buildAnimatedLogoutButton() {
     return ScaleTransition(
       scale: _logoutButtonAnimation,
-      child: Center(
-        child: SizedBox(
+      child: GestureDetector(
+        onTap: () async {
+          try {
+            await Supabase.instance.client.auth.signOut();
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.clear();
+            Get.offAllNamed('/login');
+          } catch (e) {
+            Get.snackbar('Error', 'Failed to logout. Please try again.');
+          }
+        },
+        child: Container(
           width: double.infinity,
-          child: _AnimatedButton(
-            onPressed: () async {
-              try {
-                await Supabase.instance.client.auth.signOut();
-
-                // Clear all SharedPreferences data on logout
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
-
-                Get.offAllNamed('/login');
-              } catch (e) {
-                // Handle logout error
-                Get.snackbar('Error', 'Failed to logout. Please try again.');
-              }
-            },
-            child: const Text(
-              "Log Out",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
-              ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFE53E3E), Color(0xFF9B1F1F)],
             ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFE53E3E).withOpacity(0.35),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.logout_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 10),
+              Text(
+                'Log Out',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF111827),
-          fontSize: 20,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.1),
-            blurRadius: 25,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(children: children),
-    );
-  }
-
-  // Widget _buildVersionInfo() {
-  //   return FadeTransition(
-  //     opacity: _logoutButtonAnimation,
-  //     child: const Center(
-  //       child: Text(
-  //         "App version 18.5.7\nv69-2",
-  //         textAlign: TextAlign.center,
-  //         style: TextStyle(fontSize: 12, color: Colors.grey),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
 
 // Enhanced List Tile with stable animations
 class _EnhancedListTile extends StatefulWidget {
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -463,6 +471,7 @@ class _EnhancedListTile extends StatefulWidget {
 
   const _EnhancedListTile({
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.subtitle,
     required this.onTap,
@@ -586,29 +595,15 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
 
   Widget _buildIcon() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor.withOpacity(0.15),
-            AppTheme.primaryColor.withOpacity(0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: widget.iconColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(13),
       ),
       child: Icon(
         widget.icon,
-        color: AppTheme.primaryColor,
-        size: 24,
+        color: widget.iconColor,
+        size: 22,
       ),
     );
   }

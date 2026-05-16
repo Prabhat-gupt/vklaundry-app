@@ -137,14 +137,13 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAnimatedAppBar(),
+      backgroundColor: const Color(0xFFF0F2F8),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
         child: Column(
           children: [
-            // _buildAnimatedHeader(),
-            const SizedBox(height: 20),
+            _buildGradientHeader(context),
+            const SizedBox(height: 16),
             Expanded(child: _buildAnimatedContent()),
           ],
         ),
@@ -152,26 +151,96 @@ class _AllOrdersPageState extends State<AllOrdersPage>
     );
   }
 
-  PreferredSizeWidget _buildAnimatedAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.white,
-      automaticallyImplyLeading: false,
-      title: SlideTransition(
-        position: _headerSlideAnimation,
-        child: ScaleTransition(
-          scale: _headerScaleAnimation,
-          child: Text(
-            "All Orders",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-              fontSize: 24,
-            ),
+  Widget _buildGradientHeader(BuildContext context) {
+    return SlideTransition(
+      position: _headerSlideAnimation,
+      child: Container(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 16,
+          bottom: 24,
+          left: 20,
+          right: 20,
+        ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
           ),
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            bottomRight: Radius.circular(30),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x553D52A0),
+              blurRadius: 16,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left: title + count
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'My Bookings',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Obx(() {
+                    final count =
+                        (orderTrackController.order['orders'] ?? []).length;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.25), width: 1),
+                      ),
+                      child: Text(
+                        count == 0
+                            ? 'No orders yet'
+                            : '$count ${count == 1 ? 'order' : 'orders'} found',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            // Right: icon
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.25), width: 1),
+              ),
+              child: const Icon(
+                Icons.receipt_long_rounded,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+          ],
         ),
       ),
-      centerTitle: true,
     );
   }
 
@@ -269,9 +338,8 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       position: _contentSlideAnimation,
       child: FadeTransition(
         opacity: _contentFadeAnimation,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 18.0),
-          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Obx(() {
             final ordersData = orderTrackController.order['orders'] ?? [];
 
@@ -292,42 +360,32 @@ class _AllOrdersPageState extends State<AllOrdersPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 1200),
+            duration: const Duration(milliseconds: 900),
             tween: Tween(begin: 0.0, end: 1.0),
             builder: (context, value, child) {
-              return Transform.scale(
-                scale: value,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppTheme.primaryColor.withOpacity(0.1),
-                        AppTheme.primaryColor.withOpacity(0.05),
-                      ],
+              return Opacity(
+                opacity: value,
+                child: Transform.scale(
+                  scale: 0.7 + (0.3 * value),
+                  child: Container(
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3D52A0).withOpacity(0.08),
+                      shape: BoxShape.circle,
                     ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryColor.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Image.asset(
-                    "assets/icons/empty_basket.png",
-                    height: 200,
-                    width: 200,
-                    fit: BoxFit.contain,
+                    child: const Icon(
+                      Icons.inbox_rounded,
+                      size: 72,
+                      color: Color(0xFF3D52A0),
+                    ),
                   ),
                 ),
               );
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
           TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 800),
+            duration: const Duration(milliseconds: 700),
             tween: Tween(begin: 0.0, end: 1.0),
             builder: (context, value, child) {
               return Opacity(
@@ -336,25 +394,25 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                   offset: Offset(0, 20 * (1 - value)),
                   child: Column(
                     children: [
-                      Text(
-                        "No Orders Found",
+                      const Text(
+                        "No Orders Yet",
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
+                          color: Color(0xFF1A2340),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       const Text(
                         "You haven't placed any orders yet.\nStart by exploring our services!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           color: Colors.grey,
-                          height: 1.5,
+                          height: 1.6,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
                       _buildExploreServicesButton(),
                     ],
                   ),
@@ -370,18 +428,15 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   Widget _buildExploreServicesButton() {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.primaryColor,
-            AppTheme.primaryColor.withOpacity(0.8),
-          ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
         ),
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF3D52A0).withOpacity(0.4),
+            blurRadius: 14,
+            offset: const Offset(0, 7),
           ),
         ],
       ),
@@ -389,31 +444,23 @@ class _AllOrdersPageState extends State<AllOrdersPage>
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Switch bottom nav to Services tab (index 1)
             final homeController = Get.find<HomePageController>();
             homeController.currentNavIndex.value = 1;
           },
-          borderRadius: BorderRadius.circular(25),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 16,
-            ),
+          borderRadius: BorderRadius.circular(20),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.explore_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                const Text(
+                Icon(Icons.explore_rounded, color: Colors.white, size: 20),
+                SizedBox(width: 10),
+                Text(
                   'Explore Services',
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
                 ),
               ],
@@ -425,39 +472,21 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   }
 
   Widget _buildAnimatedOrdersList(List ordersData) {
+    final sorted = List.from(ordersData);
+    sorted.sort((a, b) {
+      final dateA = DateTime.tryParse(a['created_at'] ?? '') ?? DateTime(1970);
+      final dateB = DateTime.tryParse(b['created_at'] ?? '') ?? DateTime(1970);
+      return dateB.compareTo(dateA);
+    });
     return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 500),
       tween: Tween(begin: 0.0, end: 1.0),
       builder: (context, value, child) {
-        return Transform.scale(
-          scale: 0.9 + (0.1 * value),
-          child: Opacity(
-            opacity: value,
-            child: Container(
-              decoration: BoxDecoration(
-                // color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
-                    blurRadius: 30,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: OrderCard(
-                  orders: List<Map<String, dynamic>>.from(ordersData),
-                  numbersOrders: ordersData.length,
-                ),
-              ),
-            ),
+        return Opacity(
+          opacity: value,
+          child: OrderCard(
+            orders: List<Map<String, dynamic>>.from(sorted),
+            numbersOrders: sorted.length,
           ),
         );
       },

@@ -7,7 +7,7 @@
         </intent>
     </queries>
     <application
-        android:label="laundry_app"
+        android:label="VK Laundry"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
