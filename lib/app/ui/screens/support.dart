@@ -134,7 +134,7 @@ class SupportPage extends StatelessWidget {
                 icon: Icons.chat,
                 label: 'WhatsApp',
                 value: support['whatsapp']!,
-                onTap: () => _launchWhatsApp(phoneNumber: support['whatsapp']!),
+                onTap: () => _launchWhatsApp(phoneNumber: '917995500760'!),
               ),
             ],
           );
