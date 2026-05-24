@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/controllers/notification_controller.dart';
 
@@ -24,7 +25,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text('Notifications'),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 1,
@@ -32,14 +33,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: Obx(() {
         if (notificationController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
 
         if (notificationController.notifications.isEmpty) {
           return Center(
             child: Text(
               'No notifications yet!',
-              style: TextStyle(fontSize: 20, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 20.sp, color: Colors.grey[600]),
             ),
           );
         }
@@ -50,19 +51,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
             final notif = notificationController.notifications[index];
             return Card(
               color: Colors.white,
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              margin: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               elevation: 2,
               child: ListTile(
                 title: Text(
                   notif['title'] ?? '',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(notif['message'] ?? ''),
                 // trailing: notif['type'] != null
                 //     ? Chip(
                 //         label: Text(
                 //           notif['type'].toString()?? '',
-                //           style: const TextStyle(color: Colors.white),
+                //           style: TextStyle(color: Colors.white),
                 //         ),
                 //         backgroundColor: Colors.blue,
                 //       )

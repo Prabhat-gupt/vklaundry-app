@@ -6,6 +6,7 @@ import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:upgrader/upgrader.dart';
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app/routes/app_pages.dart';
 
 // Future<void> main() async {
@@ -42,22 +43,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'VK Laundry',
-      theme: AppTheme.lightTheme,
-      initialRoute: AppRoutes.SPLASHSCREEN,
-      getPages: AppPages.routes,
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: true,
       builder: (context, child) {
-        return UpgradeAlert(
-          dialogStyle: UpgradeDialogStyle.material,
-          showIgnore: false,
-          showLater: true,
-          showReleaseNotes: true,
-          upgrader: Upgrader(
-            durationUntilAlertAgain: const Duration(days: 1),
-          ),
-          child: child,
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'VK Laundry',
+          theme: AppTheme.lightTheme,
+          initialRoute: AppRoutes.SPLASHSCREEN,
+          getPages: AppPages.routes,
+          builder: (context, child) {
+            return UpgradeAlert(
+              dialogStyle: UpgradeDialogStyle.material,
+              showIgnore: false,
+              showLater: true,
+              showReleaseNotes: true,
+              upgrader: Upgrader(
+                durationUntilAlertAgain: const Duration(days: 1),
+              ),
+              child: child,
+            );
+          },
         );
       },
     );

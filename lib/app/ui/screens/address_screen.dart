@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
@@ -28,11 +29,11 @@ class AddressScreen extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.userAddress.isEmpty) {
-          return const Center(child: Text("No address found"));
+          return Center(child: Text("No address found"));
         }
 
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.r),
           children: [
             ...controller.userAddress.map((addr) {
               String fullAddress =
@@ -49,7 +50,7 @@ class AddressScreen extends StatelessWidget {
               );
             }).toList(),
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+              padding: EdgeInsets.only(top: 8.0.h),
               child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -60,11 +61,11 @@ class AddressScreen extends StatelessWidget {
                       controller,
                     );
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.add_location_alt_outlined,
                     color: Colors.white,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Update Address',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -72,10 +73,10 @@ class AddressScreen extends StatelessWidget {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     side: BorderSide(color: AppTheme.primaryColor),
                     foregroundColor: AppTheme.primaryColor,
-                    textStyle: const TextStyle(fontSize: 16),
+                    textStyle: TextStyle(fontSize: 16.sp),
                     backgroundColor: AppTheme.primaryColor,
                   ),
                 ),
@@ -108,7 +109,7 @@ class AddressScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text("Update Address"),
+        title: Text("Update Address"),
         content: SingleChildScrollView(
           child: Column(
             children: [
@@ -117,37 +118,37 @@ class AddressScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: "Address Line",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextField(
                 controller: cityController,
                 decoration: InputDecoration(
                   labelText: "City",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextField(
                 controller: stateController,
                 decoration: InputDecoration(
                   labelText: "State",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextField(
                 controller: landmarkController,
                 decoration: InputDecoration(
                   labelText: "Landmark / Pincode",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
@@ -157,7 +158,7 @@ class AddressScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text("Cancel"),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -189,7 +190,7 @@ class AddressScreen extends StatelessWidget {
                 );
               }
             },
-            child: const Text("Save"),
+            child: Text("Save"),
           ),
         ],
       ),
@@ -214,17 +215,17 @@ class AddressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(Icons.location_on_outlined, color: AppTheme.primaryColor),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,17 +234,17 @@ class AddressCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     color: AppTheme.primaryColor,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   address,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     color: Color.fromRGBO(148, 152, 155, 1),
                   ),
                 ),
@@ -251,7 +252,7 @@ class AddressCard extends StatelessWidget {
             ),
           ),
           // IconButton(
-          //   icon: const Icon(Icons.edit),
+          //   icon: Icon(Icons.edit),
           //   onPressed: onEdit,
           //   color: AppTheme.primaryColor,
           // )

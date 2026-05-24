@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
@@ -22,69 +23,69 @@ class ServiceNotAvailableScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(32.0.r),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Icon
               Container(
-                width: 100,
-                height: 100,
+                width: 100.w,
+                height: 100.h,
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.location_off_rounded,
-                  size: 50,
+                  size: 50.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
               // Title
               Text(
                 'Service Not Available',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
 
               // Message
               Text(
                 'We currently serve customers within 10 km radius from our service center.',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: Colors.grey.shade700,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
 
               // Coming soon message
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: AppTheme.secondaryColor.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
                   '✨ We will come to your location soon!',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.primaryColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40.h),
 
               // Change Address button
               SizedBox(
@@ -92,20 +93,20 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => _showChangeAddressDialog(context),
                   icon:
-                      const Icon(Icons.edit_location_alt, color: Colors.white),
-                  label: const Text(
+                      Icon(Icons.edit_location_alt, color: Colors.white),
+                  label: Text(
                     'Change Address',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                 ),
@@ -144,7 +145,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => Center(child: CircularProgressIndicator()),
     );
 
     _fetchAddressFromSupabase().then((userAddress) {
@@ -191,12 +192,12 @@ class ServiceNotAvailableScreen extends StatelessWidget {
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: Colors.white,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
           title: Row(
             children: [
               Icon(Icons.location_on, color: AppTheme.primaryColor),
-              const SizedBox(width: 8),
-              const Text('Change Address'),
+              SizedBox(width: 8.w),
+              Text('Change Address'),
             ],
           ),
           content: SingleChildScrollView(
@@ -204,64 +205,64 @@ class ServiceNotAvailableScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10.r),
                   decoration: BoxDecoration(
                     color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: Colors.blue),
-                      SizedBox(width: 6),
+                      Icon(Icons.info_outline, size: 16.sp, color: Colors.blue),
+                      SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
                           'Enter your pincode so we can check if your area is serviceable.',
-                          style: TextStyle(fontSize: 12, color: Colors.blue),
+                          style: TextStyle(fontSize: 12.sp, color: Colors.blue),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 TextField(
                   controller: houseController,
                   decoration: InputDecoration(
                     labelText: 'Address Line',
-                    prefixIcon: const Icon(Icons.home_outlined),
+                    prefixIcon: Icon(Icons.home_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8.r)),
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 TextField(
                   controller: cityController,
                   decoration: InputDecoration(
                     labelText: 'City',
-                    prefixIcon: const Icon(Icons.location_city_outlined),
+                    prefixIcon: Icon(Icons.location_city_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8.r)),
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 TextField(
                   controller: stateController,
                   decoration: InputDecoration(
                     labelText: 'State',
-                    prefixIcon: const Icon(Icons.map_outlined),
+                    prefixIcon: Icon(Icons.map_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8.r)),
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 TextField(
                   controller: pincodeController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Pincode *',
                     hintText: 'Enter your area pincode',
-                    prefixIcon: const Icon(Icons.pin_drop_outlined),
+                    prefixIcon: Icon(Icons.pin_drop_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8.r)),
                   ),
                 ),
               ],
@@ -270,7 +271,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text('Cancel'),
             ),
             ValueListenableBuilder<bool>(
               valueListenable: isSaving,
@@ -278,7 +279,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8.r)),
                 ),
                 onPressed: saving
                     ? null
@@ -296,13 +297,13 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                         isSaving.value = false;
                       },
                 child: saving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
+                    ? SizedBox(
+                        width: 18.w,
+                        height: 18.h,
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text(
+                    : Text(
                         'Save & Check',
                         style: TextStyle(color: Colors.white),
                       ),

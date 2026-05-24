@@ -210,6 +210,7 @@ class LoginController extends GetxController {
 
           await prefs.setInt('user_id', userId);
           await prefs.setBool('isLoggedIn', true);
+          await prefs.setBool('isGuest', false); // clear guest mode on login
 
           // Check service availability before navigation
           final isServiceAvailable = await _checkServiceAvailability(userId);
@@ -239,6 +240,7 @@ class LoginController extends GetxController {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setInt('user_id', inserted['id']);
           await prefs.setBool('isLoggedIn', true);
+          await prefs.setBool('isGuest', false); // clear guest mode on login
 
           Get.offAllNamed(AppRoutes.SETUPSCREEN);
         }
@@ -262,6 +264,22 @@ class LoginController extends GetxController {
       if (onWrongOtp != null) onWrongOtp();
       Get.snackbar("Error", "OTP verification failed: $e");
       print("❌ Error verifying OTP: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Continue as guest
+  Future<void> continueAsGuest() async {
+    isLoading.value = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setBool('isGuest', true);
+      await prefs.setInt('user_id', -1); // Guest ID
+      Get.offAllNamed(AppRoutes.ROOT);
+    } catch (e) {
+      Get.snackbar("Error", "Could not sign in as guest");
     } finally {
       isLoading.value = false;
     }

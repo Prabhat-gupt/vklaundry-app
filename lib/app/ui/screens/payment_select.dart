@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/payment_select_controller.dart';
@@ -10,10 +11,10 @@ class PaymentSelectPage extends StatelessWidget {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -25,8 +26,8 @@ class PaymentSelectPage extends StatelessWidget {
   }) {
     return Obx(() {
       return ListTile(
-        leading: Icon(icon, size: 28),
-        title: Text(title, style: const TextStyle(fontSize: 16)),
+        leading: Icon(icon, size: 28.sp),
+        title: Text(title, style: TextStyle(fontSize: 16.sp)),
         trailing: Radio<String>(
           value: value,
           groupValue: paymentController.selectedPaymentMethod.value,
@@ -41,7 +42,7 @@ class PaymentSelectPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Payment Method'),
+        title: Text('Select Payment Method'),
         centerTitle: true,
         leading: const BackButton(),
         backgroundColor: Colors.white,
@@ -95,14 +96,14 @@ class PaymentSelectPage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Obx(() {
           bool isSelected =
               paymentController.selectedPaymentMethod.value.isNotEmpty;
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: isSelected ? AppTheme.primaryColor : Colors.grey,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
             onPressed: isSelected
                 ? () {
@@ -110,7 +111,7 @@ class PaymentSelectPage extends StatelessWidget {
                     Get.back();
                   }
                 : null,
-            child: const Text('Continue', style: TextStyle(fontSize: 18)),
+            child: Text('Continue', style: TextStyle(fontSize: 18.sp)),
           );
         }),
       ),

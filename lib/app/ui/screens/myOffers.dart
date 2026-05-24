@@ -27,7 +27,7 @@ void showOffersBottomSheet(
         // Glassmorphism effect
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.95), // Slight transparency for the effect
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -37,7 +37,7 @@ void showOffersBottomSheet(
           ],
         ),
         child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -45,18 +45,18 @@ void showOffersBottomSheet(
               Container(
                 height: 4,
                 width: 60,
-                margin: const EdgeInsets.symmetric(vertical: 16),
+                margin: EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade400,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+                padding: EdgeInsets.fromLTRB(24, 8, 24, 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       "Available Offers",
                       style: TextStyle(
                         fontSize: 24,
@@ -65,7 +65,7 @@ void showOffersBottomSheet(
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.grey, size: 28),
+                      icon: Icon(Icons.close_rounded, color: Colors.grey, size: 28),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -74,7 +74,7 @@ void showOffersBottomSheet(
               // Offers List
               Obx(() {
                 if (activeOffers.isEmpty) {
-                  return const Padding(
+                  return Padding(
                     padding: EdgeInsets.all(24.0),
                     child: Center(
                       child: Text(
@@ -88,7 +88,7 @@ void showOffersBottomSheet(
                 return Flexible(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.symmetric(horizontal: 24),
                     itemCount: activeOffers.length,
                     itemBuilder: (context, index) {
                       final offer = activeOffers[index];
@@ -101,8 +101,8 @@ void showOffersBottomSheet(
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        margin: const EdgeInsets.only(bottom: 20),
-                        padding: const EdgeInsets.all(20),
+                        margin: EdgeInsets.only(bottom: 20),
+                        padding: EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? LinearGradient(
@@ -141,7 +141,7 @@ void showOffersBottomSheet(
                               color: isSelected ? Colors.white : (isEligible ? Colors.green : Colors.grey),
                               size: 32,
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +156,7 @@ void showOffersBottomSheet(
                                           : (isEligible ? const Color(0xFF1F2937) : Colors.grey),
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
+                                  SizedBox(height: 6),
                                   Text(
                                     discountType == 'percentage'
                                         ? "$discountValue% off on orders above ₹$minAmount"
@@ -168,7 +168,7 @@ void showOffersBottomSheet(
                                   ),
                                   if (!isEligible && !isSelected)
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
+                                      padding: EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         "You are not eligible for this offer.",
                                         style: TextStyle(
@@ -181,7 +181,7 @@ void showOffersBottomSheet(
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             // Apply/Remove Button
                             ElevatedButton(
                               onPressed: isEligible
@@ -206,14 +206,14 @@ void showOffersBottomSheet(
                                 ),
                                 elevation: isEligible ? 5 : 0,
                                 shadowColor: AppTheme.primaryColor.withOpacity(0.4),
-                                padding: const EdgeInsets.symmetric(
+                                padding: EdgeInsets.symmetric(
                                   horizontal: 24,
                                   vertical: 14,
                                 ),
                               ),
                               child: Text(
                                 isSelected ? "Remove" : "Apply",
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],

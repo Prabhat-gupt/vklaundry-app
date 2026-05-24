@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
@@ -107,7 +108,7 @@ class SupportPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0.r),
         child: Obx(() {
           final support = controller.supportDetails;
           return Column(
@@ -150,13 +151,13 @@ class SupportPage extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: EdgeInsets.symmetric(vertical: 8.h),
       child: ListTile(
         leading: Icon(icon, color: Colors.blue),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(value),
         trailing: onTap != null
-            ? const Icon(Icons.arrow_forward_ios, size: 16)
+            ? Icon(Icons.arrow_forward_ios, size: 16.sp)
             : null,
         onTap: () async {
           // Copy to clipboard
@@ -168,7 +169,7 @@ class SupportPage extends StatelessWidget {
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: AppTheme.primaryColor,
               colorText: Colors.white,
-              margin: const EdgeInsets.all(8),
+              margin: EdgeInsets.all(8.r),
               duration: const Duration(seconds: 1),
             );
           }

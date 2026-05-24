@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
 import 'dart:convert';
 
 class ProductListController extends GetxController {
@@ -20,10 +21,12 @@ class ProductListController extends GetxController {
   // Categories & Services
   var categories = <Map<String, dynamic>>[].obs;
   var serviceNamesCache = <String, String>{}.obs; // Cache service names
+  var isGuestMode = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+    checkGuestMode();
     loadCategoriesFromSupabase();
     preloadServiceNames();
     fetchActiveOffer();
@@ -32,6 +35,13 @@ class ProductListController extends GetxController {
 
   void setService(String service) {
     currentService.value = service;
+  }
+
+  Future<void> checkGuestMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final isGuest = prefs.getBool('isGuest') ?? false;
+    isGuestMode.value = !isLoggedIn || isGuest;
   }
 
   RxList activeOffer = [].obs;
@@ -126,6 +136,11 @@ class ProductListController extends GetxController {
   }
 
   void addToCart(Map<String, dynamic> product) {
+    if (isGuestMode.value) {
+      _showLoginPopup();
+      return;
+    }
+
     final service = product['service_id'].toString();
     final productId = product['id'];
     final key = '${service}_$productId';
@@ -198,6 +213,10 @@ class ProductListController extends GetxController {
   }
 
   void incrementQuantity(int productId, int serviceId) {
+    if (isGuestMode.value) {
+      _showLoginPopup();
+      return;
+    }
     final key = '${serviceId}_$productId';
     if (cartQuantities.containsKey(key)) {
       cartQuantities[key] = (cartQuantities[key] ?? 1) + 1;
@@ -260,6 +279,22 @@ class ProductListController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cart_quantities');
     await prefs.remove('cart_product_details');
+  }
+
+  void _showLoginPopup() {
+    Get.defaultDialog(
+      title: "Login Required",
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      middleText: "You need to log in to add items to your cart. Would you like to log in now?",
+      textConfirm: "Login",
+      textCancel: "Cancel",
+      confirmTextColor: const Color(0xFFFFFFFF),
+      buttonColor: const Color(0xFF5768AB),
+      onConfirm: () {
+        Get.back(); // close dialog
+        Get.toNamed('/login');
+      },
+    );
   }
 }
 

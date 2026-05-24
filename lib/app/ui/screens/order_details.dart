@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 
 class OrderDetailsPage extends StatelessWidget {
@@ -12,13 +13,13 @@ class OrderDetailsPage extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Order #PQILDFA4095",
-              style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+              style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14.sp),
             ),
             Text(
               "3 items",
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -29,48 +30,48 @@ class OrderDetailsPage extends StatelessWidget {
         actions: [
           TextButton.icon(
             onPressed: () {},
-            icon: const Icon(
+            icon: Icon(
               Icons.message_outlined,
               color: Colors.white,
-              size: 16,
+              size: 16.sp,
             ),
-            label: const Text(
+            label: Text(
               "Get Help",
               style: TextStyle(color: Colors.white),
             ),
             style: TextButton.styleFrom(
               backgroundColor: Color.fromRGBO(60, 195, 223, 0.6),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: 10.w),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Delivered Section
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.check_box_rounded,
                         color: Color.fromARGB(167, 76, 175, 79),
-                        size: 42,
+                        size: 42.sp,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +79,7 @@ class OrderDetailsPage extends StatelessWidget {
                             Text(
                               "Delivered",
                               style: TextStyle(
-                                fontSize: 22,
+                                fontSize: 22.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -86,9 +87,9 @@ class OrderDetailsPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 52,
+                        height: 52.h,
                         child: VerticalDivider(
-                          width: 20,
+                          width: 20.w,
                           thickness: 1,
                           indent: 8,
                           endIndent: 8,
@@ -96,7 +97,7 @@ class OrderDetailsPage extends StatelessWidget {
                         ),
                       ),
 
-                      // SizedBox(width: 10,),
+                      // SizedBox(width: 10.w,),
                       Column(
                         children: [
                           Text(
@@ -104,15 +105,15 @@ class OrderDetailsPage extends StatelessWidget {
                             style: TextStyle(color: Colors.grey),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
                               color: Color.fromRGBO(60, 195, 233, 0.6),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
-                            child: const Text(
+                            child: Text(
                               "5 DAYS",
                               style: TextStyle(
                                 color: Color.fromRGBO(0, 112, 136, 1),
@@ -124,12 +125,12 @@ class OrderDetailsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Divider(color: Colors.grey.shade300, thickness: 1),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "3 Items in order",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -137,34 +138,34 @@ class OrderDetailsPage extends StatelessWidget {
                         contentPadding: EdgeInsets.zero,
                         leading: Image.asset(
                           "assets/icons/shirt.png",
-                          height: 50,
+                          height: 50.h,
                         ),
-                        title: const Text(
+                        title: Text(
                           "Shirt full sleeve",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                            fontSize: 18.sp,
                           ),
                         ),
-                        subtitle: const Text(
+                        subtitle: Text(
                           "All shirt eg. denim cotton",
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12.sp),
                         ),
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Text(
                               "₹34",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 16.sp,
                               ),
                             ),
                             Text(
                               "₹34",
                               style: TextStyle(
                                 color: Colors.grey,
-                                fontSize: 12,
+                                fontSize: 12.sp,
                                 decoration: TextDecoration.lineThrough,
                               ),
                             ),
@@ -176,22 +177,22 @@ class OrderDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             // Bill Details
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Bill details",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   _billRow("Items total", "₹34"),
                   _billRow("Dealivery charge", "₹34"),
                   _billRow("Handling charge", "₹34"),
@@ -199,7 +200,7 @@ class OrderDetailsPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         "Grand Total",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -207,7 +208,7 @@ class OrderDetailsPage extends StatelessWidget {
                         children: [
                           TextButton(
                             onPressed: () {},
-                            child: const Text(
+                            child: Text(
                               "Download Invoice",
                               style: TextStyle(
                                 color: Color.fromRGBO(0, 112, 136, 1),
@@ -220,20 +221,20 @@ class OrderDetailsPage extends StatelessWidget {
                                 233,
                                 0.6,
                               ),
-                              padding: EdgeInsets.all(8),
+                              padding: EdgeInsets.all(8.r),
                               minimumSize: const Size(0, 0),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              side: const BorderSide(
-                                color: Colors.lightBlue,
-                                width: 1,
+                              side: BorderSide(
+                                color: AppTheme.primaryColor.withOpacity(0.5),
+                                width: 1.w,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(8.r),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
+                          SizedBox(width: 8.w),
+                          Text(
                             "₹214",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -244,39 +245,39 @@ class OrderDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Order Details
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Order details",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Text(
                     "Order ID\n#PQISNSFF09435",
                     style: TextStyle(height: 1.4),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Text(
                     "Receiver Details\nTony Stark, +91-8937298743",
                     style: TextStyle(height: 1.4),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Text(
                     "Delivery Address\nA-2, Krishna Nagar, Chandigarh",
                     style: TextStyle(height: 1.4),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Text(
                     "Delivered on\n28 Jun 2025, 2:04 PM",
                     style: TextStyle(height: 1.4),
@@ -284,17 +285,17 @@ class OrderDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
-            // const SizedBox(height: 80),
+            // SizedBox(height: 80.h),
           ],
         ),
       ),
 
       // Bottom bar
       bottomNavigationBar: Container(
-        height: 80,
+        height: 80.h,
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: AppTheme.primaryColor, width: 1),
+            top: BorderSide(color: AppTheme.primaryColor, width: 1.w),
           ),
           color: Colors.white,
         ),
@@ -305,14 +306,14 @@ class OrderDetailsPage extends StatelessWidget {
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                side: BorderSide(color: AppTheme.primaryColor, width: 2),
+                side: BorderSide(color: AppTheme.primaryColor, width: 2.w),
               ),
               child: Text(
                 "Other Items",
                 style: TextStyle(
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                 ),
               ),
             ),
@@ -321,12 +322,12 @@ class OrderDetailsPage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
               ),
-              child: const Text(
+              child: Text(
                 "Order Again",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                 ),
               ),
             ),
@@ -338,7 +339,7 @@ class OrderDetailsPage extends StatelessWidget {
 
   Widget _billRow(String label, String amount) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [Text(label), Text(amount)],

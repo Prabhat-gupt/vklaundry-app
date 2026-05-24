@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 
 class TermsAndConditionsPage extends StatelessWidget {
@@ -6,11 +7,11 @@ class TermsAndConditionsPage extends StatelessWidget {
 
   Widget buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: EdgeInsets.symmetric(vertical: 12.0.h),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 18.sp,
           fontWeight: FontWeight.bold,
           color: AppTheme.primaryColor,
         ),
@@ -20,15 +21,15 @@ class TermsAndConditionsPage extends StatelessWidget {
 
   Widget buildBullet(String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, bottom: 6.0),
+      padding: EdgeInsets.only(left: 16.0.w, bottom: 6.0.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("•  ", style: TextStyle(fontSize: 14)),
+          Text("•  ", style: TextStyle(fontSize: 14.sp)),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14, height: 1.5),
+              style: TextStyle(fontSize: 14.sp, height: 1.5),
             ),
           ),
         ],
@@ -45,29 +46,29 @@ class TermsAndConditionsPage extends StatelessWidget {
         foregroundColor: Colors.white,
         shadowColor: const Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Terms & Conditions",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Terms and Conditions – VK Laundry",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8.h),
+            Text(
               "VK Laundry Private Limited (hereinafter referred to as “Company”) provides its services subject to your (“Customer”) compliance and acceptance with the terms and conditions set forth below.\n"
               "By availing VK Laundry services, the Customer agrees to be bound by the following Terms and Conditions:",
-              style: TextStyle(fontSize: 14, height: 1.5),
+              style: TextStyle(fontSize: 14.sp, height: 1.5),
             ),
 
             // Garment Handling

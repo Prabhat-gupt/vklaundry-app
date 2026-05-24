@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
@@ -110,7 +111,7 @@ class _ServiceScreenState extends State<ServiceScreen>
         child: Column(
           children: [
             // _buildAnimatedHeader(),
-            // const SizedBox(height: 20),
+            // SizedBox(height: 20.h),
             Expanded(child: _buildServicesList()),
           ],
         ),
@@ -130,7 +131,7 @@ class _ServiceScreenState extends State<ServiceScreen>
             'Our Services',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 26,
+              fontSize: 26.sp,
               color: AppTheme.primaryColor,
               letterSpacing: 0.5,
             ),
@@ -150,7 +151,7 @@ class _ServiceScreenState extends State<ServiceScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(24.r),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -159,11 +160,11 @@ class _ServiceScreenState extends State<ServiceScreen>
                   valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Text(
                 'Loading services...',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -174,7 +175,7 @@ class _ServiceScreenState extends State<ServiceScreen>
       }
 
       return ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
         itemCount: services.length,
         itemBuilder: (context, index) {
           final service = services[index];
@@ -310,7 +311,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
               end: Offset.zero,
             ).animate(animationValue),
             child: Container(
-              margin: const EdgeInsets.only(bottom: 20),
+              margin: EdgeInsets.only(bottom: 20.h),
               child: MouseRegion(
                 onEnter: (_) => _handleHoverStart(),
                 onExit: (_) => _handleHoverEnd(),
@@ -322,7 +323,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.08),
@@ -340,15 +341,15 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: widget.onTap,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(20.r),
                             splashColor: AppTheme.primaryColor.withOpacity(0.1),
                             highlightColor: AppTheme.primaryColor.withOpacity(0.05),
                             child: Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: EdgeInsets.all(4.r),
                               child: Row(
                                 children: [
                                   _buildServiceImage(),
-                                  const SizedBox(width: 16),
+                                  SizedBox(width: 16.w),
                                   Expanded(child: _buildServiceInfo()),
                                   _buildTrailingIcon(),
                                 ],
@@ -373,7 +374,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
       tag: 'service_image_${widget.service['id']}',
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
               color: AppTheme.primaryColor.withOpacity(0.2),
@@ -383,10 +384,10 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           child: Container(
-            width: 120,
-            height: 120,
+            width: 120.w,
+            height: 120.h,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -402,12 +403,12 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                 Image.network(
                   widget.service['image_url'] ??
                       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZGOWHxy5gcPkGjr4AxlsSgRIVVTCaQ0sJDw&s',
-                  width: 120,
-                  height: 120,
+                  width: 120.w,
+                  height: 120.h,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    width: 120,
-                    height: 120,
+                    width: 120.w,
+                    height: 120.h,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -420,15 +421,15 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                     ),
                     child: Icon(
                       Icons.cleaning_services,
-                      size: 50,
+                      size: 50.sp,
                       color: AppTheme.primaryColor,
                     ),
                   ),
                 ),
                 // Subtle overlay
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: 120.w,
+                  height: 120.h,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -450,33 +451,33 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
 
   Widget _buildServiceInfo() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             widget.service['name'] ?? '-',
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1F2937),
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             widget.service['description'] ?? 'Professional laundry service',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               color: Colors.grey[600],
               height: 1.4,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -484,12 +485,12 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                   AppTheme.primaryColor.withOpacity(0.05),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
             ),
             child: Text(
               'Available Now',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.primaryColor,
               ),
@@ -505,11 +506,11 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
       animation: _hoverAnimation,
       builder: (context, child) {
         return Container(
-          margin: const EdgeInsets.only(right: 20),
-          padding: const EdgeInsets.all(12),
+          margin: EdgeInsets.only(right: 20.w),
+          padding: EdgeInsets.all(12.r),
           decoration: BoxDecoration(
             color: AppTheme.primaryColor.withOpacity(0.1 + (_hoverAnimation.value * 0.05)),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             boxShadow: _isHovering
                 ? [
               BoxShadow(
@@ -525,7 +526,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
             child: Icon(
               Icons.arrow_forward_ios,
               color: AppTheme.primaryColor,
-              size: 18,
+              size: 18.sp,
             ),
           ),
         );
