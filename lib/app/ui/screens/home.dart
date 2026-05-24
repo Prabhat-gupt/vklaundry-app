@@ -84,11 +84,15 @@ class _HomeScreenState extends State<HomeScreen>
       _bodyController.forward();
 
       // Wait for user details to be fetched, then get orders
-      dynamic userId = await controller.fetchUserDetails();
-      await orderTrackController.fetchOrderDetails(userId);
-
-      // Setup real-time updates for all orders
-      orderTrackController.subscribeToAllUserOrders(userId);
+      dynamic userId = await controller.fetchUserDetailsNullable();
+      if (userId != null) {
+        await orderTrackController.fetchOrderDetails(userId);
+        // Setup real-time updates for all orders
+        orderTrackController.subscribeToAllUserOrders(userId);
+      } else {
+        // If guest, stop loading on order track controller
+        orderTrackController.isLoading.value = false;
+      }
     });
   }
 
@@ -520,6 +524,8 @@ class _HomeScreenState extends State<HomeScreen>
                                           fit: BoxFit.cover,
                                           height: 68,
                                           width: 68,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.local_laundry_service, color: Colors.white, size: 32),
                                         ),
                                       ),
                                     ),
@@ -802,6 +808,10 @@ class _HomeScreenState extends State<HomeScreen>
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Obx(() {
+            if (controller.isGuestMode.value) {
+              return _buildGuestLoginPrompt();
+            }
+
             final ordersData = List<Map<String, dynamic>>.from(
               orderTrackController.order['orders'] ?? [],
             );
@@ -878,6 +888,77 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildGuestLoginPrompt() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF5768AB).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.account_circle_outlined,
+              size: 40,
+              color: Color(0xFF5768AB),
+            ),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            "Track Your Orders",
+            style: TextStyle(
+              fontSize: 15,
+              color: Color(0xFF1A2340),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Sign in to view your recent\nlaundry bookings.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => Get.offAllNamed(AppRoutes.LOGIN),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5768AB),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: const Text(
+              "Login / Sign Up",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

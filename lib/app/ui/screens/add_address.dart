@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class AddAddressScreen extends StatefulWidget {
@@ -19,44 +20,44 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Address Details", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("Add Address Details", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Add Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            const SizedBox(height: 12),
+            Text("Add Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+            SizedBox(height: 12.h),
             _buildTextField("House No. & Floor*", houseController),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             _buildTextField("Building & Block No. (optional)", buildingController),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             _buildTextField("Landmark*", landmarkController, hintText: "Enter nearby landmark"),
-            const SizedBox(height: 24),
-            const Text("Receiver’s Details", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            const SizedBox(height: 12),
+            SizedBox(height: 24.h),
+            Text("Receiver’s Details", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+            SizedBox(height: 12.h),
             _buildTextField("Receiver's Name *", receiverNameController),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             _buildTextField("Receiver's Phone Number *", receiverPhoneController, keyboardType: TextInputType.phone),
-            const SizedBox(height: 32),
+            SizedBox(height: 32.h),
             
             SizedBox(
               width: double.infinity,
-              height: 48,
+              height: 48.h,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1B1C39),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                 ),
                 onPressed: () {
                   Get.back();
                 },
-                child: const Text("Save Address", style: TextStyle(fontSize: 16)),
+                child: Text("Save Address", style: TextStyle(fontSize: 16.sp)),
               ),
             ),
           ],
@@ -70,8 +71,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 6),
+        Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500)),
+        SizedBox(height: 6.h),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
@@ -79,8 +80,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             hintText: hintText,
             filled: true,
             fillColor: const Color(0xFFE0E0E0),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
           ),
         ),
       ],

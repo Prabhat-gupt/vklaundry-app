@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/ui/screens/order_details.dart';
 
@@ -66,43 +67,43 @@ class OrdersScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         shadowColor: Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Orders",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         itemCount: orders.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        separatorBuilder: (_, __) => SizedBox(height: 16.h),
         itemBuilder: (context, index) {
           final order = orders[index];
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image row
                 SizedBox(
-                  height: 50,
+                  height: 50.h,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: (order["images"] as List).length,
                     itemBuilder: (context, imgIndex) {
                       return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        width: 50,
-                        height: 50,
+                        margin: EdgeInsets.only(right: 8.w),
+                        width: 50.w,
+                        height: 50.h,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                           image: DecorationImage(
                             image: AssetImage(
                               (order["images"] as List<String>)[imgIndex],
@@ -114,7 +115,7 @@ class OrdersScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // Status + Amount Row
                 Row(
@@ -126,16 +127,16 @@ class OrdersScreen extends StatelessWidget {
                       children: [
                         Text(
                           order["status"]! as String,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 16.sp,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: 2),
                         Text(
                           order["date"]! as String,
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: TextStyle(
+                            fontSize: 12.sp,
                             color: Colors.grey,
                           ),
                         ),
@@ -157,18 +158,18 @@ class OrdersScreen extends StatelessWidget {
                         children: [
                           Text(
                             order["amount"]! as String,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 16.sp,
                             ),
                           ),
-                          const Icon(Icons.chevron_right),
+                          Icon(Icons.chevron_right),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Divider(color: Colors.grey.shade300),
                 Center(
                   child: InkWell(

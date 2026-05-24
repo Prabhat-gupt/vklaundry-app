@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
@@ -46,11 +47,11 @@ class _RootPageState extends State<RootPage> {
           ),
           bottomNavigationBar: Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 10.0.h),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(30.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -60,7 +61,7 @@ class _RootPageState extends State<RootPage> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(30.r),
                 child: BottomNavigationBar(
                   type: BottomNavigationBarType.fixed,
                   elevation: 0,
@@ -73,12 +74,12 @@ class _RootPageState extends State<RootPage> {
                       ),
                       label: 'Home',
                       activeIcon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
+                        padding: EdgeInsets.all(8.r),
+                        decoration: BoxDecoration(
                           color: Color.fromRGBO(35, 42, 69, 1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.home, color: Colors.white),
+                        child: Icon(Icons.home, color: Colors.white),
                       ),
                     ),
                     BottomNavigationBarItem(
@@ -88,12 +89,12 @@ class _RootPageState extends State<RootPage> {
                       ),
                       label: 'Services',
                       activeIcon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
+                        padding: EdgeInsets.all(8.r),
+                        decoration: BoxDecoration(
                           color: Color.fromRGBO(35, 42, 69, 1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.category, color: Colors.white),
+                        child: Icon(Icons.category, color: Colors.white),
                       ),
                     ),
                     BottomNavigationBarItem(
@@ -103,13 +104,13 @@ class _RootPageState extends State<RootPage> {
                       ),
                       label: 'Booking',
                       activeIcon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
+                        padding: EdgeInsets.all(8.r),
+                        decoration: BoxDecoration(
                           color: Color.fromRGBO(35, 42, 69, 1),
                           shape: BoxShape.circle,
                         ),
                         child:
-                            const Icon(Icons.receipt_long, color: Colors.white),
+                            Icon(Icons.receipt_long, color: Colors.white),
                       ),
                     ),
                     BottomNavigationBarItem(
@@ -119,12 +120,12 @@ class _RootPageState extends State<RootPage> {
                       ),
                       label: 'Setting',
                       activeIcon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
+                        padding: EdgeInsets.all(8.r),
+                        decoration: BoxDecoration(
                           color: Color.fromRGBO(35, 42, 69, 1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.settings, color: Colors.white),
+                        child: Icon(Icons.settings, color: Colors.white),
                       ),
                     ),
                   ],

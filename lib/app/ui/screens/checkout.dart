@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 // Removed get_storage import - using SharedPreferences instead
@@ -353,7 +354,7 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     if (selectedItems.isEmpty) {
       Future.microtask(() => Get.back());
-      return const SizedBox();
+      return SizedBox();
     }
 
     final double itemsTotal = controller.calculateItemsTotal();
@@ -395,17 +396,17 @@ class _CheckoutPageState extends State<CheckoutPage>
         child: FadeTransition(
           opacity: _pageOpacityAnimation,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             child: Column(
               children: [
                 _buildAnimatedItemsCard(selectedItems),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _buildAnimatedPickupSlotSelector(context),
                 if (selectedPickupDate != null && selectedPickupSlot != null)
                   _buildAnimatedDeliveryDateDisplay(),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _buildAnimatedOffersSection(grandTotal),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _buildAnimatedBillDetails(
                   itemsTotal,
                   deliveryCharge,
@@ -414,7 +415,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   discount,
                   discountLabel,
                 ),
-                const SizedBox(height: 100), // Space for bottom bar
+                SizedBox(height: 100.h), // Space for bottom bar
               ],
             ),
           ),
@@ -436,7 +437,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           style: TextStyle(
             color: AppTheme.primaryColor,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 20.sp,
           ),
         ),
       ),
@@ -449,10 +450,10 @@ class _CheckoutPageState extends State<CheckoutPage>
             await controllersHome.fetchSubscriptions();
           },
           child: Container(
-            margin: const EdgeInsets.all(8),
+            margin: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
               Icons.arrow_back,
@@ -472,7 +473,7 @@ class _CheckoutPageState extends State<CheckoutPage>
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.08),
@@ -486,14 +487,14 @@ class _CheckoutPageState extends State<CheckoutPage>
               ),
             ],
           ),
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.r),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(12.r),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -501,26 +502,26 @@ class _CheckoutPageState extends State<CheckoutPage>
                           AppTheme.primaryColor.withOpacity(0.1),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(
                       Icons.shopping_bag_rounded,
                       color: AppTheme.primaryColor,
-                      size: 24,
+                      size: 24.sp,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  const Text(
+                  SizedBox(width: 16.w),
+                  Text(
                     "Selected Items",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       color: Color(0xFF1F2937),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               ...items.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
@@ -531,7 +532,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   onUpdate: () => setState(() {}),
                 );
               }),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               _buildAddMoreSection(),
             ],
           ),
@@ -542,7 +543,7 @@ class _CheckoutPageState extends State<CheckoutPage>
 
   Widget _buildAddMoreSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -550,10 +551,10 @@ class _CheckoutPageState extends State<CheckoutPage>
             AppTheme.primaryColor.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: AppTheme.primaryColor.withOpacity(0.2),
-          width: 1,
+          width: 1.w,
         ),
       ),
       child: Row(
@@ -565,9 +566,9 @@ class _CheckoutPageState extends State<CheckoutPage>
                 Icon(
                   Icons.lightbulb_outline,
                   color: AppTheme.primaryColor,
-                  size: 20,
+                  size: 20.sp,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 const Flexible(
                   child: Text(
                     "Missed something?",
@@ -581,7 +582,7 @@ class _CheckoutPageState extends State<CheckoutPage>
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Container(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -592,7 +593,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
                   color: const Color.fromRGBO(87, 104, 171, 0.3),
@@ -605,16 +606,16 @@ class _CheckoutPageState extends State<CheckoutPage>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => Get.back(),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: const Text(
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  child: Text(
                     "+ Add More",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ),
@@ -630,10 +631,10 @@ class _CheckoutPageState extends State<CheckoutPage>
     return SlideTransition(
       position: _dateSlideAnimation,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -648,7 +649,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -656,26 +657,26 @@ class _CheckoutPageState extends State<CheckoutPage>
                         AppTheme.primaryColor.withOpacity(0.1),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Icon(
                     Icons.schedule_rounded,
                     color: AppTheme.primaryColor,
-                    size: 24,
+                    size: 24.sp,
                   ),
                 ),
-                const SizedBox(width: 16),
-                const Text(
+                SizedBox(width: 16.w),
+                Text(
                   "Select Pickup Date & Slot",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     color: Color(0xFF1F2937),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -699,36 +700,36 @@ class _CheckoutPageState extends State<CheckoutPage>
                     }).toList(),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20.h),
+            Text(
               "Select Time Slot",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 16.sp,
                 color: Color(0xFF1F2937),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             if (isLoadingSlots || isLoadingDates)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: CircularProgressIndicator(),
                 ),
               )
             else if (dynamicPickupSlots.isEmpty)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding: EdgeInsets.symmetric(vertical: 20.h),
                 decoration: BoxDecoration(
                   color: Colors.red.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(color: Colors.red.withOpacity(0.1)),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 30),
-                    SizedBox(height: 8),
+                    Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 30.sp),
+                    SizedBox(height: 8.h),
                     Text(
                       "No slots available for this date",
                       style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500),
@@ -743,7 +744,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   children: dynamicPickupSlots.map((slot) {
                     bool isSelected = slot == selectedPickupSlot;
                     return Padding(
-                      padding: const EdgeInsets.only(right: 12),
+                      padding: EdgeInsets.only(right: 12.w),
                       child: _EnhancedTimeSlot(
                         slot: slot,
                         isSelected: isSelected,
@@ -761,7 +762,7 @@ class _CheckoutPageState extends State<CheckoutPage>
 
   Widget _buildAnimatedDeliveryDateDisplay() {
     if (selectedPickupDate == null) {
-      return const SizedBox();
+      return SizedBox();
     }
 
     final deliveryDate = selectedPickupDate!.add(const Duration(hours: 72));
@@ -769,8 +770,8 @@ class _CheckoutPageState extends State<CheckoutPage>
     return SlideTransition(
       position: _dateSlideAnimation,
       child: Container(
-        margin: const EdgeInsets.only(top: 16),
-        padding: const EdgeInsets.all(20),
+        margin: EdgeInsets.only(top: 16.h),
+        padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -778,10 +779,10 @@ class _CheckoutPageState extends State<CheckoutPage>
               Colors.green.withOpacity(0.05),
             ],
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
             color: Colors.green.withOpacity(0.3),
-            width: 1,
+            width: 1.w,
           ),
         ),
         child: Column(
@@ -790,40 +791,40 @@ class _CheckoutPageState extends State<CheckoutPage>
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.local_shipping_rounded,
                     color: Colors.green,
-                    size: 24,
+                    size: 24.sp,
                   ),
                 ),
-                const SizedBox(width: 16),
-                const Text(
+                SizedBox(width: 16.w),
+                Text(
                   "Expected Delivery",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     color: Colors.green,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
                 DateFormat('EEEE, MMM d, yyyy  |  hh:mm a')
                     .format(deliveryDate),
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF1F2937),
                 ),
@@ -839,7 +840,7 @@ class _CheckoutPageState extends State<CheckoutPage>
     return FadeTransition(
       opacity: _billFadeAnimation,
       child: hasSubscription == 1
-          ? const SizedBox.shrink()
+          ? SizedBox.shrink()
           : Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -849,10 +850,10 @@ class _CheckoutPageState extends State<CheckoutPage>
                     Colors.orange.withOpacity(0.05),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 border: Border.all(
                   color: Colors.orange.withOpacity(0.3),
-                  width: 1,
+                  width: 1.w,
                 ),
               ),
               child: Material(
@@ -878,38 +879,38 @@ class _CheckoutPageState extends State<CheckoutPage>
                       alreadyAppliedOffer: controller.activeOfferselected,
                     );
                   },
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                   child: Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20.r),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12.r),
                           decoration: BoxDecoration(
                             color: Colors.orange.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.local_offer_rounded,
                             color: Colors.orange,
-                            size: 24,
+                            size: 24.sp,
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        const Expanded(
+                        SizedBox(width: 16.w),
+                        Expanded(
                           child: Text(
                             "View Available Offers",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               color: Color(0xFF1F2937),
                             ),
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_ios,
                           color: Colors.orange,
-                          size: 18,
+                          size: 18.sp,
                         ),
                       ],
                     ),
@@ -957,10 +958,10 @@ class _CheckoutPageState extends State<CheckoutPage>
     final double finalTotal = grandTotal - discount;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -975,7 +976,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -983,52 +984,52 @@ class _CheckoutPageState extends State<CheckoutPage>
                       AppTheme.primaryColor.withOpacity(0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Icon(
                   Icons.receipt_rounded,
                   color: AppTheme.primaryColor,
-                  size: 24,
+                  size: 24.sp,
                 ),
               ),
-              const SizedBox(width: 16),
-              const Text(
+              SizedBox(width: 16.w),
+              Text(
                 "Bill Details",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   color: Color(0xFF1F2937),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _billRow("Items total", "\u20B9${itemsTotal.toStringAsFixed(2)}"),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _billRow(
               "Delivery charge", "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _billRow(
               "Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
           if (discount > 0) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             _billRow(
               "Discount",
               "-\u20B9${discount.toStringAsFixed(2)}",
               isDiscount: true,
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               discountLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.green,
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 16),
+            margin: EdgeInsets.symmetric(vertical: 16.h),
             height: 1,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -1062,10 +1063,10 @@ class _CheckoutPageState extends State<CheckoutPage>
     final int remaining = totalSubscriptionItems - (delivered + newItems);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -1080,7 +1081,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -1088,26 +1089,26 @@ class _CheckoutPageState extends State<CheckoutPage>
                       Colors.green.withOpacity(0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.card_membership_rounded,
                   color: Colors.green,
-                  size: 24,
+                  size: 24.sp,
                 ),
               ),
-              const SizedBox(width: 16),
-              const Text(
+              SizedBox(width: 16.w),
+              Text(
                 "Subscription Details",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   color: Color(0xFF1F2937),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _buildSubscriptionRow("Total Subscription Items",
               "$totalSubscriptionItems", Icons.inventory_2),
           _buildSubscriptionRow("New Items Added", "$newItems",
@@ -1124,16 +1125,16 @@ class _CheckoutPageState extends State<CheckoutPage>
   Widget _buildSubscriptionRow(String label, String value, IconData icon,
       [Color? color, bool isBold = false]) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
         color: (color ?? AppTheme.primaryColor).withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color ?? AppTheme.primaryColor, size: 20),
-          const SizedBox(width: 12),
+          Icon(icon, color: color ?? AppTheme.primaryColor, size: 20.sp),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               label,
@@ -1148,7 +1149,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
               color: color ?? AppTheme.primaryColor,
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
         ],
@@ -1193,7 +1194,7 @@ class _CheckoutPageState extends State<CheckoutPage>
     return SlideTransition(
       position: _bottomBarSlideAnimation,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -1217,14 +1218,14 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 60.h,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: canPlaceOrder
               ? [Colors.green.shade600, Colors.green.shade700]
               : [Colors.grey.shade400, Colors.grey.shade500],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: canPlaceOrder
             ? [
                 BoxShadow(
@@ -1239,9 +1240,9 @@ class _CheckoutPageState extends State<CheckoutPage>
         color: Colors.transparent,
         child: InkWell(
           onTap: canPlaceOrder ? () => _handlePlaceOrder(finalTotal) : null,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1252,41 +1253,41 @@ class _CheckoutPageState extends State<CheckoutPage>
                     children: [
                       Text(
                         "\u20B9${finalTotal.toStringAsFixed(2)}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
+                      Text(
                         "Total Amount",
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 24),
+                  SizedBox(width: 24.w),
                 ],
                 Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
                     color: Colors.white24,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.shopping_cart_checkout,
                     color: Colors.white,
-                    size: 24,
+                    size: 24.sp,
                   ),
                 ),
-                const SizedBox(width: 12),
-                const Text(
+                SizedBox(width: 12.w),
+                Text(
                   "Place Order",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1510,8 +1511,8 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           child: Opacity(
             opacity: _slideAnimation.value.clamp(0.0, 1.0),
             child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(16),
+              margin: EdgeInsets.only(bottom: 16.h),
+              padding: EdgeInsets.all(16.r),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -1519,45 +1520,45 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                     AppTheme.primaryColor.withOpacity(0.02),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
                   color: AppTheme.primaryColor.withOpacity(0.1),
-                  width: 1,
+                  width: 1.w,
                 ),
               ),
               child: Row(
                 children: [
                   _buildItemImage(),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.item['product']['name'] ?? '',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             color: Color(0xFF1F2937),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6.h),
                         Text(
                           "Service: ${widget.item['service_name']}",
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.grey.shade600,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12.h),
                         _buildQuantityControls(),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   _buildPriceDisplay(),
                 ],
               ),
@@ -1571,7 +1572,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
   Widget _buildItemImage() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: AppTheme.primaryColor.withOpacity(0.2),
@@ -1581,16 +1582,16 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         child: Image.network(
           widget.item['product']['image'] ??
               'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
-          height: 60,
-          width: 60,
+          height: 60.h,
+          width: 60.w,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => Container(
-            height: 60,
-            width: 60,
+            height: 60.h,
+            width: 60.w,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -1602,7 +1603,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
             child: Icon(
               Icons.local_laundry_service,
               color: AppTheme.primaryColor,
-              size: 24,
+              size: 24.sp,
             ),
           ),
         ),
@@ -1618,25 +1619,25 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
         children: [
           Text(
             widget.item['product']['name'] ?? '',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 16.sp,
               color: Color(0xFF1F2937),
             ),
             maxLines: 2, // Allow up to 2 lines
             overflow: TextOverflow.ellipsis, // Handle overflow gracefully
           ),
-          const SizedBox(height: 8), // Increased spacing
+          SizedBox(height: 8.h), // Increased spacing
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
               "Service: ${widget.item['service_name']}",
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.w500,
                 color: AppTheme.primaryColor,
               ),
@@ -1660,7 +1661,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: const Color.fromRGBO(87, 104, 171, 0.3),
@@ -1680,29 +1681,29 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                 widget.controller.update();
                 widget.onUpdate();
               },
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12.r),
+                bottomLeft: Radius.circular(12.r),
               ),
               child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
+                padding: EdgeInsets.all(8.r),
+                child: Icon(
                   Icons.remove,
-                  size: 18,
+                  size: 18.sp,
                   color: Colors.white,
                 ),
               ),
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             child: Obx(() {
               final quantity = widget.controller.cartQuantities[
                       '${widget.item['service']}_${widget.item['product']['id']}'] ??
                   0;
               return Text(
                 "$quantity",
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1717,15 +1718,15 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                 widget.controller.update();
                 widget.onUpdate();
               },
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(12),
-                bottomRight: Radius.circular(12),
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(12.r),
+                bottomRight: Radius.circular(12.r),
               ),
               child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
+                padding: EdgeInsets.all(8.r),
+                child: Icon(
                   Icons.add,
-                  size: 18,
+                  size: 18.sp,
                   color: Colors.white,
                 ),
               ),
@@ -1743,20 +1744,20 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           0;
       final totalPrice = quantity * widget.item['product']['price'];
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
             color: Colors.grey.shade300,
-            width: 1,
+            width: 1.w,
           ),
         ),
         child: Text(
           "\u20B9$totalPrice",
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 16.sp,
             color: Color(0xFF1F2937),
           ),
         ),
@@ -1783,8 +1784,8 @@ class _EnhancedDateCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: EdgeInsets.only(right: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
@@ -1795,10 +1796,10 @@ class _EnhancedDateCard extends StatelessWidget {
                 )
               : null,
           color: !isSelected ? Colors.grey.shade100 : null,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
-            width: 2,
+            width: 2.w,
           ),
           boxShadow: isSelected
               ? [
@@ -1817,14 +1818,14 @@ class _EnhancedDateCard extends StatelessWidget {
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
-                fontSize: 12,
+                fontSize: 12.sp,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               date.day.toString(),
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : AppTheme.primaryColor,
               ),
@@ -1854,7 +1855,7 @@ class _EnhancedTimeSlot extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
@@ -1865,10 +1866,10 @@ class _EnhancedTimeSlot extends StatelessWidget {
                 )
               : null,
           color: !isSelected ? Colors.grey.shade100 : null,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(25.r),
           border: Border.all(
             color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
-            width: 2,
+            width: 2.w,
           ),
           boxShadow: isSelected
               ? [
@@ -1885,10 +1886,10 @@ class _EnhancedTimeSlot extends StatelessWidget {
           children: [
             Icon(
               Icons.schedule,
-              size: 16,
+              size: 16.sp,
               color: isSelected ? Colors.white : AppTheme.primaryColor,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Text(
               slot,
               style: TextStyle(

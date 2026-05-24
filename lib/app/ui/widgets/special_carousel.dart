@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 // Removed get_storage import - using SharedPreferences instead
@@ -78,6 +79,45 @@ class _SpecialCarouselState extends State<SpecialCarousel>
   }
 
   void _openCheckout(Map sub) {
+    if (controller.isGuestMode.value) {
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.r)),
+          title: Row(
+            children: [
+              const Icon(Icons.lock_rounded, color: Color(0xFF3D52A0)),
+              SizedBox(width: 10.w),
+              const Text('Login Required'),
+            ],
+          ),
+          content: const Text(
+              'Please login or create an account to purchase a subscription.'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3D52A0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              onPressed: () {
+                Get.back();
+                Get.toNamed('/login');
+              },
+              child: const Text('Login',
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     if (_isProcessingPayment.value) return;
 
     // Check if user already has any active subscription (force reactive read)
@@ -219,8 +259,8 @@ class _SpecialCarouselState extends State<SpecialCarousel>
 
       // Show loading while subscription status is being fetched
       if (_isLoadingStatus.value) {
-        return const SizedBox(
-          height: 200,
+        return SizedBox(
+          height: 200.h,
           child: Center(
             child: CircularProgressIndicator(),
           ),
@@ -231,7 +271,7 @@ class _SpecialCarouselState extends State<SpecialCarousel>
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            height: 200,
+            height: 200.h,
             child: PageView.builder(
               controller: _pageController,
               itemCount: controller.subscriptions.length,
@@ -274,7 +314,7 @@ class _SpecialCarouselState extends State<SpecialCarousel>
               },
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
 
           // Dots indicator with dynamic animation
           Row(
@@ -282,14 +322,14 @@ class _SpecialCarouselState extends State<SpecialCarousel>
             children: List.generate(controller.subscriptions.length, (index) {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                height: 8,
+                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                height: 8.h,
                 width: _current == index ? 22 : 8,
                 decoration: BoxDecoration(
                   color: _current == index
                       ? AppTheme.primaryColor
                       : Colors.grey[400],
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
               );
             }),
@@ -316,9 +356,9 @@ void _showSubscriptionDetail(
       return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
           ),
           child: Stack(
             children: [
@@ -328,28 +368,29 @@ void _showSubscriptionDetail(
               ),
               // Main Content Layer
               Padding(
-                padding: const EdgeInsets.only(top: 16.0),
+                padding: EdgeInsets.only(top: 16.0.h),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Draggable handle
                     Container(
-                      height: 4,
-                      width: 60,
-                      margin: const EdgeInsets.symmetric(vertical: 16),
+                      height: 4.h,
+                      width: 60.w,
+                      margin: EdgeInsets.symmetric(vertical: 16.h),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
                       child: Hero(
                         tag: 'subscription-card-${sub['id']}',
                         child: Material(
                           color: Colors.transparent,
                           child: Container(
-                            padding: const EdgeInsets.all(24),
+                            padding: EdgeInsets.all(24.r),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
@@ -359,7 +400,7 @@ void _showSubscriptionDetail(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(24.r),
                               boxShadow: [
                                 BoxShadow(
                                   color: AppTheme.primaryColor.withOpacity(0.4),
@@ -379,57 +420,57 @@ void _showSubscriptionDetail(
                                     Expanded(
                                       child: Text(
                                         sub['name'] ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 28,
+                                        style: TextStyle(
+                                          fontSize: 28.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
                                       ),
                                     ),
-                                    const Icon(
+                                    Icon(
                                       Icons.star_rounded,
                                       color: Color(0xFFFFD700),
-                                      size: 36,
+                                      size: 36.sp,
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
+                                SizedBox(height: 12.h),
                                 if (sub['description'] != null)
                                   Text(
                                     sub['description'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
                                       color: Colors.white70,
                                     ),
                                   ),
-                                const SizedBox(height: 20),
+                                SizedBox(height: 20.h),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
                                       "₹${sub['discounted_price']}",
-                                      style: const TextStyle(
-                                        fontSize: 32,
+                                      style: TextStyle(
+                                        fontSize: 32.sp,
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFFB5FFC8),
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12.w),
                                     Text(
                                       "₹${sub['original_price']}",
-                                      style: const TextStyle(
-                                        fontSize: 18,
+                                      style: TextStyle(
+                                        fontSize: 18.sp,
                                         color: Colors.white54,
                                         decoration: TextDecoration.lineThrough,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10.h),
                                 Text(
                                   "${sub['pieces']} pcs • ${sub['validity_days']} days",
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
                                     color: Colors.white70,
                                   ),
                                 ),
@@ -438,11 +479,12 @@ void _showSubscriptionDetail(
                           ),
                         ),
                       ),
+                      ),
                     ),
                     // Separated button section
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 16.0),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 24.0.w, vertical: 16.0.h),
                       child: Obx(
                         () => SubscribeButton(
                           isSubscribed: isSubscribed,
@@ -551,17 +593,17 @@ class SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 30, right: 15, left: 5),
+      margin: EdgeInsets.only(bottom: 30.h, right: 15.w, left: 5.w),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24.r),
               gradient: LinearGradient(
                 colors: [
                   AppTheme.primaryColor.withOpacity(0.9),
-                  const Color(0xFF232F46).withOpacity(0.9),
+                  Color(0xFF232F46).withOpacity(0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -575,7 +617,7 @@ class SubscriptionCard extends StatelessWidget {
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24.r),
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -589,14 +631,14 @@ class SubscriptionCard extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: EdgeInsets.all(24.r),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           sub['name'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 24,
+                          style: TextStyle(
+                            fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -607,28 +649,28 @@ class SubscriptionCard extends StatelessWidget {
                           children: [
                             Text(
                               "₹${sub['discounted_price']}",
-                              style: const TextStyle(
-                                fontSize: 26,
+                              style: TextStyle(
+                                fontSize: 26.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFFB5FFC8),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12.w),
                             Text(
                               "₹${sub['original_price']}",
-                              style: const TextStyle(
-                                fontSize: 18,
+                              style: TextStyle(
+                                fontSize: 18.sp,
                                 color: Colors.white70,
                                 decoration: TextDecoration.lineThrough,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6.h),
                         Text(
                           "${sub['pieces']} pcs • ${sub['validity_days']} days",
-                          style: const TextStyle(
-                            fontSize: 14,
+                          style: TextStyle(
+                            fontSize: 14.sp,
                             color: Color.fromARGB(223, 255, 255, 255),
                           ),
                         ),
@@ -717,10 +759,10 @@ class _SubscribeButtonState extends State<SubscribeButton>
           );
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: widget.isSubscribed ? Colors.grey[400] : Colors.white,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -733,7 +775,7 @@ class _SubscribeButtonState extends State<SubscribeButton>
             widget.isSubscribed ? "Subscribed" : "Subscribe",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
+              fontSize: 14.sp,
               color: widget.isSubscribed ? Colors.white : AppTheme.primaryColor,
             ),
           ),

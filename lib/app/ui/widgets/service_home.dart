@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class ServiceIcon extends StatelessWidget {
   final String icon;
   final String label;
@@ -9,11 +10,11 @@ class ServiceIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image.asset(icon, width: 24, height: 24),
-        const SizedBox(height: 6),
+        Image.asset(icon, width: 24.w, height: 24.h),
+        SizedBox(height: 6.h),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.white),
+          style: TextStyle(fontSize: 12.sp, color: Colors.white),
           textAlign: TextAlign.center,
         ),
       ],

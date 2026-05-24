@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/routes/app_pages.dart';
+import 'package:laundry_app/app/controllers/login_controller.dart' as laundry_app_login_controller;
 
 class GetStarted extends StatefulWidget {
   const GetStarted({super.key});
@@ -86,6 +87,38 @@ class _GetStartedState extends State<GetStarted> {
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GestureDetector(
+                      onTap: () {
+                        final loginController = Get.put(laundry_app_login_controller.LoginController());
+                        loginController.continueAsGuest();
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromRGBO(35, 42, 69, 1),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                          color: Colors.transparent,
+                        ),
+                        child: const Center(
+                          child: Text(
+                            "Continue as Guest",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(35, 42, 69, 1),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

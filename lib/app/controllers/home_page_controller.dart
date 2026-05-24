@@ -1,7 +1,6 @@
 import 'dart:math' show cos, sin, sqrt, asin, pi;
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:laundry_app/app/ui/screens/service_not_available_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,6 +19,7 @@ class HomePageController extends GetxController {
   var isLoading = false.obs;
   var isServiceAvailable = true.obs;
   var userDistanceFromCenter = 0.0.obs;
+  var isGuestMode = false.obs;
 
   // Service center coordinates
   static const double centerLatitude = 17.608400;
@@ -52,15 +52,21 @@ class HomePageController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Fetch user details first (sets _cachedUserId)
-      await fetchUserDetails();
+      // Check guest mode from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      final isGuest = prefs.getBool('isGuest') ?? false;
+      isGuestMode.value = !isLoggedIn || isGuest;
 
-      // Then fetch other data using cached userId
-      await Future.wait([
-        Future(() => fetchServices()),
-        Future(() => fetchUserAddress()),
-        Future(() => fetchSubscriptions()),
-      ]);
+      // Always fetch public services (no auth required)
+      await fetchServices();
+      fetchSubscriptions(); // Fetch promotional offers for all users
+
+      if (!isGuestMode.value) {
+        // Fetch user-specific data only for logged-in users
+        await fetchUserDetails();
+        fetchUserAddress();    // void — no await needed
+      }
     } catch (e) {
       print('Error initializing data: $e');
     } finally {
@@ -111,6 +117,25 @@ class HomePageController extends GetxController {
   //   }
   // }
 
+  /// Returns the logged-in user ID, or null for guest users.
+  Future<int?> fetchUserDetailsNullable() async {
+    try {
+      if (_cachedUserId != null) return _cachedUserId;
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+      if (userId == null) return null;
+      final response =
+          await supabase.from('users').select('*').eq('id', userId).single();
+      if (response != null && response['id'] != null) {
+        _cachedUserId = response['id'] as int;
+        return _cachedUserId;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<int> fetchUserDetails() async {
     try {
       // Return cached userId if available
@@ -136,17 +161,18 @@ class HomePageController extends GetxController {
 
       throw Exception('User ID not found');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load user details');
       throw Exception('Failed to load user details: $e');
     }
   }
 
   /// ✅ Fetch services
-  void fetchServices() async {
+  Future<void> fetchServices() async {
     try {
       final response = await supabase.from('services').select('*');
+      print('✅ HomePage fetchServices response: $response');
       services.value = response;
     } catch (e) {
+      print('❌ HomePage fetchServices error: $e');
       Get.snackbar('Error', 'Failed to load services');
     }
   }

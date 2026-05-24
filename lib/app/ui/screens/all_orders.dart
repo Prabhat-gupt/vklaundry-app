@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
@@ -143,7 +144,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
         child: Column(
           children: [
             _buildGradientHeader(context),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Expanded(child: _buildAnimatedContent()),
           ],
         ),
@@ -161,15 +162,15 @@ class _AllOrdersPageState extends State<AllOrdersPage>
           left: 20,
           right: 20,
         ),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
           ),
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(30),
-            bottomRight: Radius.circular(30),
+            bottomLeft: Radius.circular(30.r),
+            bottomRight: Radius.circular(30.r),
           ),
           boxShadow: [
             BoxShadow(
@@ -186,35 +187,35 @@ class _AllOrdersPageState extends State<AllOrdersPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'My Bookings',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Obx(() {
                     final count =
                         (orderTrackController.order['orders'] ?? []).length;
                     return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20.r),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.25), width: 1),
+                            color: Colors.white.withOpacity(0.25), width: 1.w),
                       ),
                       child: Text(
                         count == 0
                             ? 'No orders yet'
                             : '$count ${count == 1 ? 'order' : 'orders'} found',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -225,17 +226,17 @@ class _AllOrdersPageState extends State<AllOrdersPage>
             ),
             // Right: icon
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14.r),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.25), width: 1),
+                    color: Colors.white.withOpacity(0.25), width: 1.w),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.receipt_long_rounded,
                 color: Colors.white,
-                size: 28,
+                size: 28.sp,
               ),
             ),
           ],
@@ -250,8 +251,8 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       child: ScaleTransition(
         scale: _headerScaleAnimation,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.all(24),
+          margin: EdgeInsets.symmetric(horizontal: 20.w),
+          padding: EdgeInsets.all(24.r),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -261,7 +262,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                 AppTheme.primaryColor.withOpacity(0.05),
               ],
             ),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -273,7 +274,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -281,7 +282,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                       AppTheme.primaryColor.withOpacity(0.15),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.primaryColor.withOpacity(0.3),
@@ -292,11 +293,11 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                 ),
                 child: Icon(
                   Icons.history_rounded,
-                  size: 32,
+                  size: 32.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
-              const SizedBox(width: 20),
+              SizedBox(width: 20.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,12 +305,12 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                     Text(
                       'Order History',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Obx(() {
                       final ordersData =
                           orderTrackController.order['orders'] ?? [];
@@ -317,8 +318,8 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                         ordersData.isEmpty
                             ? 'No orders found'
                             : '${ordersData.length} ${ordersData.length == 1 ? 'order' : 'orders'} found',
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: 14.sp,
                           color: Colors.grey,
                         ),
                       );
@@ -339,7 +340,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       child: FadeTransition(
         opacity: _contentFadeAnimation,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: 16.0.w),
           child: Obx(() {
             final ordersData = orderTrackController.order['orders'] ?? [];
 
@@ -368,14 +369,14 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                 child: Transform.scale(
                   scale: 0.7 + (0.3 * value),
                   child: Container(
-                    padding: const EdgeInsets.all(28),
+                    padding: EdgeInsets.all(28.r),
                     decoration: BoxDecoration(
                       color: const Color(0xFF3D52A0).withOpacity(0.08),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.inbox_rounded,
-                      size: 72,
+                      size: 72.sp,
                       color: Color(0xFF3D52A0),
                     ),
                   ),
@@ -383,7 +384,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
               );
             },
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: 28.h),
           TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 700),
             tween: Tween(begin: 0.0, end: 1.0),
@@ -394,25 +395,25 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                   offset: Offset(0, 20 * (1 - value)),
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "No Orders Yet",
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 22.sp,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1A2340),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
+                      SizedBox(height: 10.h),
+                      Text(
                         "You haven't placed any orders yet.\nStart by exploring our services!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: Colors.grey,
                           height: 1.6,
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28.h),
                       _buildExploreServicesButton(),
                     ],
                   ),
@@ -431,7 +432,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
         gradient: const LinearGradient(
           colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF3D52A0).withOpacity(0.4),
@@ -447,20 +448,20 @@ class _AllOrdersPageState extends State<AllOrdersPage>
             final homeController = Get.find<HomePageController>();
             homeController.currentNavIndex.value = 1;
           },
-          borderRadius: BorderRadius.circular(20),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+          borderRadius: BorderRadius.circular(20.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 14.h),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.explore_rounded, color: Colors.white, size: 20),
-                SizedBox(width: 10),
+                Icon(Icons.explore_rounded, color: Colors.white, size: 20.sp),
+                SizedBox(width: 10.w),
                 Text(
                   'Explore Services',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 15.sp,
                   ),
                 ),
               ],

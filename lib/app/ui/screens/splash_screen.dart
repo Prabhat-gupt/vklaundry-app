@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
@@ -140,26 +141,31 @@ class _SplashScreenState extends State<SplashScreen>
       _navigated = true;
 
       final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      final isGuest = prefs.getBool('isGuest') ?? false;
 
       // Add delay for better UX and to let Supabase session restore
       await Future.delayed(const Duration(seconds: 2));
-      
+
       if (mounted) {
         if (isLoggedIn) {
           // Reload prefs after delay to get updated userId
           final updatedPrefs = await SharedPreferences.getInstance();
-          
+
           // Check service availability before navigating
-          final isServiceAvailable = await _checkServiceAvailability(updatedPrefs);
-          
+          final isServiceAvailable =
+              await _checkServiceAvailability(updatedPrefs);
+
           if (isServiceAvailable['available'] == true) {
             Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
           } else {
             // Navigate to service not available screen
             Get.off(() => ServiceNotAvailableScreen(
-              distance: isServiceAvailable['distance'] ?? 0.0,
-            ));
+                  distance: isServiceAvailable['distance'] ?? 0.0,
+                ));
           }
+        } else if (isGuest) {
+          // Guest user — go directly to home, no login needed
+          Navigator.pushReplacementNamed(context, AppRoutes.ROOT);
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.GETSTARTED);
         }
@@ -327,8 +333,8 @@ class _SplashScreenState extends State<SplashScreen>
                         left: x - 15,
                         top: y - 15,
                         child: Container(
-                          width: 30,
-                          height: 30,
+                          width: 30.w,
+                          height: 30.h,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withOpacity(0.1),
@@ -351,7 +357,7 @@ class _SplashScreenState extends State<SplashScreen>
                           return Transform.translate(
                             offset: Offset(0, -_floatingAnimation.value),
                             child: Container(
-                              padding: const EdgeInsets.all(20),
+                              padding: EdgeInsets.all(20.r),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white.withOpacity(0.1),
@@ -364,7 +370,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ],
                               ),
                               child: Container(
-                                // padding: const EdgeInsets.all(20),
+                                // padding: EdgeInsets.all(20.r),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,
@@ -397,8 +403,8 @@ class _SplashScreenState extends State<SplashScreen>
                                   child: Image.asset(
                                     splashImages[_currentIndex],
                                     key: ValueKey<int>(_currentIndex),
-                                    height: 200,
-                                    width: 200,
+                                    height: 200.h,
+                                    width: 200.w,
                                   ),
                                 ),
                               ),
@@ -407,7 +413,7 @@ class _SplashScreenState extends State<SplashScreen>
                         },
                       ),
 
-                      const SizedBox(height: 60),
+                      SizedBox(height: 60.h),
 
                       // App title with fade-in animation
                       FadeTransition(
@@ -417,7 +423,7 @@ class _SplashScreenState extends State<SplashScreen>
                             // Text(
                             //   'Laundry App',
                             //   style: TextStyle(
-                            //     fontSize: 42,
+                            //     fontSize: 42.sp,
                             //     fontWeight: FontWeight.bold,
                             //     color: Colors.white,
                             //     letterSpacing: 1.5,
@@ -436,13 +442,13 @@ class _SplashScreenState extends State<SplashScreen>
                                 Text(
                                   'VK Laundary',
                                   style: TextStyle(
-                                    fontSize: 42,
+                                    fontSize: 42.sp,
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 8.h),
                                 TweenAnimationBuilder<double>(
                                   tween: Tween(begin: 0.0, end: 1.0),
                                   duration: Duration(seconds: 2),
@@ -453,7 +459,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   child: Text(
                                     'Your Laundry, Our Priority',
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 20.sp,
                                       color: Colors.white.withOpacity(0.9),
                                     ),
                                   ),
@@ -466,7 +472,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
 
-                      const SizedBox(height: 80),
+                      SizedBox(height: 80.h),
 
                       // Loading indicator
                       // AnimatedBuilder(
@@ -477,13 +483,13 @@ class _SplashScreenState extends State<SplashScreen>
                       //       child: Column(
                       //         children: [
                       //           Container(
-                      //             width: 40,
-                      //             height: 40,
+                      //             width: 40.w,
+                      //             height: 40.h,
                       //             decoration: BoxDecoration(
                       //               shape: BoxShape.circle,
                       //               border: Border.all(
                       //                 color: Colors.white,
-                      //                 width: 3,
+                      //                 width: 3.w,
                       //               ),
                       //             ),
                       //             child: const CircularProgressIndicator(
@@ -491,12 +497,12 @@ class _SplashScreenState extends State<SplashScreen>
                       //               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       //             ),
                       //           ),
-                      //           const SizedBox(height: 16),
+                      //           SizedBox(height: 16.h),
                       //           Text(
                       //             'Loading...',
                       //             style: TextStyle(
                       //               color: Colors.white.withOpacity(0.8),
-                      //               fontSize: 14,
+                      //               fontSize: 14.sp,
                       //               letterSpacing: 1.0,
                       //             ),
                       //           ),
@@ -525,8 +531,8 @@ class _SplashScreenState extends State<SplashScreen>
                         left: x - 3,
                         top: y - 3,
                         child: Container(
-                          width: 6,
-                          height: 6,
+                          width: 6.w,
+                          height: 6.h,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withOpacity(0.3),

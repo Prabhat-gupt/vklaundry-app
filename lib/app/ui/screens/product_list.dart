@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/productlist_controller.dart';
@@ -148,13 +149,13 @@ class _ProductListScreenState extends State<ProductListScreen>
           children: [
             _buildAnimatedHeader(context),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
               child: _buildAnimatedCategories(),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
                 child: _buildAnimatedProductGrid(),
               ),
             ),
@@ -175,15 +176,15 @@ class _ProductListScreenState extends State<ProductListScreen>
           left: 16,
           right: 16,
         ),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
           ),
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(28),
-            bottomRight: Radius.circular(28),
+            bottomLeft: Radius.circular(28.r),
+            bottomRight: Radius.circular(28.r),
           ),
           boxShadow: [
             BoxShadow(
@@ -198,36 +199,36 @@ class _ProductListScreenState extends State<ProductListScreen>
             GestureDetector(
               onTap: () => Navigator.of(context).maybePop(),
               child: Container(
-                padding: const EdgeInsets.all(9),
+                padding: EdgeInsets.all(9.r),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
-                      color: Colors.white.withOpacity(0.25), width: 1),
+                      color: Colors.white.withOpacity(0.25), width: 1.w),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 18),
+                child: Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white, size: 18.sp),
               ),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: 14.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     serviceName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  const Text(
+                  SizedBox(height: 3),
+                  Text(
                     'Choose your items',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       color: Colors.white60,
                     ),
                   ),
@@ -237,27 +238,27 @@ class _ProductListScreenState extends State<ProductListScreen>
             // Cart count badge in header
             Obx(() {
               final count = controller.getTotalCartItems();
-              if (count == 0) return const SizedBox.shrink();
+              if (count == 0) return SizedBox.shrink();
               return Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
-                      color: Colors.white.withOpacity(0.3), width: 1),
+                      color: Colors.white.withOpacity(0.3), width: 1.w),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.shopping_cart_rounded,
-                        color: Colors.white, size: 16),
-                    const SizedBox(width: 5),
+                    Icon(Icons.shopping_cart_rounded,
+                        color: Colors.white, size: 16.sp),
+                    SizedBox(width: 5.w),
                     Text(
                       '$count',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontSize: 13.sp,
                       ),
                     ),
                   ],
@@ -274,7 +275,7 @@ class _ProductListScreenState extends State<ProductListScreen>
     return ScaleTransition(
       scale: _categoryScaleAnimation,
       child: SizedBox(
-        height: 44,
+        height: 44.h,
         child: Obx(
           () => Skeletonizer(
             enabled: controller.isLoading.value,
@@ -324,7 +325,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                   : controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.66,
+                childAspectRatio: 0.58,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -361,35 +362,35 @@ class _ProductListScreenState extends State<ProductListScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.r),
               decoration: BoxDecoration(
                 color: AppTheme.primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Image.network(
                 "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",
-                height: 80,
+                height: 80.h,
                 errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.shopping_bag_outlined,
-                  size: 80,
+                  size: 80.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             Text(
               "No items available",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8.h),
+            Text(
               "Please try selecting a different category",
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 14.sp,
                 color: Colors.grey,
               ),
             ),
@@ -404,13 +405,13 @@ class _ProductListScreenState extends State<ProductListScreen>
         ? SlideTransition(
             position: _cartSlideAnimation,
             child: Container(
-              margin: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-              height: 60,
+              margin: EdgeInsets.fromLTRB(16, 8, 16, 20),
+              height: 60.h,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF4B5EAA), Color(0xFF1A2340)],
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFF3D52A0).withOpacity(0.5),
@@ -433,45 +434,45 @@ class _ProductListScreenState extends State<ProductListScreen>
                       },
                     );
                   },
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(8.r),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.shopping_cart_checkout_rounded,
                             color: Colors.white,
-                            size: 20,
+                            size: 20.sp,
                           ),
                         ),
-                        const SizedBox(width: 14),
-                        const Text(
+                        SizedBox(width: 14.w),
+                        Text(
                           "Proceed to Checkout",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 15,
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.3,
                           ),
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 6.h),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: Text(
                             controller.getTotalCartItems().toString(),
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: TextStyle(
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -484,16 +485,16 @@ class _ProductListScreenState extends State<ProductListScreen>
               ),
             ),
           )
-        : const SizedBox.shrink());
+        : SizedBox.shrink());
   }
 
   Widget _buildCategorySkeleton() {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+      margin: EdgeInsets.only(right: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(25.r),
       ),
     );
   }
@@ -502,7 +503,7 @@ class _ProductListScreenState extends State<ProductListScreen>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
         ],
@@ -556,7 +557,7 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: EdgeInsets.only(right: 8.0.w),
       child: GestureDetector(
         onTapDown: (_) => _animationController.forward(),
         onTapUp: (_) => _animationController.reverse(),
@@ -570,7 +571,7 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                 decoration: BoxDecoration(
                   gradient: widget.isSelected
                       ? const LinearGradient(
@@ -578,12 +579,12 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
                         )
                       : null,
                   color: !widget.isSelected ? Colors.white : null,
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(22.r),
                   border: Border.all(
                     color: widget.isSelected
                         ? const Color(0xFF3D52A0)
                         : Colors.grey.shade300,
-                    width: 1.5,
+                    width: 1.5.w,
                   ),
                   boxShadow: widget.isSelected
                       ? [
@@ -608,18 +609,18 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
                       ClipOval(
                         child: Image.network(
                           widget.iconUrl!,
-                          width: 20,
-                          height: 20,
+                          width: 20.w,
+                          height: 20.h,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                          errorBuilder: (_, __, ___) => SizedBox.shrink(),
                         ),
                       ),
                     if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty)
-                      const SizedBox(width: 7),
+                      SizedBox(width: 7.w),
                     Text(
                       widget.label,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: widget.isSelected
                             ? Colors.white
@@ -720,10 +721,10 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                   return Transform.scale(
                     scale: _scaleAnimation.value,
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 0),
+                      margin: EdgeInsets.only(bottom: 0.h),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(18.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black
@@ -737,17 +738,18 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildProductImage(),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildProductInfo(),
-                                const SizedBox(height: 6),
-                                _buildRatingRow(),
-                                const SizedBox(height: 8),
-                                _buildActionButton(),
-                              ],
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(11, 8, 11, 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildProductInfo(),
+                                  _buildRatingRow(),
+                                  _buildActionButton(),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -768,18 +770,18 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
           child: SizedBox(
-            height: 115,
+            height: 100.h,
             width: double.infinity,
             child: Image.network(
               widget.item['image'] ?? '',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
                 color: const Color(0xFFEEF0F8),
-                child: const Icon(
+                child: Icon(
                   Icons.local_laundry_service_rounded,
-                  size: 44,
+                  size: 44.sp,
                   color: Color(0xFF3D52A0),
                 ),
               ),
@@ -792,16 +794,16 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
             top: 8,
             left: 8,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
               decoration: BoxDecoration(
                 color: Colors.green.shade600,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
                 discount,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 10,
+                  fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -817,34 +819,34 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
       children: [
         Text(
           widget.item['name'] ?? '',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 14.sp,
             color: Color(0xFF1A2340),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 5),
+        SizedBox(height: 5.h),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               "\u20B9${widget.item['price']}",
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF3D52A0),
-                fontSize: 17,
+                fontSize: 17.sp,
               ),
             ),
-            const SizedBox(width: 5),
+            SizedBox(width: 5.w),
             if ((widget.item['oldPrice']?.toString() ?? '').isNotEmpty)
               Text(
                 "\u20B9${widget.item['oldPrice']}",
-                style: const TextStyle(
+                style: TextStyle(
                   decoration: TextDecoration.lineThrough,
                   color: Colors.grey,
-                  fontSize: 11,
+                  fontSize: 11.sp,
                 ),
               ),
           ],
@@ -857,32 +859,32 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
           decoration: BoxDecoration(
             color: Colors.green.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(4.r),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.star, color: Colors.green, size: 14),
-              const SizedBox(width: 2),
+              Icon(Icons.star, color: Colors.green, size: 14.sp),
+              SizedBox(width: 2.w),
               Text(
                 "${widget.item['rating']}",
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: Colors.green,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: 4.w),
         Text(
           "(${widget.item['reviews']})",
-          style: const TextStyle(
-            fontSize: 12,
+          style: TextStyle(
+            fontSize: 12.sp,
             color: Colors.grey,
           ),
         ),
@@ -909,9 +911,9 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
   Widget _buildQuantitySelector(int quantity) {
     return Container(
       key: const ValueKey('quantity_selector'),
-      height: 40,
+      height: 40.h,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
         gradient: LinearGradient(
           colors: [
@@ -927,15 +929,15 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => widget.controller.removeFromCart(widget.item),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12.r),
+                  bottomLeft: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 40,
+                  height: 40.h,
                   child: Icon(
                     Icons.remove,
-                    size: 18,
+                    size: 18.sp,
                     color: AppTheme.primaryColor,
                   ),
                 ),
@@ -943,8 +945,8 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
             ),
           ),
           Container(
-            width: 1,
-            height: 24,
+            width: 1.w,
+            height: 24.h,
             color: AppTheme.primaryColor.withOpacity(0.3),
           ),
           Expanded(
@@ -952,7 +954,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               child: Text(
                 quantity.toString(),
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryColor,
                 ),
@@ -960,8 +962,8 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
             ),
           ),
           Container(
-            width: 1,
-            height: 24,
+            width: 1.w,
+            height: 24.h,
             color: AppTheme.primaryColor.withOpacity(0.3),
           ),
           Expanded(
@@ -969,15 +971,15 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => widget.controller.addToCart(widget.item),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12.r),
+                  bottomRight: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 40,
+                  height: 40.h,
                   child: Icon(
                     Icons.add,
-                    size: 18,
+                    size: 18.sp,
                     color: AppTheme.primaryColor,
                   ),
                 ),
@@ -993,12 +995,12 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     return Container(
       key: const ValueKey('add_button'),
       width: double.infinity,
-      height: 40,
+      height: 40.h,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8)],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: AppTheme.primaryColor.withOpacity(0.3),
@@ -1011,14 +1013,14 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
         color: Colors.transparent,
         child: InkWell(
           onTap: () => widget.controller.addToCart(widget.item),
-          borderRadius: BorderRadius.circular(12),
-          child: const Center(
+          borderRadius: BorderRadius.circular(12.r),
+          child: Center(
             child: Text(
               'Add to Cart',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
-                fontSize: 14,
+                fontSize: 14.sp,
               ),
             ),
           ),

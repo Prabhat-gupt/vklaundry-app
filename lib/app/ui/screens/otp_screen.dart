@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/login_controller.dart';
@@ -57,9 +58,9 @@ class _OtpScreenState extends State<OtpScreen> {
         backgroundColor: const Color(0xFFF57C00),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.all(16.r),
         borderRadius: 12,
-        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
       );
       return;
     }
@@ -72,9 +73,9 @@ class _OtpScreenState extends State<OtpScreen> {
         backgroundColor: const Color(0xFFF57C00),
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
+        margin: EdgeInsets.all(16.r),
         borderRadius: 12,
-        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
       );
       return;
     }
@@ -112,7 +113,7 @@ class _OtpScreenState extends State<OtpScreen> {
           Scaffold(
             resizeToAvoidBottomInset: false,
             body: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -130,39 +131,39 @@ class _OtpScreenState extends State<OtpScreen> {
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 20,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24.w,
+                              vertical: 20.h,
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.arrow_back,
                                     color: Colors.white,
                                   ),
                                   onPressed: () => Get.back(),
                                 ),
-                                const SizedBox(height: 40),
-                                const Text(
+                                SizedBox(height: 40.h),
+                                Text(
                                   'OTP\nVerification',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 25,
+                                    fontSize: 25.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                SizedBox(height: 12.h),
                                 Text(
                                   'OTP has been sent to +91 $phoneNumber',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: 16.sp,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
-                                const SizedBox(height: 30),
+                                SizedBox(height: 30.h),
 
                                 // ✅ PIN CODE FIELD
                                 PinCodeTextField(
@@ -177,7 +178,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   errorAnimationDuration: 300,
                                   pinTheme: PinTheme(
                                     shape: PinCodeFieldShape.box,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8.r),
                                     fieldHeight: 50,
                                     fieldWidth: 45,
                                     activeFillColor: Colors.white,
@@ -194,7 +195,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   onCompleted: (value) => _verifyOtp(),
                                 ),
 
-                                const SizedBox(height: 20),
+                                SizedBox(height: 20.h),
                                 Center(
                                   child: Column(
                                     crossAxisAlignment:
@@ -202,20 +203,20 @@ class _OtpScreenState extends State<OtpScreen> {
                                     children: [
                                       Text(
                                         '00:${_seconds.toString().padLeft(2, '0')}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 25,
+                                          fontSize: 25.sp,
                                         ),
                                       ),
-                                      const SizedBox(height: 14),
-                                      const Text(
+                                      SizedBox(height: 14.h),
+                                      Text(
                                         "Didn't get it?",
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16,
+                                          fontSize: 16.sp,
                                         ),
                                       ),
-                                      const SizedBox(height: 18),
+                                      SizedBox(height: 18.h),
                                       TextButton(
                                         onPressed: _seconds == 0
                                             ? () {
@@ -225,7 +226,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                                 _startTimer();
                                               }
                                             : null,
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
@@ -236,9 +237,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                                 146,
                                                 1,
                                               ),
-                                              size: 20,
+                                              size: 20.sp,
                                             ),
-                                            SizedBox(width: 6),
+                                            SizedBox(width: 6.w),
                                             Text(
                                               'Send OTP(SMS)',
                                               style: TextStyle(
@@ -269,18 +270,18 @@ class _OtpScreenState extends State<OtpScreen> {
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
+                        padding: EdgeInsets.only(bottom: 16.0.h),
                         child: GestureDetector(
                           onTap: () {
                             Get.to(() => const TermsAndConditionsPage());
                           },
                           child: RichText(
                             textAlign: TextAlign.center,
-                            text: const TextSpan(
+                            text: TextSpan(
                               text: 'By continuing, you agree to our \n',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 14,
+                                fontSize: 14.sp,
                               ),
                               children: [
                                 TextSpan(
@@ -288,7 +289,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   style: TextStyle(
                                     color: Color.fromRGBO(89, 168, 146, 1),
                                     decoration: TextDecoration.underline,
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                   ),
                                 ),
                                 TextSpan(text: ' & '),
@@ -297,7 +298,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   style: TextStyle(
                                     color: Color.fromRGBO(89, 168, 146, 1),
                                     decoration: TextDecoration.underline,
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                   ),
                                 ),
                               ],
@@ -316,7 +317,7 @@ class _OtpScreenState extends State<OtpScreen> {
           if (loginController.isLoading.value)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(color: Colors.white),
               ),
             ),

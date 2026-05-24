@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry_app/app/controllers/login_controller.dart';
 import 'package:laundry_app/app/ui/widgets/terms_conditions.dart';
 
@@ -247,6 +248,23 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 16.w,
+                child: TextButton(
+                  onPressed: () {
+                    loginController.continueAsGuest();
+                  },
+                  child: Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

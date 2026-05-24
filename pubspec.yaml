@@ -52,6 +52,7 @@ dependencies:
   animated_text_kit: ^4.2.3
   geocoding: ^3.0.0
   upgrader: ^11.4.0
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/profile_controller.dart';
@@ -82,17 +83,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: Colors.white,
         shadowColor: const Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Profile",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.r),
         child: Column(
           children: [
             const Stack(
@@ -106,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _buildTextField("Name*", nameController),
             _buildTextField(
               "Mobile Number*",
@@ -119,10 +120,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               hint: "Enter your email",
               keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 50.h,
               child: ElevatedButton(
                 onPressed: isButtonEnabled
                     ? () async {
@@ -171,17 +172,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: AppTheme.primaryColor,
                   disabledBackgroundColor: Colors.grey,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   "Submit",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-            const Divider(height: 24),
+            SizedBox(height: 40.h),
+            Divider(height: 24.h),
             GestureDetector(
               onTap: () {
                 Get.snackbar(
@@ -192,23 +193,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               child: Column(
                 children: [
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "Delete Account",
                       style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                        fontSize: 20.sp,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Align(
+                  SizedBox(height: 4.h),
+                  Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "Deleting account will remove all your orders",
-                      style: TextStyle(color: Colors.black54, fontSize: 16),
+                      style: TextStyle(color: Colors.black54, fontSize: 16.sp),
                     ),
                   ),
                 ],
@@ -231,27 +232,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 14,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 14.h,
             ),
             filled: true,
             fillColor: const Color(0xFFE2E8F0),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide.none,
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
       ],
     );
   }

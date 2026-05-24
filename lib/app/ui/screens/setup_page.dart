@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:geocoding/geocoding.dart';
 // Removed get_storage import - using SharedPreferences instead
@@ -209,7 +210,7 @@ class _SetupScreenState extends State<SetupScreen> {
       appBar: AppBar(title: const Text('Setup Profile'), centerTitle: true),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(16.0.r),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -218,7 +219,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 nameController,
                 hintText: "Enter your full name",
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _buildTextField(
                 "Email",
                 emailController,
@@ -230,31 +231,31 @@ class _SetupScreenState extends State<SetupScreen> {
                     ? "Enter a valid email address"
                     : null,
               ),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16.h),
+              Text(
                 "Add Address",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               _buildTextField(
                 "House No. & Floor*",
                 houseController,
                 hintText: "A5, 2nd floor",
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _buildTextField(
                 "Building Name & Block No.*",
                 buildingController,
                 hintText: "Sikhar Tower, 10",
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _buildTextField(
                 "Landmark Pincode*",
                 landmarkController,
                 hintText: "Enter nearby landmark",
                 keyboardType: TextInputType.number,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -264,8 +265,8 @@ class _SetupScreenState extends State<SetupScreen> {
                   ),
                   onPressed: (!isFormValid || isLoading) ? null : _saveUserData,
                   child: isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Save', style: TextStyle(fontSize: 20)),
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Save', style: TextStyle(fontSize: 20.sp)),
                 ),
               ),
             ],
@@ -287,9 +288,9 @@ class _SetupScreenState extends State<SetupScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
@@ -299,12 +300,12 @@ class _SetupScreenState extends State<SetupScreen> {
             filled: true,
             fillColor: const Color(0xFFE0E0E0),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 16,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 16.h,
             ),
           ),
         ),
