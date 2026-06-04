@@ -59,6 +59,7 @@ class _CheckoutPageState extends State<CheckoutPage>
   late final Animation<Offset> _bottomBarSlideAnimation;
 
   bool _isAnimationStarted = false;
+  String _selectedPaymentMethod = 'Online';
 
   @override
   void initState() {
@@ -1239,7 +1240,15 @@ class _CheckoutPageState extends State<CheckoutPage>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: canPlaceOrder ? () => _handlePlaceOrder(finalTotal) : null,
+          onTap: canPlaceOrder
+              ? () {
+                  if (hasSubscription != 1) {
+                    _showPaymentMethodPopup(finalTotal);
+                  } else {
+                    _handlePlaceOrder(finalTotal);
+                  }
+                }
+              : null,
           borderRadius: BorderRadius.circular(16.r),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -1299,6 +1308,145 @@ class _CheckoutPageState extends State<CheckoutPage>
     );
   }
 
+  void _showPaymentMethodPopup(double finalTotal) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(24.r),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24.r),
+              topRight: Radius.circular(24.r),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                "Select Payment Method",
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              _buildPopupOption(
+                title: "Pay Online",
+                subtitle: "Credit/Debit Card, UPI, Wallets",
+                icon: Icons.account_balance_wallet_rounded,
+                color: Colors.blue,
+                onTap: () {
+                  Get.back();
+                  setState(() => _selectedPaymentMethod = 'Online');
+                  _handlePlaceOrder(finalTotal);
+                },
+              ),
+              SizedBox(height: 16.h),
+              _buildPopupOption(
+                title: "Cash on Delivery",
+                subtitle: "Pay when you receive the order",
+                icon: Icons.money_rounded,
+                color: Colors.green,
+                onTap: () {
+                  Get.back();
+                  setState(() => _selectedPaymentMethod = 'COD');
+                  _handlePlaceOrder(finalTotal);
+                },
+              ),
+              SizedBox(height: 16.h),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPopupOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: color.withOpacity(0.2),
+            width: 1.w,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.r),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 28.sp,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: color.withOpacity(0.5),
+              size: 16.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _handlePlaceOrder(double finalTotal) async {
     final prefs = await SharedPreferences.getInstance();
     final userIdMy = prefs.getInt('user_id');
@@ -1350,8 +1498,8 @@ class _CheckoutPageState extends State<CheckoutPage>
         await orderController.placeOrder(
           selectedItems: controller.getSelectedCartItems(),
           totalAmount: finalTotal,
-          paymentMethod: 'Subscription',
-          paymentStatus: 'paid',
+          paymentMethod: 1,
+          paymentStatus: 1,
           pickupDateTime:
               "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
           deliveryDateTime:
@@ -1385,7 +1533,43 @@ class _CheckoutPageState extends State<CheckoutPage>
         );
       }
     } else if (hasSubscription == 0) {
-      await controllersHome.fetchSubscriptions();
+      if (_selectedPaymentMethod == 'COD') {
+        try {
+          final orderId = await orderController.placeOrder(
+            selectedItems: controller.getSelectedCartItems(),
+            totalAmount: finalTotal,
+            paymentMethod: 2, // 2 for COD
+            paymentStatus: 0, // 0 for Unpaid/Pending
+            pickupDateTime:
+                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+            deliveryDateTime:
+                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+            userId: userIdMy,
+            addressId: userIdMy,
+          );
+
+          Get.snackbar(
+            "Order Placed",
+            "Your order has been placed via Cash on Delivery.",
+            backgroundColor: Colors.green.shade600,
+            colorText: Colors.white,
+          );
+
+          Get.offAllNamed(
+            AppRoutes.SUCCESS,
+            arguments: {'order_id': orderId ?? 58},
+          );
+        } catch (e) {
+          Get.snackbar(
+            "Order Error",
+            "Failed to place order.\n${e.toString()}",
+            backgroundColor: Colors.red.shade700,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 5),
+          );
+        }
+      } else {
+        await controllersHome.fetchSubscriptions();
 
       razorpayController.payNow(
         amount: finalTotal,
@@ -1405,8 +1589,8 @@ class _CheckoutPageState extends State<CheckoutPage>
             await orderController.placeOrder(
               selectedItems: controller.getSelectedCartItems(),
               totalAmount: finalTotal,
-              paymentMethod: 'Razorpay',
-              paymentStatus: 'paid',
+              paymentMethod: 1,
+              paymentStatus: 1,
               pickupDateTime:
                   "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
               deliveryDateTime:
@@ -1451,6 +1635,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           );
         },
       );
+      }
     }
   }
 }
@@ -1651,88 +1836,92 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
   }
 
   Widget _buildQuantityControls() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color.fromRGBO(87, 104, 171, 1),
-            Color.fromRGBO(35, 42, 69, 1),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color.fromRGBO(87, 104, 171, 1),
+              Color.fromRGBO(35, 42, 69, 1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromRGBO(87, 104, 171, 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromRGBO(87, 104, 171, 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                widget.controller.removeFromCart(widget.item['product']);
-                widget.controller.update();
-                widget.onUpdate();
-              },
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12.r),
-                bottomLeft: Radius.circular(12.r),
-              ),
-              child: Container(
-                padding: EdgeInsets.all(8.r),
-                child: Icon(
-                  Icons.remove,
-                  size: 18.sp,
-                  color: Colors.white,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  widget.controller.removeFromCart(widget.item['product']);
+                  widget.controller.update();
+                  widget.onUpdate();
+                },
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12.r),
+                  bottomLeft: Radius.circular(12.r),
+                ),
+                child: Container(
+                  padding: EdgeInsets.all(8.r),
+                  child: Icon(
+                    Icons.remove,
+                    size: 18.sp,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: Obx(() {
-              final quantity = widget.controller.cartQuantities[
-                      '${widget.item['service']}_${widget.item['product']['id']}'] ??
-                  0;
-              return Text(
-                "$quantity",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              child: Obx(() {
+                final quantity = widget.controller.cartQuantities[
+                        '${widget.item['service']}_${widget.item['product']['id']}'] ??
+                    0;
+                return Text(
+                  "$quantity",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              }),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  widget.controller.addToCart(widget.item['product']);
+                  widget.controller.update();
+                  widget.onUpdate();
+                },
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12.r),
+                  bottomRight: Radius.circular(12.r),
                 ),
-              );
-            }),
-          ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                widget.controller.addToCart(widget.item['product']);
-                widget.controller.update();
-                widget.onUpdate();
-              },
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(12.r),
-                bottomRight: Radius.circular(12.r),
-              ),
-              child: Container(
-                padding: EdgeInsets.all(8.r),
-                child: Icon(
-                  Icons.add,
-                  size: 18.sp,
-                  color: Colors.white,
+                child: Container(
+                  padding: EdgeInsets.all(8.r),
+                  child: Icon(
+                    Icons.add,
+                    size: 18.sp,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

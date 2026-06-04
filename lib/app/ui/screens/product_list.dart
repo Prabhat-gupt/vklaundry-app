@@ -935,10 +935,14 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                 ),
                 child: Container(
                   height: 40.h,
-                  child: Icon(
-                    Icons.remove,
-                    size: 18.sp,
-                    color: AppTheme.primaryColor,
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Icon(
+                      Icons.remove,
+                      size: 18.sp,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
                 ),
               ),
@@ -951,12 +955,15 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
           ),
           Expanded(
             child: Center(
-              child: Text(
-                quantity.toString(),
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  quantity.toString(),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryColor,
+                  ),
                 ),
               ),
             ),
@@ -977,10 +984,14 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                 ),
                 child: Container(
                   height: 40.h,
-                  child: Icon(
-                    Icons.add,
-                    size: 18.sp,
-                    color: AppTheme.primaryColor,
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Icon(
+                      Icons.add,
+                      size: 18.sp,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
                 ),
               ),
