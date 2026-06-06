@@ -386,8 +386,8 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16.r),
           child: Container(
-            width: 120.w,
-            height: 120.h,
+            width: 100.w,
+            height: 100.h,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -403,12 +403,12 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                 Image.network(
                   widget.service['image_url'] ??
                       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZGOWHxy5gcPkGjr4AxlsSgRIVVTCaQ0sJDw&s',
-                  width: 120.w,
-                  height: 120.h,
+                  width: 100.w,
+                  height: 100.h,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    width: 120.w,
-                    height: 120.h,
+                    width: 100.w,
+                    height: 100.h,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -428,8 +428,8 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                 ),
                 // Subtle overlay
                 Container(
-                  width: 120.w,
-                  height: 120.h,
+                  width: 100.w,
+                  height: 100.h,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -451,7 +451,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
 
   Widget _buildServiceInfo() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -464,7 +464,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
               letterSpacing: 0.5,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           Text(
             widget.service['description'] ?? 'Professional laundry service',
             style: TextStyle(
@@ -475,7 +475,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(

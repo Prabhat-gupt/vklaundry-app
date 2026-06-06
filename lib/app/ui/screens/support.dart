@@ -89,57 +89,109 @@ class SupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F2F5),
       appBar: AppBar(
-        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         title: Text(
           'Support',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
             color: AppTheme.primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        foregroundColor: Colors.white,
-        shadowColor: Color.fromARGB(255, 158, 158, 158),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryColor),
-          onPressed: () => Navigator.pop(context),
+        centerTitle: true,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: EdgeInsets.all(8.r),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppTheme.primaryColor,
+              size: 18.sp,
+            ),
+          ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0.r),
-        child: Obx(() {
-          final support = controller.supportDetails;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(20.0.r),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildContactTile(
-                icon: Icons.person,
-                label: 'Name',
-                value: support['name']!,
+              SizedBox(height: 20.h),
+              Container(
+                padding: EdgeInsets.all(24.r),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.support_agent_rounded,
+                  size: 80.sp,
+                  color: AppTheme.primaryColor,
+                ),
               ),
-              _buildContactTile(
-                icon: Icons.phone,
-                label: 'Phone',
-                value: support['phone']!,
-                // onTap: () => _launchPhone(support['phone']!),
+              SizedBox(height: 24.h),
+              Text(
+                "How can we help you?",
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1F2937),
+                ),
               ),
-              _buildContactTile(
-                icon: Icons.email,
-                label: 'Email',
-                value: support['email']!,
-                onTap: () => _launchUrl("mailto:${support['email']}"),
+              SizedBox(height: 8.h),
+              Text(
+                "Reach out to our support team for any queries or assistance.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.grey.shade600,
+                ),
               ),
-              _buildContactTile(
-                icon: Icons.chat,
-                label: 'WhatsApp',
-                value: support['whatsapp']!,
-                onTap: () => _launchWhatsApp(phoneNumber: support['whatsapp']!),
-              ),
+              SizedBox(height: 32.h),
+              Obx(() {
+                final support = controller.supportDetails;
+                return Column(
+                  children: [
+                    _buildContactTile(
+                      icon: Icons.person_rounded,
+                      label: 'Name',
+                      value: support['name']!,
+                      iconColor: Colors.blue,
+                    ),
+                    _buildContactTile(
+                      icon: Icons.phone_rounded,
+                      label: 'Phone',
+                      value: support['phone']!,
+                      iconColor: Colors.orange,
+                    ),
+                    _buildContactTile(
+                      icon: Icons.email_rounded,
+                      label: 'Email',
+                      value: support['email']!,
+                      onTap: () => _launchUrl("mailto:${support['email']}"),
+                      iconColor: Colors.red,
+                    ),
+                    _buildContactTile(
+                      icon: Icons.chat_rounded,
+                      label: 'WhatsApp',
+                      value: support['whatsapp']!,
+                      onTap: () => _launchWhatsApp(phoneNumber: support['whatsapp']!),
+                      iconColor: Colors.green,
+                    ),
+                  ],
+                );
+              }),
             ],
-          );
-        }),
+          ),
+        ),
       ),
     );
   }
@@ -149,38 +201,98 @@ class SupportPage extends StatelessWidget {
     required String label,
     required String value,
     VoidCallback? onTap,
+    Color? iconColor,
   }) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.h),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue),
-        title: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(value),
-        trailing: onTap != null
-            ? Icon(Icons.arrow_forward_ios, size: 16.sp)
-            : null,
-        onTap: () async {
-          // Copy to clipboard
-          if (label == 'Phone') {
-            await Clipboard.setData(ClipboardData(text: value));
-            Get.snackbar(
-              'Copied',
-              '$label copied to clipboard',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppTheme.primaryColor,
-              colorText: Colors.white,
-              margin: EdgeInsets.all(8.r),
-              duration: const Duration(seconds: 1),
-            );
-          }
-
-          // Optional: Launch call if onTap provided
-          if (onTap != null) {
-            onTap();
-          }
-
-          // Show snackbar confirmation
-        },
+    final color = iconColor ?? AppTheme.primaryColor;
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            if (label == 'Phone') {
+              await Clipboard.setData(ClipboardData(text: value));
+              Get.snackbar(
+                'Copied',
+                '$label copied to clipboard',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: AppTheme.primaryColor,
+                colorText: Colors.white,
+                margin: EdgeInsets.all(16.r),
+                borderRadius: 16.r,
+                duration: const Duration(seconds: 2),
+              );
+            }
+            if (onTap != null) {
+              onTap();
+            }
+          },
+          borderRadius: BorderRadius.circular(20.r),
+          child: Padding(
+            padding: EdgeInsets.all(16.r),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12.r),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  child: Icon(icon, color: color, size: 24.sp),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: const Color(0xFF1F2937),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (onTap != null)
+                  Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14.sp,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

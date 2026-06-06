@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:upgrader/upgrader.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
@@ -40,101 +41,109 @@ class _RootPageState extends State<RootPage> {
             homeController.currentNavIndex.value = 0;
           }
         },
-        child: Scaffold(
-          body: IndexedStack(
-            index: selectedIndex,
-            children: _widgetOptions,
+        child: UpgradeAlert(
+          showIgnore: false,
+          showLater: false,
+          showReleaseNotes: true,
+          upgrader: Upgrader(
+            durationUntilAlertAgain: const Duration(days: 1),
           ),
-          bottomNavigationBar: Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 10.0.h),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30.r),
-                child: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  elevation: 0,
-                  backgroundColor: Colors.white,
-                  items: <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.home_outlined,
-                        color: selectedIndex == 0 ? Colors.white : Colors.grey,
-                      ),
-                      label: 'Home',
-                      activeIcon: Container(
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(35, 42, 69, 1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.home, color: Colors.white),
-                      ),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.category_outlined,
-                        color: selectedIndex == 1 ? Colors.white : Colors.grey,
-                      ),
-                      label: 'Services',
-                      activeIcon: Container(
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(35, 42, 69, 1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.category, color: Colors.white),
-                      ),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.receipt_long_outlined,
-                        color: selectedIndex == 2 ? Colors.white : Colors.grey,
-                      ),
-                      label: 'Booking',
-                      activeIcon: Container(
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(35, 42, 69, 1),
-                          shape: BoxShape.circle,
-                        ),
-                        child:
-                            Icon(Icons.receipt_long, color: Colors.white),
-                      ),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.settings_outlined,
-                        color: selectedIndex == 3 ? Colors.white : Colors.grey,
-                      ),
-                      label: 'Setting',
-                      activeIcon: Container(
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: Color.fromRGBO(35, 42, 69, 1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.settings, color: Colors.white),
-                      ),
+          child: Scaffold(
+            body: IndexedStack(
+              index: selectedIndex,
+              children: _widgetOptions,
+            ),
+            bottomNavigationBar: Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
                   ],
-                  currentIndex: selectedIndex,
-                  selectedItemColor: const Color.fromRGBO(35, 42, 69, 1),
-                  unselectedItemColor: Colors.grey,
-                  showUnselectedLabels: true,
-                  onTap: (index) =>
-                      homeController.currentNavIndex.value = index,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30.0),
+                  child: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    elevation: 0,
+                    backgroundColor: Colors.white,
+                    items: <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.home_outlined,
+                          color: selectedIndex == 0 ? Colors.white : Colors.grey,
+                        ),
+                        label: 'Home',
+                        activeIcon: Container(
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(35, 42, 69, 1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.home, color: Colors.white),
+                        ),
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.category_outlined,
+                          color: selectedIndex == 1 ? Colors.white : Colors.grey,
+                        ),
+                        label: 'Services',
+                        activeIcon: Container(
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(35, 42, 69, 1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.category, color: Colors.white),
+                        ),
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.receipt_long_outlined,
+                          color: selectedIndex == 2 ? Colors.white : Colors.grey,
+                        ),
+                        label: 'Booking',
+                        activeIcon: Container(
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(35, 42, 69, 1),
+                            shape: BoxShape.circle,
+                          ),
+                          child:
+                              Icon(Icons.receipt_long, color: Colors.white),
+                        ),
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.settings_outlined,
+                          color: selectedIndex == 3 ? Colors.white : Colors.grey,
+                        ),
+                        label: 'Setting',
+                        activeIcon: Container(
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(35, 42, 69, 1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.settings, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                    currentIndex: selectedIndex,
+                    selectedItemColor: const Color.fromRGBO(35, 42, 69, 1),
+                    unselectedItemColor: Colors.grey,
+                    showUnselectedLabels: true,
+                    onTap: (index) =>
+                        homeController.currentNavIndex.value = index,
+                  ),
                 ),
               ),
             ),

@@ -416,7 +416,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   discount,
                   discountLabel,
                 ),
-                SizedBox(height: 100.h), // Space for bottom bar
+                SizedBox(height: 20.h), // Space for bottom bar
               ],
             ),
           ),

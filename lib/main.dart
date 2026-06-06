@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(360, 690),
+      designSize: const Size(360, 800),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -55,16 +55,7 @@ class MyApp extends StatelessWidget {
           initialRoute: AppRoutes.SPLASHSCREEN,
           getPages: AppPages.routes,
           builder: (context, child) {
-            return UpgradeAlert(
-              dialogStyle: UpgradeDialogStyle.material,
-              showIgnore: false,
-              showLater: true,
-              showReleaseNotes: true,
-              upgrader: Upgrader(
-                durationUntilAlertAgain: const Duration(days: 1),
-              ),
-              child: child,
-            );
+            return child!;
           },
         );
       },

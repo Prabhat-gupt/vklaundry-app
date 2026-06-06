@@ -109,6 +109,11 @@ class _ProductListScreenState extends State<ProductListScreen>
         await Future.delayed(const Duration(milliseconds: 300));
         if (mounted) _gridController.forward();
 
+        // Check initial state so cart button is visible when returning
+        if (mounted && controller.getTotalCartItems() > 0) {
+          _cartController.forward();
+        }
+
         // Listen for cart changes to animate cart button
         ever(controller.cartQuantities, (_) {
           if (mounted) {
@@ -152,7 +157,6 @@ class _ProductListScreenState extends State<ProductListScreen>
               padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
               child: _buildAnimatedCategories(),
             ),
-            SizedBox(height: 10.h),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -320,12 +324,13 @@ class _ProductListScreenState extends State<ProductListScreen>
           return Skeletonizer(
             enabled: controller.isLoading.value,
             child: GridView.builder(
+              padding: EdgeInsets.only(bottom: 20.h, top: 12.h),
               itemCount: controller.isLoading.value
                   ? 6
                   : controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.58,
+                childAspectRatio: 0.68,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -404,10 +409,11 @@ class _ProductListScreenState extends State<ProductListScreen>
     return Obx(() => controller.getTotalCartItems() > 0
         ? SlideTransition(
             position: _cartSlideAnimation,
-            child: Container(
-              margin: EdgeInsets.fromLTRB(16, 8, 16, 20),
-              height: 60.h,
-              decoration: BoxDecoration(
+            child: SafeArea(
+              child: Container(
+                margin: EdgeInsets.fromLTRB(16, 8, 16, 20),
+                height: 60.h,
+                decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF4B5EAA), Color(0xFF1A2340)],
                 ),
@@ -484,8 +490,9 @@ class _ProductListScreenState extends State<ProductListScreen>
                 ),
               ),
             ),
-          )
-        : SizedBox.shrink());
+          ),
+        )
+        : const SizedBox.shrink());
   }
 
   Widget _buildCategorySkeleton() {

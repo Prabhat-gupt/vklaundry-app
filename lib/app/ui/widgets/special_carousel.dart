@@ -353,149 +353,202 @@ void _showSubscriptionDetail(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          decoration: BoxDecoration(
+      return Container(
+        decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Stack(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated Background Layer
-              const Positioned.fill(
-                child: _AnimatedBackground(),
+              // Draggable handle
+              Container(
+                height: 5.h,
+                width: 50.w,
+                margin: EdgeInsets.symmetric(vertical: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(5.r),
+                ),
               ),
-              // Main Content Layer
               Padding(
-                padding: EdgeInsets.only(top: 16.0.h),
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Draggable handle
+                    // Icon / Illustration
                     Container(
-                      height: 4.h,
-                      width: 60.w,
-                      margin: EdgeInsets.symmetric(vertical: 16.h),
+                      padding: EdgeInsets.all(20.r),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(2.r),
+                        color: AppTheme.primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.star_rounded,
+                        color: AppTheme.primaryColor,
+                        size: 48.sp,
                       ),
                     ),
-                    Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
-                      child: Hero(
-                        tag: 'subscription-card-${sub['id']}',
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Container(
-                            padding: EdgeInsets.all(24.r),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppTheme.primaryColor,
-                                  const Color(0xFF232F46),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                    SizedBox(height: 16.h),
+                    
+                    // Title
+                    Text(
+                      sub['name'] ?? 'Subscription Plan',
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A2340),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8.h),
+                    
+                    // Description
+                    if (sub['description'] != null && sub['description'].toString().isNotEmpty)
+                      Text(
+                        sub['description'],
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.grey[600],
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    SizedBox(height: 24.h),
+
+                    // Price Info Box
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "₹${sub['discounted_price']}",
+                                style: TextStyle(
+                                  fontSize: 28.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(24.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.primaryColor.withOpacity(0.4),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
+                              if (sub['original_price'] != null)
+                                Text(
+                                  "₹${sub['original_price']}",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        sub['name'] ?? '',
-                                        style: TextStyle(
-                                          fontSize: 28.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.star_rounded,
-                                      color: Color(0xFFFFD700),
-                                      size: 36.sp,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12.h),
-                                if (sub['description'] != null)
+                            ],
+                          ),
+                          SizedBox(width: 20.w),
+                          Container(
+                            width: 1,
+                            height: 40.h,
+                            color: Colors.grey.shade300,
+                          ),
+                          SizedBox(width: 20.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.checkroom_rounded, size: 16.sp, color: Colors.grey[600]),
+                                  SizedBox(width: 6.w),
                                   Text(
-                                    sub['description'],
+                                    "${sub['pieces']} pieces",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A2340),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 4.h),
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today_rounded, size: 16.sp, color: Colors.grey[600]),
+                                  SizedBox(width: 6.w),
+                                  Text(
+                                    "${sub['validity_days']} days",
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A2340),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 32.h),
+
+                    // Subscribe Button
+                    SafeArea(
+                      top: false,
+                      child: Obx(
+                        () => SizedBox(
+                          width: double.infinity,
+                          height: 56.h,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isSubscribed ? Colors.grey[400] : AppTheme.primaryColor,
+                              foregroundColor: Colors.white,
+                              elevation: isSubscribed ? 0 : 4,
+                              shadowColor: AppTheme.primaryColor.withOpacity(0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16.r),
+                              ),
+                            ),
+                            onPressed: isSubscribed
+                                ? () => Get.snackbar('Subscribed', 'Already Subscribed')
+                                : (isProcessingPayment.value
+                                    ? null
+                                    : () => openCheckout(sub)),
+                            child: isProcessingPayment.value
+                                ? SizedBox(
+                                    width: 24.w,
+                                    height: 24.w,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : Text(
+                                    isSubscribed ? "Subscribed" : "Subscribe Now",
                                     style: TextStyle(
                                       fontSize: 16.sp,
-                                      color: Colors.white70,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                SizedBox(height: 20.h),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      "₹${sub['discounted_price']}",
-                                      style: TextStyle(
-                                        fontSize: 32.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFB5FFC8),
-                                      ),
-                                    ),
-                                    SizedBox(width: 12.w),
-                                    Text(
-                                      "₹${sub['original_price']}",
-                                      style: TextStyle(
-                                        fontSize: 18.sp,
-                                        color: Colors.white54,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 10.h),
-                                Text(
-                                  "${sub['pieces']} pcs • ${sub['validity_days']} days",
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                         ),
                       ),
-                      ),
                     ),
-                    // Separated button section
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 24.0.w, vertical: 16.0.h),
-                      child: Obx(
-                        () => SubscribeButton(
-                          isSubscribed: isSubscribed,
-                          onSubscribe: isProcessingPayment.value
-                              ? null
-                              : () {
-                                  openCheckout(sub);
-                                },
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: 16.h), // Extra padding above the safe area bottom
                   ],
                 ),
               ),
