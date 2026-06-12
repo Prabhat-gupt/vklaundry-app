@@ -27,37 +27,37 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(15.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Add Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+            Text("Add Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp)),
             SizedBox(height: 12.h),
             _buildTextField("House No. & Floor*", houseController),
             SizedBox(height: 12.h),
             _buildTextField("Building & Block No. (optional)", buildingController),
             SizedBox(height: 12.h),
             _buildTextField("Landmark*", landmarkController, hintText: "Enter nearby landmark"),
-            SizedBox(height: 24.h),
-            Text("Receiver’s Details", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+            SizedBox(height: 23.h),
+            Text("Receiver’s Details", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp)),
             SizedBox(height: 12.h),
             _buildTextField("Receiver's Name *", receiverNameController),
             SizedBox(height: 12.h),
             _buildTextField("Receiver's Phone Number *", receiverPhoneController, keyboardType: TextInputType.phone),
-            SizedBox(height: 32.h),
+            SizedBox(height: 30.h),
             
             SizedBox(
               width: double.infinity,
-              height: 48.h,
+              height: 45.h,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B1C39),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                  backgroundColor: Color(0xFF1B1C39),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.r)),
                 ),
                 onPressed: () {
                   Get.back();
                 },
-                child: Text("Save Address", style: TextStyle(fontSize: 16.sp)),
+                child: Text("Save Address", style: TextStyle(fontSize: 15.sp)),
               ),
             ),
           ],
@@ -79,9 +79,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
-            fillColor: const Color(0xFFE0E0E0),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
+            fillColor: Color(0xFFE0E0E0),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(7.r), borderSide: BorderSide.none),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 15.h),
           ),
         ),
       ],

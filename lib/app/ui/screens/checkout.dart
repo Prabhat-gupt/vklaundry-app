@@ -112,27 +112,27 @@ class _CheckoutPageState extends State<CheckoutPage>
   void _initializeAnimations() {
     _pageLoadController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _itemsController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
     );
 
     _dateController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 1000),
     );
 
     _billController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: Duration(milliseconds: 1200),
     );
 
     _bottomBarController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: Duration(milliseconds: 400),
     );
 
     _pageOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -187,13 +187,13 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     try {
       _pageLoadController.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
       if (mounted) _itemsController.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
       if (mounted) _dateController.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
       if (mounted) _billController.forward();
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
       if (mounted) _bottomBarController.forward();
     } catch (e) {
       if (mounted) {
@@ -387,7 +387,7 @@ class _CheckoutPageState extends State<CheckoutPage>
     final double finalTotal = (grandTotal - discount).clamp(0, double.infinity);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: _buildAnimatedAppBar(),
       body: WillPopScope(
         onWillPop: () async {
@@ -397,17 +397,17 @@ class _CheckoutPageState extends State<CheckoutPage>
         child: FadeTransition(
           opacity: _pageOpacityAnimation,
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(16.r),
+            padding: EdgeInsets.all(14.r),
             child: Column(
               children: [
                 _buildAnimatedItemsCard(selectedItems),
-                SizedBox(height: 16.h),
+                SizedBox(height: 14.h),
                 _buildAnimatedPickupSlotSelector(context),
                 if (selectedPickupDate != null && selectedPickupSlot != null)
                   _buildAnimatedDeliveryDateDisplay(),
-                SizedBox(height: 16.h),
+                SizedBox(height: 14.h),
                 _buildAnimatedOffersSection(grandTotal),
-                SizedBox(height: 16.h),
+                SizedBox(height: 14.h),
                 _buildAnimatedBillDetails(
                   itemsTotal,
                   deliveryCharge,
@@ -416,7 +416,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   discount,
                   discountLabel,
                 ),
-                SizedBox(height: 20.h), // Space for bottom bar
+                SizedBox(height: 15.h), // Space for bottom bar
               ],
             ),
           ),
@@ -438,7 +438,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           style: TextStyle(
             color: AppTheme.primaryColor,
             fontWeight: FontWeight.bold,
-            fontSize: 20.sp,
+            fontSize: 15.sp,
           ),
         ),
       ),
@@ -451,10 +451,10 @@ class _CheckoutPageState extends State<CheckoutPage>
             await controllersHome.fetchSubscriptions();
           },
           child: Container(
-            margin: EdgeInsets.all(8.r),
+            margin: EdgeInsets.all(6.r),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(11.r),
             ),
             child: Icon(
               Icons.arrow_back,
@@ -474,7 +474,7 @@ class _CheckoutPageState extends State<CheckoutPage>
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(15.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.08),
@@ -488,14 +488,14 @@ class _CheckoutPageState extends State<CheckoutPage>
               ),
             ],
           ),
-          padding: EdgeInsets.all(20.r),
+          padding: EdgeInsets.all(15.r),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(12.r),
+                    padding: EdgeInsets.all(11.r),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -503,26 +503,26 @@ class _CheckoutPageState extends State<CheckoutPage>
                           AppTheme.primaryColor.withOpacity(0.1),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(11.r),
                     ),
                     child: Icon(
                       Icons.shopping_bag_rounded,
                       color: AppTheme.primaryColor,
-                      size: 24.sp,
+                      size: 21.sp,
                     ),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 14.w),
                   Text(
                     "Selected Items",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18.sp,
+                      fontSize: 15.sp,
                       color: Color(0xFF1F2937),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 15.h),
               ...items.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
@@ -533,7 +533,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   onUpdate: () => setState(() {}),
                 );
               }),
-              SizedBox(height: 16.h),
+              SizedBox(height: 14.h),
               _buildAddMoreSection(),
             ],
           ),
@@ -544,7 +544,7 @@ class _CheckoutPageState extends State<CheckoutPage>
 
   Widget _buildAddMoreSection() {
     return Container(
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -552,7 +552,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             AppTheme.primaryColor.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: AppTheme.primaryColor.withOpacity(0.2),
           width: 1.w,
@@ -567,10 +567,10 @@ class _CheckoutPageState extends State<CheckoutPage>
                 Icon(
                   Icons.lightbulb_outline,
                   color: AppTheme.primaryColor,
-                  size: 20.sp,
+                  size: 15.sp,
                 ),
-                SizedBox(width: 8.w),
-                const Flexible(
+                SizedBox(width: 6.w),
+                Flexible(
                   child: Text(
                     "Missed something?",
                     style: TextStyle(
@@ -583,10 +583,10 @@ class _CheckoutPageState extends State<CheckoutPage>
               ],
             ),
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 6.w),
           Container(
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [
                   Color.fromRGBO(87, 104, 171, 1),
                   Color.fromRGBO(35, 42, 69, 1),
@@ -594,10 +594,10 @@ class _CheckoutPageState extends State<CheckoutPage>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(11.r),
               boxShadow: [
                 BoxShadow(
-                  color: const Color.fromRGBO(87, 104, 171, 0.3),
+                  color: Color.fromRGBO(87, 104, 171, 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -607,16 +607,16 @@ class _CheckoutPageState extends State<CheckoutPage>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => Get.back(),
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(11.r),
                 child: Container(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
                   child: Text(
                     "+ Add More",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
-                      fontSize: 13.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ),
@@ -632,10 +632,10 @@ class _CheckoutPageState extends State<CheckoutPage>
     return SlideTransition(
       position: _dateSlideAnimation,
       child: Container(
-        padding: EdgeInsets.all(20.r),
+        padding: EdgeInsets.all(15.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(15.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -650,7 +650,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12.r),
+                  padding: EdgeInsets.all(11.r),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -658,26 +658,26 @@ class _CheckoutPageState extends State<CheckoutPage>
                         AppTheme.primaryColor.withOpacity(0.1),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(11.r),
                   ),
                   child: Icon(
                     Icons.schedule_rounded,
                     color: AppTheme.primaryColor,
-                    size: 24.sp,
+                    size: 21.sp,
                   ),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 14.w),
                 Text(
                   "Select Pickup Date & Slot",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18.sp,
+                    fontSize: 15.sp,
                     color: Color(0xFF1F2937),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 20.h),
+            SizedBox(height: 15.h),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -701,36 +701,36 @@ class _CheckoutPageState extends State<CheckoutPage>
                     }).toList(),
               ),
             ),
-            SizedBox(height: 20.h),
+            SizedBox(height: 15.h),
             Text(
               "Select Time Slot",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
+                fontSize: 14.sp,
                 color: Color(0xFF1F2937),
               ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 11.h),
             if (isLoadingSlots || isLoadingDates)
               Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                  padding: EdgeInsets.symmetric(vertical: 15.h),
                   child: CircularProgressIndicator(),
                 ),
               )
             else if (dynamicPickupSlots.isEmpty)
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 20.h),
+                padding: EdgeInsets.symmetric(vertical: 15.h),
                 decoration: BoxDecoration(
                   color: Colors.red.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(11.r),
                   border: Border.all(color: Colors.red.withOpacity(0.1)),
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 30.sp),
-                    SizedBox(height: 8.h),
+                    Icon(Icons.event_busy_rounded, color: Colors.redAccent, size: 25.sp),
+                    SizedBox(height: 6.h),
                     Text(
                       "No slots available for this date",
                       style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500),
@@ -745,7 +745,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   children: dynamicPickupSlots.map((slot) {
                     bool isSelected = slot == selectedPickupSlot;
                     return Padding(
-                      padding: EdgeInsets.only(right: 12.w),
+                      padding: EdgeInsets.only(right: 11.w),
                       child: _EnhancedTimeSlot(
                         slot: slot,
                         isSelected: isSelected,
@@ -766,13 +766,13 @@ class _CheckoutPageState extends State<CheckoutPage>
       return SizedBox();
     }
 
-    final deliveryDate = selectedPickupDate!.add(const Duration(hours: 72));
+    final deliveryDate = selectedPickupDate!.add(Duration(hours: 72));
 
     return SlideTransition(
       position: _dateSlideAnimation,
       child: Container(
-        margin: EdgeInsets.only(top: 16.h),
-        padding: EdgeInsets.all(20.r),
+        margin: EdgeInsets.only(top: 14.h),
+        padding: EdgeInsets.all(15.r),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -780,7 +780,7 @@ class _CheckoutPageState extends State<CheckoutPage>
               Colors.green.withOpacity(0.05),
             ],
           ),
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(15.r),
           border: Border.all(
             color: Colors.green.withOpacity(0.3),
             width: 1.w,
@@ -792,40 +792,40 @@ class _CheckoutPageState extends State<CheckoutPage>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12.r),
+                  padding: EdgeInsets.all(11.r),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(11.r),
                   ),
                   child: Icon(
                     Icons.local_shipping_rounded,
                     color: Colors.green,
-                    size: 24.sp,
+                    size: 21.sp,
                   ),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 14.w),
                 Text(
                   "Expected Delivery",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18.sp,
+                    fontSize: 15.sp,
                     color: Colors.green,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 11.h),
             Container(
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.all(14.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(11.r),
               ),
               child: Text(
                 DateFormat('EEEE, MMM d, yyyy  |  hh:mm a')
                     .format(deliveryDate),
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF1F2937),
                 ),
@@ -851,7 +851,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                     Colors.orange.withOpacity(0.05),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(15.r),
                 border: Border.all(
                   color: Colors.orange.withOpacity(0.3),
                   width: 1.w,
@@ -880,30 +880,30 @@ class _CheckoutPageState extends State<CheckoutPage>
                       alreadyAppliedOffer: controller.activeOfferselected,
                     );
                   },
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(15.r),
                   child: Container(
-                    padding: EdgeInsets.all(20.r),
+                    padding: EdgeInsets.all(15.r),
                     child: Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(12.r),
+                          padding: EdgeInsets.all(11.r),
                           decoration: BoxDecoration(
                             color: Colors.orange.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12.r),
+                            borderRadius: BorderRadius.circular(11.r),
                           ),
                           child: Icon(
                             Icons.local_offer_rounded,
                             color: Colors.orange,
-                            size: 24.sp,
+                            size: 21.sp,
                           ),
                         ),
-                        SizedBox(width: 16.w),
+                        SizedBox(width: 14.w),
                         Expanded(
                           child: Text(
                             "View Available Offers",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               color: Color(0xFF1F2937),
                             ),
                           ),
@@ -911,7 +911,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                         Icon(
                           Icons.arrow_forward_ios,
                           color: Colors.orange,
-                          size: 18.sp,
+                          size: 15.sp,
                         ),
                       ],
                     ),
@@ -959,10 +959,10 @@ class _CheckoutPageState extends State<CheckoutPage>
     final double finalTotal = grandTotal - discount;
 
     return Container(
-      padding: EdgeInsets.all(20.r),
+      padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -977,7 +977,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(12.r),
+                padding: EdgeInsets.all(11.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -985,53 +985,53 @@ class _CheckoutPageState extends State<CheckoutPage>
                       AppTheme.primaryColor.withOpacity(0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Icon(
                   Icons.receipt_rounded,
                   color: AppTheme.primaryColor,
-                  size: 24.sp,
+                  size: 21.sp,
                 ),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 14.w),
               Text(
                 "Bill Details",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18.sp,
+                  fontSize: 15.sp,
                   color: Color(0xFF1F2937),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 15.h),
           _billRow("Items total", "\u20B9${itemsTotal.toStringAsFixed(2)}"),
-          SizedBox(height: 12.h),
+          SizedBox(height: 11.h),
           _billRow(
               "Delivery charge", "\u20B9${deliveryCharge.toStringAsFixed(2)}"),
-          SizedBox(height: 12.h),
+          SizedBox(height: 11.h),
           _billRow(
               "Handling charge", "\u20B9${handlingCharge.toStringAsFixed(2)}"),
           if (discount > 0) ...[
-            SizedBox(height: 12.h),
+            SizedBox(height: 11.h),
             _billRow(
               "Discount",
               "-\u20B9${discount.toStringAsFixed(2)}",
               isDiscount: true,
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 6.h),
             Text(
               discountLabel,
               style: TextStyle(
                 color: Colors.green,
-                fontSize: 12.sp,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
           Container(
-            margin: EdgeInsets.symmetric(vertical: 16.h),
-            height: 1,
+            margin: EdgeInsets.symmetric(vertical: 14.h),
+            height: 1.w,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -1064,10 +1064,10 @@ class _CheckoutPageState extends State<CheckoutPage>
     final int remaining = totalSubscriptionItems - (delivered + newItems);
 
     return Container(
-      padding: EdgeInsets.all(20.r),
+      padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(15.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -1082,7 +1082,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(12.r),
+                padding: EdgeInsets.all(11.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -1090,26 +1090,26 @@ class _CheckoutPageState extends State<CheckoutPage>
                       Colors.green.withOpacity(0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Icon(
                   Icons.card_membership_rounded,
                   color: Colors.green,
-                  size: 24.sp,
+                  size: 21.sp,
                 ),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 14.w),
               Text(
                 "Subscription Details",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18.sp,
+                  fontSize: 15.sp,
                   color: Color(0xFF1F2937),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 15.h),
           _buildSubscriptionRow("Total Subscription Items",
               "$totalSubscriptionItems", Icons.inventory_2),
           _buildSubscriptionRow("New Items Added", "$newItems",
@@ -1126,22 +1126,22 @@ class _CheckoutPageState extends State<CheckoutPage>
   Widget _buildSubscriptionRow(String label, String value, IconData icon,
       [Color? color, bool isBold = false]) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.r),
+      margin: EdgeInsets.only(bottom: 11.h),
+      padding: EdgeInsets.all(11.r),
       decoration: BoxDecoration(
         color: (color ?? AppTheme.primaryColor).withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(11.r),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color ?? AppTheme.primaryColor, size: 20.sp),
-          SizedBox(width: 12.w),
+          Icon(icon, color: color ?? AppTheme.primaryColor, size: 15.sp),
+          SizedBox(width: 11.w),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
                 fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-                color: const Color(0xFF1F2937),
+                color: Color(0xFF1F2937),
               ),
             ),
           ),
@@ -1150,7 +1150,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
               color: color ?? AppTheme.primaryColor,
-              fontSize: 16.sp,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -1168,7 +1168,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           style: TextStyle(
             fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
             fontSize: isBold ? 16 : 14,
-            color: const Color(0xFF1F2937),
+            color: Color(0xFF1F2937),
           ),
         ),
         Text(
@@ -1180,7 +1180,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                 ? Colors.green
                 : isBold
                     ? AppTheme.primaryColor
-                    : const Color(0xFF1F2937),
+                    : Color(0xFF1F2937),
           ),
         ),
       ],
@@ -1195,7 +1195,7 @@ class _CheckoutPageState extends State<CheckoutPage>
     return SlideTransition(
       position: _bottomBarSlideAnimation,
       child: Container(
-        padding: EdgeInsets.all(20.r),
+        padding: EdgeInsets.all(15.r),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -1219,14 +1219,14 @@ class _CheckoutPageState extends State<CheckoutPage>
 
     return Container(
       width: double.infinity,
-      height: 60.h,
+      height: 50.h,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: canPlaceOrder
               ? [Colors.green.shade600, Colors.green.shade700]
               : [Colors.grey.shade400, Colors.grey.shade500],
         ),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(14.r),
         boxShadow: canPlaceOrder
             ? [
                 BoxShadow(
@@ -1249,9 +1249,9 @@ class _CheckoutPageState extends State<CheckoutPage>
                   }
                 }
               : null,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(14.r),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            padding: EdgeInsets.symmetric(horizontal: 21.w),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1264,7 +1264,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                         "\u20B9${finalTotal.toStringAsFixed(2)}",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18.sp,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1272,15 +1272,15 @@ class _CheckoutPageState extends State<CheckoutPage>
                         "Total Amount",
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 12.sp,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(width: 24.w),
+                  SizedBox(width: 21.w),
                 ],
                 Container(
-                  padding: EdgeInsets.all(8.r),
+                  padding: EdgeInsets.all(6.r),
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     shape: BoxShape.circle,
@@ -1288,15 +1288,15 @@ class _CheckoutPageState extends State<CheckoutPage>
                   child: Icon(
                     Icons.shopping_cart_checkout,
                     color: Colors.white,
-                    size: 24.sp,
+                    size: 21.sp,
                   ),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 11.w),
                 Text(
                   "Place Order",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18.sp,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1315,12 +1315,12 @@ class _CheckoutPageState extends State<CheckoutPage>
       isScrollControlled: true,
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(24.r),
+          padding: EdgeInsets.all(21.r),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24.r),
-              topRight: Radius.circular(24.r),
+              topLeft: Radius.circular(21.r),
+              topRight: Radius.circular(21.r),
             ),
           ),
           child: Column(
@@ -1329,24 +1329,24 @@ class _CheckoutPageState extends State<CheckoutPage>
             children: [
               Center(
                 child: Container(
-                  width: 40.w,
-                  height: 4.h,
+                  width: 34.w,
+                  height: 6.h,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 21.h),
               Text(
                 "Select Payment Method",
                 style: TextStyle(
-                  fontSize: 20.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
+                  color: Color(0xFF1F2937),
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 21.h),
               _buildPopupOption(
                 title: "Pay Online",
                 subtitle: "Credit/Debit Card, UPI, Wallets",
@@ -1358,7 +1358,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   _handlePlaceOrder(finalTotal);
                 },
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 14.h),
               _buildPopupOption(
                 title: "Cash on Delivery",
                 subtitle: "Pay when you receive the order",
@@ -1370,7 +1370,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   _handlePlaceOrder(finalTotal);
                 },
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 14.h),
             ],
           ),
         );
@@ -1387,12 +1387,12 @@ class _CheckoutPageState extends State<CheckoutPage>
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16.r),
+      borderRadius: BorderRadius.circular(14.r),
       child: Container(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(14.r),
         decoration: BoxDecoration(
           color: color.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
             color: color.withOpacity(0.2),
             width: 1.w,
@@ -1401,18 +1401,18 @@ class _CheckoutPageState extends State<CheckoutPage>
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(12.r),
+              padding: EdgeInsets.all(11.r),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(11.r),
               ),
               child: Icon(
                 icon,
                 color: color,
-                size: 28.sp,
+                size: 23.sp,
               ),
             ),
-            SizedBox(width: 16.w),
+            SizedBox(width: 14.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1420,16 +1420,16 @@ class _CheckoutPageState extends State<CheckoutPage>
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1F2937),
+                      color: Color(0xFF1F2937),
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 6.h),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 11.sp,
                       color: Colors.grey.shade600,
                     ),
                   ),
@@ -1439,7 +1439,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             Icon(
               Icons.arrow_forward_ios_rounded,
               color: color.withOpacity(0.5),
-              size: 16.sp,
+              size: 14.sp,
             ),
           ],
         ),
@@ -1503,7 +1503,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           pickupDateTime:
               "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
           deliveryDateTime:
-              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(Duration(hours: 72)))}",
           userId: userIdMy,
           addressId: userIdMy,
         );
@@ -1543,7 +1543,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             pickupDateTime:
                 "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
             deliveryDateTime:
-                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+                "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(Duration(hours: 72)))}",
             userId: userIdMy,
             addressId: userIdMy,
           );
@@ -1565,7 +1565,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             "Failed to place order.\n${e.toString()}",
             backgroundColor: Colors.red.shade700,
             colorText: Colors.white,
-            duration: const Duration(seconds: 5),
+            duration: Duration(seconds: 5),
           );
         }
       } else {
@@ -1594,7 +1594,7 @@ class _CheckoutPageState extends State<CheckoutPage>
               pickupDateTime:
                   "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
               deliveryDateTime:
-                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(const Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(const Duration(hours: 72)))}",
+                  "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(Duration(hours: 72)))}",
               userId: userIdMy,
               addressId: userIdMy,
               transactionId: paymentId,
@@ -1620,7 +1620,7 @@ class _CheckoutPageState extends State<CheckoutPage>
               "Payment captured, but order creation failed.\n${e.toString()}",
               backgroundColor: Colors.orange.shade700,
               colorText: Colors.white,
-              duration: const Duration(seconds: 5),
+              duration: Duration(seconds: 5),
             );
           }
         },
@@ -1696,8 +1696,8 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           child: Opacity(
             opacity: _slideAnimation.value.clamp(0.0, 1.0),
             child: Container(
-              margin: EdgeInsets.only(bottom: 16.h),
-              padding: EdgeInsets.all(16.r),
+              margin: EdgeInsets.only(bottom: 14.h),
+              padding: EdgeInsets.all(14.r),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -1705,7 +1705,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                     AppTheme.primaryColor.withOpacity(0.02),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(14.r),
                 border: Border.all(
                   color: AppTheme.primaryColor.withOpacity(0.1),
                   width: 1.w,
@@ -1714,7 +1714,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
               child: Row(
                 children: [
                   _buildItemImage(),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 14.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1723,7 +1723,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                           widget.item['product']['name'] ?? '',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 16.sp,
+                            fontSize: 14.sp,
                             color: Color(0xFF1F2937),
                           ),
                         ),
@@ -1731,19 +1731,19 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                         Text(
                           "Service: ${widget.item['service_name']}",
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.grey.shade600,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 12.h),
+                        SizedBox(height: 11.h),
                         _buildQuantityControls(),
                       ],
                     ),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 14.w),
                   _buildPriceDisplay(),
                 ],
               ),
@@ -1757,7 +1757,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
   Widget _buildItemImage() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(11.r),
         boxShadow: [
           BoxShadow(
             color: AppTheme.primaryColor.withOpacity(0.2),
@@ -1767,16 +1767,16 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(11.r),
         child: Image.network(
           widget.item['product']['image'] ??
               'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
-          height: 60.h,
-          width: 60.w,
+          height: 50.h,
+          width: 50.w,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => Container(
-            height: 60.h,
-            width: 60.w,
+            height: 50.h,
+            width: 50.w,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -1788,7 +1788,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
             child: Icon(
               Icons.local_laundry_service,
               color: AppTheme.primaryColor,
-              size: 24.sp,
+              size: 21.sp,
             ),
           ),
         ),
@@ -1806,23 +1806,23 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
             widget.item['product']['name'] ?? '',
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 16.sp,
+              fontSize: 14.sp,
               color: Color(0xFF1F2937),
             ),
             maxLines: 2, // Allow up to 2 lines
             overflow: TextOverflow.ellipsis, // Handle overflow gracefully
           ),
-          SizedBox(height: 8.h), // Increased spacing
+          SizedBox(height: 6.h), // Increased spacing
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(6.r),
             ),
             child: Text(
               "Service: ${widget.item['service_name']}",
               style: TextStyle(
-                fontSize: 11.sp,
+                fontSize: 10.sp,
                 fontWeight: FontWeight.w500,
                 color: AppTheme.primaryColor,
               ),
@@ -1841,7 +1841,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
       alignment: Alignment.centerLeft,
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             colors: [
               Color.fromRGBO(87, 104, 171, 1),
               Color.fromRGBO(35, 42, 69, 1),
@@ -1849,10 +1849,10 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(11.r),
           boxShadow: [
             BoxShadow(
-              color: const Color.fromRGBO(87, 104, 171, 0.3),
+              color: Color.fromRGBO(87, 104, 171, 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1870,21 +1870,21 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                   widget.onUpdate();
                 },
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12.r),
-                  bottomLeft: Radius.circular(12.r),
+                  topLeft: Radius.circular(11.r),
+                  bottomLeft: Radius.circular(11.r),
                 ),
                 child: Container(
-                  padding: EdgeInsets.all(8.r),
+                  padding: EdgeInsets.all(6.r),
                   child: Icon(
                     Icons.remove,
-                    size: 18.sp,
+                    size: 15.sp,
                     color: Colors.white,
                   ),
                 ),
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
               child: Obx(() {
                 final quantity = widget.controller.cartQuantities[
                         '${widget.item['service']}_${widget.item['product']['id']}'] ??
@@ -1907,14 +1907,14 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                   widget.onUpdate();
                 },
                 borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(12.r),
-                  bottomRight: Radius.circular(12.r),
+                  topRight: Radius.circular(11.r),
+                  bottomRight: Radius.circular(11.r),
                 ),
                 child: Container(
-                  padding: EdgeInsets.all(8.r),
+                  padding: EdgeInsets.all(6.r),
                   child: Icon(
                     Icons.add,
-                    size: 18.sp,
+                    size: 15.sp,
                     color: Colors.white,
                   ),
                 ),
@@ -1933,10 +1933,10 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           0;
       final totalPrice = quantity * widget.item['product']['price'];
       return Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(6.r),
           border: Border.all(
             color: Colors.grey.shade300,
             width: 1.w,
@@ -1946,7 +1946,7 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           "\u20B9$totalPrice",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16.sp,
+            fontSize: 14.sp,
             color: Color(0xFF1F2937),
           ),
         ),
@@ -1972,9 +1972,9 @@ class _EnhancedDateCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: EdgeInsets.only(right: 12.w),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        duration: Duration(milliseconds: 200),
+        margin: EdgeInsets.only(right: 11.w),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
@@ -1985,7 +1985,7 @@ class _EnhancedDateCard extends StatelessWidget {
                 )
               : null,
           color: !isSelected ? Colors.grey.shade100 : null,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(14.r),
           border: Border.all(
             color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
             width: 2.w,
@@ -2007,14 +2007,14 @@ class _EnhancedDateCard extends StatelessWidget {
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
-                fontSize: 12.sp,
+                fontSize: 11.sp,
               ),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 6.h),
             Text(
               date.day.toString(),
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : AppTheme.primaryColor,
               ),
@@ -2043,8 +2043,8 @@ class _EnhancedTimeSlot extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 11.h),
         decoration: BoxDecoration(
           gradient: isSelected
               ? LinearGradient(
@@ -2055,7 +2055,7 @@ class _EnhancedTimeSlot extends StatelessWidget {
                 )
               : null,
           color: !isSelected ? Colors.grey.shade100 : null,
-          borderRadius: BorderRadius.circular(25.r),
+          borderRadius: BorderRadius.circular(21.r),
           border: Border.all(
             color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
             width: 2.w,
@@ -2075,10 +2075,10 @@ class _EnhancedTimeSlot extends StatelessWidget {
           children: [
             Icon(
               Icons.schedule,
-              size: 16.sp,
+              size: 14.sp,
               color: isSelected ? Colors.white : AppTheme.primaryColor,
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: 6.w),
             Text(
               slot,
               style: TextStyle(

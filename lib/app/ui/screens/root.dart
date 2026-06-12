@@ -46,7 +46,7 @@ class _RootPageState extends State<RootPage> {
           showLater: false,
           showReleaseNotes: true,
           upgrader: Upgrader(
-            durationUntilAlertAgain: const Duration(days: 1),
+            durationUntilAlertAgain: Duration(days: 1),
           ),
           child: Scaffold(
             body: IndexedStack(
@@ -55,11 +55,11 @@ class _RootPageState extends State<RootPage> {
             ),
             bottomNavigationBar: Padding(
               padding:
-                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.w),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(15.w),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -69,7 +69,7 @@ class _RootPageState extends State<RootPage> {
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(15.w),
                   child: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,
                     elevation: 0,
@@ -82,7 +82,7 @@ class _RootPageState extends State<RootPage> {
                         ),
                         label: 'Home',
                         activeIcon: Container(
-                          padding: EdgeInsets.all(10.0),
+                          padding: EdgeInsets.all(5.w),
                           decoration: BoxDecoration(
                             color: Color.fromRGBO(35, 42, 69, 1),
                             shape: BoxShape.circle,
@@ -97,7 +97,7 @@ class _RootPageState extends State<RootPage> {
                         ),
                         label: 'Services',
                         activeIcon: Container(
-                          padding: EdgeInsets.all(10.0),
+                          padding: EdgeInsets.all(5.w),
                           decoration: BoxDecoration(
                             color: Color.fromRGBO(35, 42, 69, 1),
                             shape: BoxShape.circle,
@@ -112,7 +112,7 @@ class _RootPageState extends State<RootPage> {
                         ),
                         label: 'Booking',
                         activeIcon: Container(
-                          padding: EdgeInsets.all(10.0),
+                          padding: EdgeInsets.all(5.w),
                           decoration: BoxDecoration(
                             color: Color.fromRGBO(35, 42, 69, 1),
                             shape: BoxShape.circle,
@@ -128,7 +128,7 @@ class _RootPageState extends State<RootPage> {
                         ),
                         label: 'Setting',
                         activeIcon: Container(
-                          padding: EdgeInsets.all(10.0),
+                          padding: EdgeInsets.all(5.w),
                           decoration: BoxDecoration(
                             color: Color.fromRGBO(35, 42, 69, 1),
                             shape: BoxShape.circle,
@@ -138,7 +138,7 @@ class _RootPageState extends State<RootPage> {
                       ),
                     ],
                     currentIndex: selectedIndex,
-                    selectedItemColor: const Color.fromRGBO(35, 42, 69, 1),
+                    selectedItemColor: Color.fromRGBO(35, 42, 69, 1),
                     unselectedItemColor: Colors.grey,
                     showUnselectedLabels: true,
                     onTap: (index) =>

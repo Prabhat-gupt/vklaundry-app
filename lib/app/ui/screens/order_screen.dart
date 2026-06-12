@@ -60,7 +60,7 @@ class OrdersScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -77,33 +77,33 @@ class OrdersScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: ListView.separated(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(15.r),
         itemCount: orders.length,
-        separatorBuilder: (_, __) => SizedBox(height: 16.h),
+        separatorBuilder: (_, __) => SizedBox(height: 15.h),
         itemBuilder: (context, index) {
           final order = orders[index];
           return Container(
-            padding: EdgeInsets.all(16.r),
+            padding: EdgeInsets.all(15.r),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(15.r),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image row
                 SizedBox(
-                  height: 50.h,
+                  height: 46.h,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: (order["images"] as List).length,
                     itemBuilder: (context, imgIndex) {
                       return Container(
-                        margin: EdgeInsets.only(right: 8.w),
-                        width: 50.w,
-                        height: 50.h,
+                        margin: EdgeInsets.only(right: 7.w),
+                        width: 46.w,
+                        height: 46.h,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.r),
+                          borderRadius: BorderRadius.circular(7.r),
                           image: DecorationImage(
                             image: AssetImage(
                               (order["images"] as List<String>)[imgIndex],
@@ -129,10 +129,10 @@ class OrdersScreen extends StatelessWidget {
                           order["status"]! as String,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16.sp,
+                            fontSize: 15.sp,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        SizedBox(height: 2.w),
                         Text(
                           order["date"]! as String,
                           style: TextStyle(
@@ -160,7 +160,7 @@ class OrdersScreen extends StatelessWidget {
                             order["amount"]! as String,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
+                              fontSize: 15.sp,
                             ),
                           ),
                           Icon(Icons.chevron_right),

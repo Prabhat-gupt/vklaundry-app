@@ -8,30 +8,30 @@ class PrivacyPolicyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F8),
+      backgroundColor: Color(0xFFF0F2F8),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF3D52A0),
+        backgroundColor: Color(0xFF3D52A0),
         elevation: 0,
         title: Text(
           "Privacy Policy",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 20.sp,
+            fontSize: 18.sp,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20.sp),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18.sp),
           onPressed: () => Get.back(),
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.r),
+        padding: EdgeInsets.all(18.r),
         child: Container(
-          padding: EdgeInsets.all(24.r),
+          padding: EdgeInsets.all(23.r),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24.r),
+            borderRadius: BorderRadius.circular(23.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),
@@ -85,14 +85,14 @@ class _PolicySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 24.h),
+      padding: EdgeInsets.only(bottom: 23.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 15.sp,
               fontWeight: FontWeight.bold,
               color: Color(0xFF3D52A0),
             ),
@@ -103,7 +103,7 @@ class _PolicySection extends StatelessWidget {
             style: TextStyle(
               fontSize: 14.sp,
               color: Colors.black87,
-              height: 1.6,
+              height: 1.w,
             ),
           ),
         ],

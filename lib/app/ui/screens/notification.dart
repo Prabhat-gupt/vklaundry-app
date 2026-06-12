@@ -40,7 +40,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           return Center(
             child: Text(
               'No notifications yet!',
-              style: TextStyle(fontSize: 20.sp, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 18.sp, color: Colors.grey[600]),
             ),
           );
         }

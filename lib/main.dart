@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -35,7 +36,12 @@ Future<void> main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  runApp(MyApp());
+  runApp(
+    DevicePreview(
+      enabled: false, // Turned off Device Preview
+      builder: (context) => MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -47,6 +53,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(360, 800),
       minTextAdapt: true,
       splitScreenMode: true,
+      useInheritedMediaQuery: true, // Fixes ScreenUtil inside DevicePreview
       builder: (context, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
@@ -54,9 +61,8 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           initialRoute: AppRoutes.SPLASHSCREEN,
           getPages: AppPages.routes,
-          builder: (context, child) {
-            return child!;
-          },
+          locale: DevicePreview.locale(context),
+          builder: DevicePreview.appBuilder,
         );
       },
     );

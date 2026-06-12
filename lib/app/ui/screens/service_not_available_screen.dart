@@ -29,39 +29,39 @@ class ServiceNotAvailableScreen extends StatelessWidget {
             children: [
               // Icon
               Container(
-                width: 100.w,
-                height: 100.h,
+                width: 94.w,
+                height: 94.h,
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.location_off_rounded,
-                  size: 50.sp,
+                  size: 46.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
-              SizedBox(height: 32.h),
+              SizedBox(height: 30.h),
 
               // Title
               Text(
                 'Service Not Available',
                 style: TextStyle(
-                  fontSize: 24.sp,
+                  fontSize: 23.sp,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.primaryColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 15.h),
 
               // Message
               Text(
                 'We currently serve customers within 10 km radius from our service center.',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                   color: Colors.grey.shade700,
-                  height: 1.5,
+                  height: 1.w,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -70,10 +70,10 @@ class ServiceNotAvailableScreen extends StatelessWidget {
               // Coming soon message
               Container(
                 padding:
-                    EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                    EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: AppTheme.secondaryColor.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(7.r),
                 ),
                 child: Text(
                   '✨ We will come to your location soon!',
@@ -85,7 +85,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              SizedBox(height: 40.h),
+              SizedBox(height: 38.h),
 
               // Change Address button
               SizedBox(
@@ -97,14 +97,14 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                   label: Text(
                     'Change Address',
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    padding: EdgeInsets.symmetric(vertical: 15.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -192,11 +192,11 @@ class ServiceNotAvailableScreen extends StatelessWidget {
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: Colors.white,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
           title: Row(
             children: [
               Icon(Icons.location_on, color: AppTheme.primaryColor),
-              SizedBox(width: 8.w),
+              SizedBox(width: 7.w),
               Text('Change Address'),
             ],
           ),
@@ -208,11 +208,11 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                   padding: EdgeInsets.all(10.r),
                   decoration: BoxDecoration(
                     color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16.sp, color: Colors.blue),
+                      Icon(Icons.info_outline, size: 15.sp, color: Colors.blue),
                       SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
@@ -223,14 +223,14 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 15.h),
                 TextField(
                   controller: houseController,
                   decoration: InputDecoration(
                     labelText: 'Address Line',
                     prefixIcon: Icon(Icons.home_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
+                        borderRadius: BorderRadius.circular(7.r)),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -240,7 +240,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                     labelText: 'City',
                     prefixIcon: Icon(Icons.location_city_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
+                        borderRadius: BorderRadius.circular(7.r)),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -250,7 +250,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                     labelText: 'State',
                     prefixIcon: Icon(Icons.map_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
+                        borderRadius: BorderRadius.circular(7.r)),
                   ),
                 ),
                 SizedBox(height: 12.h),
@@ -262,7 +262,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                     hintText: 'Enter your area pincode',
                     prefixIcon: Icon(Icons.pin_drop_outlined),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
+                        borderRadius: BorderRadius.circular(7.r)),
                   ),
                 ),
               ],
@@ -279,7 +279,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r)),
+                      borderRadius: BorderRadius.circular(7.r)),
                 ),
                 onPressed: saving
                     ? null
@@ -298,8 +298,8 @@ class ServiceNotAvailableScreen extends StatelessWidget {
                       },
                 child: saving
                     ? SizedBox(
-                        width: 18.w,
-                        height: 18.h,
+                        width: 17.w,
+                        height: 17.h,
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white),
                       )
@@ -393,7 +393,7 @@ class ServiceNotAvailableScreen extends StatelessWidget {
       if (controller != null) {
         controller.fetchUserAddress();
         // Give the async internals time to finish before we read isServiceAvailable
-        await Future.delayed(const Duration(milliseconds: 1500));
+        await Future.delayed(Duration(milliseconds: 1500));
       }
 
       // Close dialog
@@ -418,9 +418,9 @@ class ServiceNotAvailableScreen extends StatelessWidget {
           '🎉 Great news!',
           'Service is now available in your area!',
           backgroundColor: Colors.green.shade100,
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         );
-        await Future.delayed(const Duration(milliseconds: 800));
+        await Future.delayed(Duration(milliseconds: 800));
         Get.offAllNamed(AppRoutes.ROOT);
       } else {
         if (lat == null) {
@@ -428,14 +428,14 @@ class ServiceNotAvailableScreen extends StatelessWidget {
             '📍 Address Updated',
             'Could not find coordinates for this pincode. Please try a different pincode.',
             backgroundColor: Colors.orange.shade100,
-            duration: const Duration(seconds: 4),
+            duration: Duration(seconds: 4),
           );
         } else {
           Get.snackbar(
             '😔 Still Outside Service Area',
             'Sorry, we don\'t serve your area yet. We\'re expanding soon!',
             backgroundColor: Colors.orange.shade100,
-            duration: const Duration(seconds: 3),
+            duration: Duration(seconds: 3),
           );
         }
       }

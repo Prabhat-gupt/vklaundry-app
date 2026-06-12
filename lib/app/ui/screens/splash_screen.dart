@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen>
   void _setupAnimations() {
     // Floating animation
     _floatingController = AnimationController(
-      duration: const Duration(seconds: 4),
+      duration: Duration(seconds: 4),
       vsync: this,
     );
     _floatingAnimation = Tween<double>(
@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Pulse animation for text elements
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: Duration(milliseconds: 2000),
       vsync: this,
     );
     _pulseAnimation = Tween<double>(
@@ -83,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Rotation animation for decorative elements
     _rotationController = AnimationController(
-      duration: const Duration(seconds: 15),
+      duration: Duration(seconds: 15),
       vsync: this,
     );
     _rotationAnimation = Tween<double>(
@@ -94,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Background gradient animation
     _backgroundController = AnimationController(
-      duration: const Duration(seconds: 6),
+      duration: Duration(seconds: 6),
       vsync: this,
     );
     _backgroundAnimation = Tween<double>(
@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Scale animation for logo entrance
     _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: Duration(milliseconds: 1500),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(
@@ -119,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Fade animation for content
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: Duration(milliseconds: 2000),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(
@@ -144,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen>
       final isGuest = prefs.getBool('isGuest') ?? false;
 
       // Add delay for better UX and to let Supabase session restore
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 2));
 
       if (mounted) {
         if (isLoggedIn) {
@@ -271,7 +271,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _startImageSlideshow() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
           _currentIndex = (_currentIndex + 1) % splashImages.length;
@@ -333,8 +333,8 @@ class _SplashScreenState extends State<SplashScreen>
                         left: x - 15,
                         top: y - 15,
                         child: Container(
-                          width: 30.w,
-                          height: 30.h,
+                          width: 29.w,
+                          height: 29.h,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white.withOpacity(0.1),
@@ -357,7 +357,7 @@ class _SplashScreenState extends State<SplashScreen>
                           return Transform.translate(
                             offset: Offset(0, -_floatingAnimation.value),
                             child: Container(
-                              padding: EdgeInsets.all(20.r),
+                              padding: EdgeInsets.all(18.r),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white.withOpacity(0.1),
@@ -370,7 +370,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ],
                               ),
                               child: Container(
-                                // padding: EdgeInsets.all(20.r),
+                                // padding: EdgeInsets.all(18.r),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,
@@ -383,7 +383,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   ],
                                 ),
                                 child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 500),
+                                  duration: Duration(milliseconds: 500),
                                   switchInCurve: Curves.easeOutCubic,
                                   transitionBuilder: (Widget child,
                                       Animation<double> animation) {
@@ -397,14 +397,14 @@ class _SplashScreenState extends State<SplashScreen>
                                       return SlideTransition(
                                           position: slideIn, child: child);
                                     } else {
-                                      return const SizedBox.shrink();
+                                      return SizedBox.shrink();
                                     }
                                   },
                                   child: Image.asset(
                                     splashImages[_currentIndex],
                                     key: ValueKey<int>(_currentIndex),
-                                    height: 200.h,
-                                    width: 200.w,
+                                    height: 188.h,
+                                    width: 188.w,
                                   ),
                                 ),
                               ),
@@ -413,7 +413,7 @@ class _SplashScreenState extends State<SplashScreen>
                         },
                       ),
 
-                      SizedBox(height: 60.h),
+                      SizedBox(height: 56.h),
 
                       // App title with fade-in animation
                       FadeTransition(
@@ -423,7 +423,7 @@ class _SplashScreenState extends State<SplashScreen>
                             // Text(
                             //   'Laundry App',
                             //   style: TextStyle(
-                            //     fontSize: 42.sp,
+                            //     fontSize: 40.sp,
                             //     fontWeight: FontWeight.bold,
                             //     color: Colors.white,
                             //     letterSpacing: 1.5,
@@ -442,13 +442,13 @@ class _SplashScreenState extends State<SplashScreen>
                                 Text(
                                   'VK Laundary',
                                   style: TextStyle(
-                                    fontSize: 42.sp,
+                                    fontSize: 40.sp,
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0.5,
                                   ),
                                 ),
-                                SizedBox(height: 8.h),
+                                SizedBox(height: 7.h),
                                 TweenAnimationBuilder<double>(
                                   tween: Tween(begin: 0.0, end: 1.0),
                                   duration: Duration(seconds: 2),
@@ -459,7 +459,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   child: Text(
                                     'Your Laundry, Our Priority',
                                     style: TextStyle(
-                                      fontSize: 20.sp,
+                                      fontSize: 18.sp,
                                       color: Colors.white.withOpacity(0.9),
                                     ),
                                   ),
@@ -472,7 +472,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
 
-                      SizedBox(height: 80.h),
+                      SizedBox(height: 75.h),
 
                       // Loading indicator
                       // AnimatedBuilder(
@@ -483,8 +483,8 @@ class _SplashScreenState extends State<SplashScreen>
                       //       child: Column(
                       //         children: [
                       //           Container(
-                      //             width: 40.w,
-                      //             height: 40.h,
+                      //             width: 38.w,
+                      //             height: 38.h,
                       //             decoration: BoxDecoration(
                       //               shape: BoxShape.circle,
                       //               border: Border.all(
@@ -497,7 +497,7 @@ class _SplashScreenState extends State<SplashScreen>
                       //               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       //             ),
                       //           ),
-                      //           SizedBox(height: 16.h),
+                      //           SizedBox(height: 15.h),
                       //           Text(
                       //             'Loading...',
                       //             style: TextStyle(

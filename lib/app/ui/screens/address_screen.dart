@@ -13,7 +13,7 @@ class AddressScreen extends StatelessWidget {
     final HomePageController controller = Get.find<HomePageController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: AppBar(
         title: Text(
           'Addresses',
@@ -33,7 +33,7 @@ class AddressScreen extends StatelessWidget {
         }
 
         return ListView(
-          padding: EdgeInsets.all(16.r),
+          padding: EdgeInsets.all(15.r),
           children: [
             ...controller.userAddress.map((addr) {
               String fullAddress =
@@ -73,10 +73,10 @@ class AddressScreen extends StatelessWidget {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    padding: EdgeInsets.symmetric(vertical: 15.h),
                     side: BorderSide(color: AppTheme.primaryColor),
                     foregroundColor: AppTheme.primaryColor,
-                    textStyle: TextStyle(fontSize: 16.sp),
+                    textStyle: TextStyle(fontSize: 15.sp),
                     backgroundColor: AppTheme.primaryColor,
                   ),
                 ),
@@ -118,7 +118,7 @@ class AddressScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: "Address Line",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
@@ -128,7 +128,7 @@ class AddressScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: "City",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
@@ -138,7 +138,7 @@ class AddressScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: "State",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
@@ -148,7 +148,7 @@ class AddressScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: "Landmark / Pincode",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
@@ -215,8 +215,8 @@ class AddressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.r),
+      margin: EdgeInsets.only(bottom: 15.h),
+      padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -234,11 +234,11 @@ class AddressCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18.sp,
+                    fontSize: 17.sp,
                     color: AppTheme.primaryColor,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 5.h),
                 Text(
                   address,
                   maxLines: 3,

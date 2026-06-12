@@ -207,7 +207,7 @@ class _SetupScreenState extends State<SetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup Profile'), centerTitle: true),
+      appBar: AppBar(title: Text('Setup Profile'), centerTitle: true),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(16.0.r),
@@ -231,12 +231,12 @@ class _SetupScreenState extends State<SetupScreen> {
                     ? "Enter a valid email address"
                     : null,
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 15.h),
               Text(
                 "Add Address",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp),
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 15.h),
               _buildTextField(
                 "House No. & Floor*",
                 houseController,
@@ -255,7 +255,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 hintText: "Enter nearby landmark",
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 15.h),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -266,7 +266,7 @@ class _SetupScreenState extends State<SetupScreen> {
                   onPressed: (!isFormValid || isLoading) ? null : _saveUserData,
                   child: isLoading
                       ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Save', style: TextStyle(fontSize: 20.sp)),
+                      : Text('Save', style: TextStyle(fontSize: 18.sp)),
                 ),
               ),
             ],
@@ -298,14 +298,14 @@ class _SetupScreenState extends State<SetupScreen> {
             hintText: hintText,
             errorText: errorText,
             filled: true,
-            fillColor: const Color(0xFFE0E0E0),
+            fillColor: Color(0xFFE0E0E0),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(7.r),
               borderSide: BorderSide.none,
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 12.w,
-              vertical: 16.h,
+              vertical: 15.h,
             ),
           ),
         ),

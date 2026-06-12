@@ -8,18 +8,18 @@ class OrderDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "Order #PQILDFA4095",
-              style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14.sp),
+              style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12.sp),
             ),
             Text(
               "3 items",
-              style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -33,7 +33,7 @@ class OrderDetailsPage extends StatelessWidget {
             icon: Icon(
               Icons.message_outlined,
               color: Colors.white,
-              size: 16.sp,
+              size: 13.sp,
             ),
             label: Text(
               "Get Help",
@@ -42,25 +42,25 @@ class OrderDetailsPage extends StatelessWidget {
             style: TextButton.styleFrom(
               backgroundColor: Color.fromRGBO(60, 195, 223, 0.6),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(5.r),
               ),
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
+              padding: EdgeInsets.symmetric(horizontal: 8.w),
             ),
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 5.w),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(13.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Delivered Section
             Container(
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.all(13.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(10.r),
               ),
               child: Column(
                 children: [
@@ -69,9 +69,9 @@ class OrderDetailsPage extends StatelessWidget {
                       Icon(
                         Icons.check_box_rounded,
                         color: Color.fromARGB(167, 76, 175, 79),
-                        size: 42.sp,
+                        size: 32.sp,
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 10.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +79,7 @@ class OrderDetailsPage extends StatelessWidget {
                             Text(
                               "Delivered",
                               style: TextStyle(
-                                fontSize: 22.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -87,17 +87,17 @@ class OrderDetailsPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 52.h,
+                        height: 40.h,
                         child: VerticalDivider(
-                          width: 20.w,
+                          width: 14.w,
                           thickness: 1,
                           indent: 8,
                           endIndent: 8,
-                          color: const Color.fromARGB(170, 158, 158, 158),
+                          color: Color.fromARGB(170, 158, 158, 158),
                         ),
                       ),
 
-                      // SizedBox(width: 10.w,),
+                      // SizedBox(width: 8.w,),
                       Column(
                         children: [
                           Text(
@@ -106,12 +106,12 @@ class OrderDetailsPage extends StatelessWidget {
                           ),
                           Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                              vertical: 4.h,
+                              horizontal: 8.w,
+                              vertical: 5.h,
                             ),
                             decoration: BoxDecoration(
                               color: Color.fromRGBO(60, 195, 233, 0.6),
-                              borderRadius: BorderRadius.circular(8.r),
+                              borderRadius: BorderRadius.circular(5.r),
                             ),
                             child: Text(
                               "5 DAYS",
@@ -125,7 +125,7 @@ class OrderDetailsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 10.h),
                   Divider(color: Colors.grey.shade300, thickness: 1),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,18 +138,18 @@ class OrderDetailsPage extends StatelessWidget {
                         contentPadding: EdgeInsets.zero,
                         leading: Image.asset(
                           "assets/icons/shirt.png",
-                          height: 50.h,
+                          height: 37.h,
                         ),
                         title: Text(
                           "Shirt full sleeve",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
+                            fontSize: 14.sp,
                           ),
                         ),
                         subtitle: Text(
                           "All shirt eg. denim cotton",
-                          style: TextStyle(fontSize: 12.sp),
+                          style: TextStyle(fontSize: 10.sp),
                         ),
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -158,14 +158,14 @@ class OrderDetailsPage extends StatelessWidget {
                               "₹34",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16.sp,
+                                fontSize: 13.sp,
                               ),
                             ),
                             Text(
                               "₹34",
                               style: TextStyle(
                                 color: Colors.grey,
-                                fontSize: 12.sp,
+                                fontSize: 10.sp,
                                 decoration: TextDecoration.lineThrough,
                               ),
                             ),
@@ -177,13 +177,13 @@ class OrderDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 13.h),
             // Bill Details
             Container(
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.all(13.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(10.r),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,11 +192,11 @@ class OrderDetailsPage extends StatelessWidget {
                     "Bill details",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 5.h),
                   _billRow("Items total", "₹34"),
                   _billRow("Dealivery charge", "₹34"),
                   _billRow("Handling charge", "₹34"),
-                  const Divider(),
+                  Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -221,7 +221,7 @@ class OrderDetailsPage extends StatelessWidget {
                                 233,
                                 0.6,
                               ),
-                              padding: EdgeInsets.all(8.r),
+                              padding: EdgeInsets.all(5.r),
                               minimumSize: const Size(0, 0),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               side: BorderSide(
@@ -229,11 +229,11 @@ class OrderDetailsPage extends StatelessWidget {
                                 width: 1.w,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.r),
+                                borderRadius: BorderRadius.circular(5.r),
                               ),
                             ),
                           ),
-                          SizedBox(width: 8.w),
+                          SizedBox(width: 5.w),
                           Text(
                             "₹214",
                             style: TextStyle(fontWeight: FontWeight.bold),
@@ -245,15 +245,15 @@ class OrderDetailsPage extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 13.h),
 
             // Order Details
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.all(13.r),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(10.r),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,37 +262,37 @@ class OrderDetailsPage extends StatelessWidget {
                     "Order details",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 10.h),
                   Text(
                     "Order ID\n#PQISNSFF09435",
-                    style: TextStyle(height: 1.4),
+                    style: TextStyle(height: 1.w),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 10.h),
                   Text(
                     "Receiver Details\nTony Stark, +91-8937298743",
-                    style: TextStyle(height: 1.4),
+                    style: TextStyle(height: 1.w),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 10.h),
                   Text(
                     "Delivery Address\nA-2, Krishna Nagar, Chandigarh",
-                    style: TextStyle(height: 1.4),
+                    style: TextStyle(height: 1.w),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 10.h),
                   Text(
                     "Delivered on\n28 Jun 2025, 2:04 PM",
-                    style: TextStyle(height: 1.4),
+                    style: TextStyle(height: 1.w),
                   ),
                 ],
               ),
             ),
-            // SizedBox(height: 80.h),
+            // SizedBox(height: 61.h),
           ],
         ),
       ),
 
       // Bottom bar
       bottomNavigationBar: Container(
-        height: 80.h,
+        height: 61.h,
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(color: AppTheme.primaryColor, width: 1.w),
@@ -313,7 +313,7 @@ class OrderDetailsPage extends StatelessWidget {
                 style: TextStyle(
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18.sp,
+                  fontSize: 14.sp,
                 ),
               ),
             ),
@@ -327,7 +327,7 @@ class OrderDetailsPage extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18.sp,
+                  fontSize: 14.sp,
                 ),
               ),
             ),
@@ -339,7 +339,7 @@ class OrderDetailsPage extends StatelessWidget {
 
   Widget _billRow(String label, String amount) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
+      padding: EdgeInsets.symmetric(vertical: 5.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [Text(label), Text(amount)],

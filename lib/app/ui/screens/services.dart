@@ -36,17 +36,17 @@ class _ServiceScreenState extends State<ServiceScreen>
   void _initializeAnimations() {
     _pageLoadController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _headerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
     );
 
     _listController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: Duration(milliseconds: 1200),
     );
 
     _pageOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -79,9 +79,9 @@ class _ServiceScreenState extends State<ServiceScreen>
 
       try {
         _pageLoadController.forward();
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: 200));
         if (mounted) _headerController.forward();
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(Duration(milliseconds: 300));
         if (mounted) _listController.forward();
       } catch (e) {
         if (mounted) {
@@ -104,14 +104,14 @@ class _ServiceScreenState extends State<ServiceScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: _buildAnimatedAppBar(),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
         child: Column(
           children: [
             // _buildAnimatedHeader(),
-            // SizedBox(height: 20.h),
+            // SizedBox(height: 16.h),
             Expanded(child: _buildServicesList()),
           ],
         ),
@@ -122,7 +122,7 @@ class _ServiceScreenState extends State<ServiceScreen>
   PreferredSizeWidget _buildAnimatedAppBar() {
     return AppBar(
       elevation: 0,
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       title: SlideTransition(
         position: _headerSlideAnimation,
         child: ScaleTransition(
@@ -131,7 +131,7 @@ class _ServiceScreenState extends State<ServiceScreen>
             'Our Services',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 26.sp,
+              fontSize: 22.sp,
               color: AppTheme.primaryColor,
               letterSpacing: 0.5,
             ),
@@ -151,7 +151,7 @@ class _ServiceScreenState extends State<ServiceScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.all(24.r),
+                padding: EdgeInsets.all(21.r),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -160,11 +160,11 @@ class _ServiceScreenState extends State<ServiceScreen>
                   valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 16.h),
               Text(
                 'Loading services...',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 14.sp,
                   color: AppTheme.primaryColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -175,7 +175,7 @@ class _ServiceScreenState extends State<ServiceScreen>
       }
 
       return ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
         itemCount: services.length,
         itemBuilder: (context, index) {
           final service = services[index];
@@ -193,7 +193,7 @@ class _ServiceScreenState extends State<ServiceScreen>
   void _navigateToProductList(Map<String, dynamic> service) {
     Navigator.of(context).push(
       PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
+        transitionDuration: Duration(milliseconds: 600),
         pageBuilder: (context, animation, secondaryAnimation) {
           return FadeTransition(
             opacity: animation,
@@ -251,7 +251,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
     super.initState();
     _hoverController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 200),
     );
 
     _hoverAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -311,7 +311,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
               end: Offset.zero,
             ).animate(animationValue),
             child: Container(
-              margin: EdgeInsets.only(bottom: 20.h),
+              margin: EdgeInsets.only(bottom: 16.h),
               child: MouseRegion(
                 onEnter: (_) => _handleHoverStart(),
                 onExit: (_) => _handleHoverEnd(),
@@ -323,7 +323,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20.r),
+                          borderRadius: BorderRadius.circular(16.r),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.08),
@@ -341,15 +341,15 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: widget.onTap,
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(16.r),
                             splashColor: AppTheme.primaryColor.withOpacity(0.1),
                             highlightColor: AppTheme.primaryColor.withOpacity(0.05),
                             child: Container(
-                              padding: EdgeInsets.all(4.r),
+                              padding: EdgeInsets.all(5.r),
                               child: Row(
                                 children: [
                                   _buildServiceImage(),
-                                  SizedBox(width: 16.w),
+                                  SizedBox(width: 14.w),
                                   Expanded(child: _buildServiceInfo()),
                                   _buildTrailingIcon(),
                                 ],
@@ -374,7 +374,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
       tag: 'service_image_${widget.service['id']}',
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(14.r),
           boxShadow: [
             BoxShadow(
               color: AppTheme.primaryColor.withOpacity(0.2),
@@ -384,10 +384,10 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(14.r),
           child: Container(
-            width: 100.w,
-            height: 100.h,
+            width: 85.w,
+            height: 85.h,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -403,12 +403,12 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                 Image.network(
                   widget.service['image_url'] ??
                       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZGOWHxy5gcPkGjr4AxlsSgRIVVTCaQ0sJDw&s',
-                  width: 100.w,
-                  height: 100.h,
+                  width: 85.w,
+                  height: 85.h,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    width: 100.w,
-                    height: 100.h,
+                    width: 85.w,
+                    height: 85.h,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -421,15 +421,15 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                     ),
                     child: Icon(
                       Icons.cleaning_services,
-                      size: 50.sp,
+                      size: 41.sp,
                       color: AppTheme.primaryColor,
                     ),
                   ),
                 ),
                 // Subtle overlay
                 Container(
-                  width: 100.w,
-                  height: 100.h,
+                  width: 85.w,
+                  height: 85.h,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -451,33 +451,33 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
 
   Widget _buildServiceInfo() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10.h),
+      padding: EdgeInsets.symmetric(vertical: 9.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             widget.service['name'] ?? '-',
             style: TextStyle(
-              fontSize: 20.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1F2937),
               letterSpacing: 0.5,
             ),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 5.h),
           Text(
             widget.service['description'] ?? 'Professional laundry service',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 13.sp,
               color: Colors.grey[600],
-              height: 1.4,
+              height: 1.w,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+            padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 5.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -485,12 +485,12 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
                   AppTheme.primaryColor.withOpacity(0.05),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20.r),
+              borderRadius: BorderRadius.circular(16.r),
             ),
             child: Text(
               'Available Now',
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.primaryColor,
               ),
@@ -506,11 +506,11 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
       animation: _hoverAnimation,
       builder: (context, child) {
         return Container(
-          margin: EdgeInsets.only(right: 20.w),
-          padding: EdgeInsets.all(12.r),
+          margin: EdgeInsets.only(right: 16.w),
+          padding: EdgeInsets.all(11.r),
           decoration: BoxDecoration(
             color: AppTheme.primaryColor.withOpacity(0.1 + (_hoverAnimation.value * 0.05)),
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(11.r),
             boxShadow: _isHovering
                 ? [
               BoxShadow(
@@ -526,7 +526,7 @@ class _EnhancedServiceCardState extends State<_EnhancedServiceCard>
             child: Icon(
               Icons.arrow_forward_ios,
               color: AppTheme.primaryColor,
-              size: 18.sp,
+              size: 15.sp,
             ),
           ),
         );

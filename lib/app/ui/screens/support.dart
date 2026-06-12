@@ -89,7 +89,7 @@ class SupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -98,14 +98,14 @@ class SupportPage extends StatelessWidget {
           style: TextStyle(
             color: AppTheme.primaryColor,
             fontWeight: FontWeight.bold,
-            fontSize: 20.sp,
+            fontSize: 18.sp,
           ),
         ),
         centerTitle: true,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
-            margin: EdgeInsets.all(8.r),
+            margin: EdgeInsets.all(7.r),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
@@ -113,7 +113,7 @@ class SupportPage extends StatelessWidget {
             child: Icon(
               Icons.arrow_back_ios_new_rounded,
               color: AppTheme.primaryColor,
-              size: 18.sp,
+              size: 17.sp,
             ),
           ),
         ),
@@ -124,29 +124,29 @@ class SupportPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 20.h),
+              SizedBox(height: 18.h),
               Container(
-                padding: EdgeInsets.all(24.r),
+                padding: EdgeInsets.all(23.r),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.support_agent_rounded,
-                  size: 80.sp,
+                  size: 75.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 23.h),
               Text(
                 "How can we help you?",
                 style: TextStyle(
-                  fontSize: 22.sp,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937),
+                  color: Color(0xFF1F2937),
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 7.h),
               Text(
                 "Reach out to our support team for any queries or assistance.",
                 textAlign: TextAlign.center,
@@ -155,7 +155,7 @@ class SupportPage extends StatelessWidget {
                   color: Colors.grey.shade600,
                 ),
               ),
-              SizedBox(height: 32.h),
+              SizedBox(height: 30.h),
               Obx(() {
                 final support = controller.supportDetails;
                 return Column(
@@ -205,10 +205,10 @@ class SupportPage extends StatelessWidget {
   }) {
     final color = iconColor ?? AppTheme.primaryColor;
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 15.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -229,29 +229,29 @@ class SupportPage extends StatelessWidget {
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: AppTheme.primaryColor,
                 colorText: Colors.white,
-                margin: EdgeInsets.all(16.r),
-                borderRadius: 16.r,
-                duration: const Duration(seconds: 2),
+                margin: EdgeInsets.all(15.r),
+                borderRadius: 15.r,
+                duration: Duration(seconds: 2),
               );
             }
             if (onTap != null) {
               onTap();
             }
           },
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(18.r),
           child: Padding(
-            padding: EdgeInsets.all(16.r),
+            padding: EdgeInsets.all(15.r),
             child: Row(
               children: [
                 Container(
                   padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16.r),
+                    borderRadius: BorderRadius.circular(15.r),
                   ),
-                  child: Icon(icon, color: color, size: 24.sp),
+                  child: Icon(icon, color: color, size: 23.sp),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 15.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,12 +264,12 @@ class SupportPage extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 5.h),
                       Text(
                         value,
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          color: const Color(0xFF1F2937),
+                          fontSize: 15.sp,
+                          color: Color(0xFF1F2937),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -278,7 +278,7 @@ class SupportPage extends StatelessWidget {
                 ),
                 if (onTap != null)
                   Container(
-                    padding: EdgeInsets.all(8.r),
+                    padding: EdgeInsets.all(7.r),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade50,
                       shape: BoxShape.circle,
