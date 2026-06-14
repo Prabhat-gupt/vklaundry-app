@@ -46,22 +46,22 @@ class _SettingsScreenState extends State<SettingsScreen>
     // Initialize animation controllers with reasonable durations
     _pageLoadController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 500),
     );
 
     _profileCardController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _sectionsController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: Duration(milliseconds: 700),
     );
 
     _logoutButtonController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: Duration(milliseconds: 400),
     );
 
     // Initialize animations with safer curves
@@ -135,13 +135,13 @@ class _SettingsScreenState extends State<SettingsScreen>
         if (!mounted) return;
 
         // Start staggered animations
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Future.delayed(Duration(milliseconds: 100));
         if (mounted) _profileCardController.forward();
 
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: 200));
         if (mounted) _sectionsController.forward();
 
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(Duration(milliseconds: 300));
         if (mounted) _logoutButtonController.forward();
       } catch (e) {
         // Handle any animation errors gracefully
@@ -168,7 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget build(BuildContext context) {
     final homeController = Get.find<HomePageController>();
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F8),
+      backgroundColor: Color(0xFFF0F2F8),
       body: Obx(
         () {
           // Show guest screen if in guest mode
@@ -176,7 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             return _buildGuestScreen(context);
           }
           return controller.isLoading.value
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(child: CircularProgressIndicator())
               : FadeTransition(
                   opacity: _pageOpacityAnimation,
                   child: Column(
@@ -185,29 +185,29 @@ class _SettingsScreenState extends State<SettingsScreen>
                       Expanded(
                         child: SingleChildScrollView(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 18.w,
-                            vertical: 20.h,
+                            horizontal: 17.w,
+                            vertical: 18.h,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildAnimatedSection(
                                 icon: Icons.person_pin_rounded,
-                                iconColor: const Color(0xFF3D52A0),
+                                iconColor: Color(0xFF3D52A0),
                                 "Your Information",
                                 [
                                   _EnhancedListTile(
                                     icon: Icons.location_on_rounded,
-                                    iconColor: const Color(0xFF2DC9B7),
+                                    iconColor: Color(0xFF2DC9B7),
                                     title: "Saved Address",
                                     subtitle: "Manage your delivery locations",
                                     onTap: () => Get.toNamed('/address_screen'),
                                     delay: 0,
                                   ),
-                                  const Divider(height: 1, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
+                                  Divider(height: 1.w, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
                                   _EnhancedListTile(
                                     icon: Icons.manage_accounts_rounded,
-                                    iconColor: const Color(0xFF9C6FFF),
+                                    iconColor: Color(0xFF9C6FFF),
                                     title: "Profile",
                                     subtitle: "Edit your personal information",
                                     onTap: () => Get.toNamed('/profile_screen'),
@@ -215,34 +215,34 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 20.h),
+                              SizedBox(height: 18.h),
                               _buildAnimatedSection(
                                 icon: Icons.info_outline_rounded,
-                                iconColor: const Color(0xFFFF8C42),
+                                iconColor: Color(0xFFFF8C42),
                                 "Other Information",
                                 [
                                   _EnhancedListTile(
                                     icon: Icons.support_agent_rounded,
-                                    iconColor: const Color(0xFF2DC9B7),
+                                    iconColor: Color(0xFF2DC9B7),
                                     title: "Support",
                                     subtitle: "Get help and contact us",
                                     onTap: () => Get.toNamed('/support_screen'),
                                     delay: 200,
                                   ),
-                                  const Divider(height: 1, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
+                                  Divider(height: 1.w, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
                                   _EnhancedListTile(
                                     icon: Icons.article_rounded,
-                                    iconColor: const Color(0xFFFFB800),
+                                    iconColor: Color(0xFFFFB800),
                                     title: "Terms & Conditions",
                                     subtitle: "Read our terms and policies",
                                     onTap: () =>
                                         Get.to(() => const TermsAndConditionsPage()),
                                     delay: 300,
                                   ),
-                                  const Divider(height: 1, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
+                                  Divider(height: 1.w, indent: 64, endIndent: 16, color: Color(0xFFEEEFF3)),
                                   _EnhancedListTile(
                                     icon: Icons.privacy_tip_rounded,
-                                    iconColor: const Color(0xFF2196F3),
+                                    iconColor: Color(0xFF2196F3),
                                     title: "Privacy Policy",
                                     subtitle: "How we protect your data",
                                     onTap: () =>
@@ -251,9 +251,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 28.h),
+                              SizedBox(height: 25.h),
                               _buildAnimatedLogoutButton(),
-                              SizedBox(height: 20.h),
+                              SizedBox(height: 18.h),
                             ],
                           ),
                         ),
@@ -273,9 +273,9 @@ class _SettingsScreenState extends State<SettingsScreen>
         Container(
           padding: EdgeInsets.only(
             top: MediaQuery.of(context).padding.top + 16,
-            bottom: 28,
-            left: 20,
-            right: 20,
+            bottom: 19.w,
+            left: 15.w,
+            right: 15.w,
           ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -284,8 +284,8 @@ class _SettingsScreenState extends State<SettingsScreen>
               colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
             ),
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(32.r),
-              bottomRight: Radius.circular(32.r),
+              bottomLeft: Radius.circular(30.r),
+              bottomRight: Radius.circular(30.r),
             ),
             boxShadow: [
               BoxShadow(
@@ -298,8 +298,8 @@ class _SettingsScreenState extends State<SettingsScreen>
           child: Row(
             children: [
               Container(
-                width: 70.w,
-                height: 70.h,
+                width: 65.w,
+                height: 65.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white.withOpacity(0.15),
@@ -309,10 +309,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                 child: Icon(
                   Icons.person_outline_rounded,
                   color: Colors.white,
-                  size: 36.sp,
+                  size: 33.sp,
                 ),
               ),
-              SizedBox(width: 18.w),
+              SizedBox(width: 17.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +321,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                       'Guest User',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -339,16 +339,16 @@ class _SettingsScreenState extends State<SettingsScreen>
         // Login CTA card
         Expanded(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(20.r),
+            padding: EdgeInsets.all(18.r),
             child: Column(
               children: [
-                SizedBox(height: 20.h),
+                SizedBox(height: 18.h),
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(28.r),
+                  padding: EdgeInsets.all(25.r),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.r),
+                    borderRadius: BorderRadius.circular(18.r),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.06),
@@ -360,50 +360,50 @@ class _SettingsScreenState extends State<SettingsScreen>
                   child: Column(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(20.r),
+                        padding: EdgeInsets.all(18.r),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3D52A0).withOpacity(0.08),
+                          color: Color(0xFF3D52A0).withOpacity(0.08),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.account_circle_rounded,
-                          size: 52.sp,
-                          color: const Color(0xFF3D52A0),
+                          size: 48.sp,
+                          color: Color(0xFF3D52A0),
                         ),
                       ),
-                      SizedBox(height: 20.h),
+                      SizedBox(height: 18.h),
                       Text(
                         'Login to unlock all features',
                         style: TextStyle(
-                          fontSize: 18.sp,
+                          fontSize: 17.sp,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1A2340),
+                          color: Color(0xFF1A2340),
                         ),
                       ),
                       Text(
                         'Sign in to place orders, track deliveries,\nmanage your profile and addresses.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 13.sp, color: Colors.grey, height: 1.6),
+                            fontSize: 13.sp, color: Colors.grey, height: 1.w),
                       ),
-                      SizedBox(height: 24.h),
+                      SizedBox(height: 23.h),
                       GestureDetector(
                         onTap: () => Get.toNamed(AppRoutes.LOGIN),
                         child: Container(
                           width: double.infinity,
-                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          padding: EdgeInsets.symmetric(vertical: 15.h),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               colors: [
                                 Color(0xFF5768AB),
                                 Color(0xFF232F46),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(50.r),
+                            borderRadius: BorderRadius.circular(45.r),
                             boxShadow: [
                               BoxShadow(
                                 color:
-                                    const Color(0xFF5768AB).withOpacity(0.35),
+                                    Color(0xFF5768AB).withOpacity(0.35),
                                 blurRadius: 12,
                                 offset: const Offset(0, 6),
                               ),
@@ -415,7 +415,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16.sp,
+                                fontSize: 15.sp,
                               ),
                             ),
                           ),
@@ -425,11 +425,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                   ),
                 ),
                 // Terms & Conditions still accessible for guests
-                SizedBox(height: 20.h),
+                SizedBox(height: 18.h),
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(18.r),
+                    borderRadius: BorderRadius.circular(17.r),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -442,20 +442,20 @@ class _SettingsScreenState extends State<SettingsScreen>
                     children: [
                       _EnhancedListTile(
                         icon: Icons.support_agent_rounded,
-                        iconColor: const Color(0xFF2DC9B7),
+                        iconColor: Color(0xFF2DC9B7),
                         title: 'Support',
                         subtitle: 'Get help and contact us',
                         onTap: () => Get.toNamed('/support_screen'),
                         delay: 0,
                       ),
-                      const Divider(
-                          height: 1,
+                      Divider(
+                          height: 1.w,
                           indent: 64,
                           endIndent: 16,
                           color: Color(0xFFEEEFF3)),
                       _EnhancedListTile(
                         icon: Icons.article_rounded,
-                        iconColor: const Color(0xFFFFB800),
+                        iconColor: Color(0xFFFFB800),
                         title: 'Terms & Conditions',
                         subtitle: 'Read our terms and policies',
                         onTap: () =>
@@ -481,9 +481,9 @@ class _SettingsScreenState extends State<SettingsScreen>
         child: Container(
           padding: EdgeInsets.only(
             top: MediaQuery.of(context).padding.top + 16,
-            bottom: 28,
-            left: 20,
-            right: 20,
+            bottom: 19.w,
+            left: 15.w,
+            right: 15.w,
           ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -492,8 +492,8 @@ class _SettingsScreenState extends State<SettingsScreen>
               colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
             ),
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(32.r),
-              bottomRight: Radius.circular(32.r),
+              bottomLeft: Radius.circular(30.r),
+              bottomRight: Radius.circular(30.r),
             ),
             boxShadow: [
               BoxShadow(
@@ -507,8 +507,8 @@ class _SettingsScreenState extends State<SettingsScreen>
             children: [
               // Avatar circle
               Container(
-                width: 70.w,
-                height: 70.h,
+                width: 65.w,
+                height: 65.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white.withOpacity(0.15),
@@ -518,10 +518,10 @@ class _SettingsScreenState extends State<SettingsScreen>
                 child: Icon(
                   Icons.person_rounded,
                   color: Colors.white,
-                  size: 36.sp,
+                  size: 33.sp,
                 ),
               ),
-              SizedBox(width: 18.w),
+              SizedBox(width: 17.w),
               // Name + phone
               Expanded(
                 child: Column(
@@ -533,7 +533,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                               : 'Loading...',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 20.sp,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.3,
                           ),
@@ -541,7 +541,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                     SizedBox(height: 6.h),
                     Obx(() => Container(
                           padding: EdgeInsets.symmetric(
-                              horizontal: 10.w, vertical: 4.h),
+                              horizontal: 10.w, vertical: 6.h),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12.r),
@@ -573,7 +573,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                         color: Colors.white.withOpacity(0.25), width: 1.w),
                   ),
                   child: Icon(Icons.edit_rounded,
-                      color: Colors.white, size: 20.sp),
+                      color: Colors.white, size: 18.sp),
                 ),
               ),
             ],
@@ -600,12 +600,12 @@ class _SettingsScreenState extends State<SettingsScreen>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(7.r),
+                  padding: EdgeInsets.all(6.r),
                   decoration: BoxDecoration(
                     color: iconColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(9.r),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Icon(icon, color: iconColor, size: 16.sp),
+                  child: Icon(icon, color: iconColor, size: 15.sp),
                 ),
                 SizedBox(width: 10.w),
                 Text(
@@ -623,7 +623,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(18.r),
+                borderRadius: BorderRadius.circular(17.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -656,12 +656,12 @@ class _SettingsScreenState extends State<SettingsScreen>
         },
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
+          padding: EdgeInsets.symmetric(vertical: 15.h),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               colors: [Color(0xFFE53E3E), Color(0xFF9B1F1F)],
             ),
-            borderRadius: BorderRadius.circular(18.r),
+            borderRadius: BorderRadius.circular(17.r),
             boxShadow: [
               BoxShadow(
                 color: Color(0xFFE53E3E).withOpacity(0.35),
@@ -673,12 +673,12 @@ class _SettingsScreenState extends State<SettingsScreen>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.logout_rounded, color: Colors.white, size: 20.sp),
+              Icon(Icons.logout_rounded, color: Colors.white, size: 18.sp),
               SizedBox(width: 10.w),
               Text(
                 'Log Out',
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 0.3,
@@ -727,7 +727,7 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 200),
     );
 
     _hoverAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -775,7 +775,7 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
                 vertical: _hoverAnimation.value * 2,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(15.r),
                 gradient: _isHovering
                     ? LinearGradient(
                         begin: Alignment.topLeft,
@@ -800,18 +800,18 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: widget.onTap,
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(15.r),
                   splashColor: AppTheme.primaryColor.withOpacity(0.1),
                   highlightColor: AppTheme.primaryColor.withOpacity(0.05),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 16.h,
+                      horizontal: 15.w,
+                      vertical: 15.h,
                     ),
                     child: Row(
                       children: [
                         _buildIcon(),
-                        SizedBox(width: 20.w),
+                        SizedBox(width: 18.w),
                         Expanded(child: _buildContent()),
                         _buildTrailingIcon(),
                       ],
@@ -836,7 +836,7 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
       child: Icon(
         widget.icon,
         color: widget.iconColor,
-        size: 22.sp,
+        size: 20.sp,
       ),
     );
   }
@@ -849,11 +849,11 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
           widget.title,
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 17.sp,
+            fontSize: 15.sp,
             color: Color(0xFF111827),
           ),
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: 6.h),
         Text(
           widget.subtitle,
           style: TextStyle(
@@ -874,7 +874,7 @@ class _EnhancedListTileState extends State<_EnhancedListTile>
           child: Icon(
             Icons.arrow_forward_ios,
             color: AppTheme.primaryColor.withOpacity(0.7),
-            size: 18.sp,
+            size: 17.sp,
           ),
         );
       },
@@ -908,7 +908,7 @@ class _AnimatedButtonState extends State<_AnimatedButton>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: Duration(milliseconds: 150),
     );
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
@@ -958,11 +958,11 @@ class _AnimatedButtonState extends State<_AnimatedButton>
             return Transform.scale(
               scale: _scaleAnimation.value,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18.r),
+                  borderRadius: BorderRadius.circular(17.r),
                   border: Border.all(
-                    color: const Color(0xFFCBD5E1),
+                    color: Color(0xFFCBD5E1),
                     width: 2.w,
                   ),
                   boxShadow: _isHovering
@@ -979,9 +979,9 @@ class _AnimatedButtonState extends State<_AnimatedButton>
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: widget.onPressed,
-                    borderRadius: BorderRadius.circular(16.r),
+                    borderRadius: BorderRadius.circular(15.r),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      padding: EdgeInsets.symmetric(vertical: 15.h),
                       child: Center(child: widget.child),
                     ),
                   ),

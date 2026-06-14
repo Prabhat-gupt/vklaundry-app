@@ -11,10 +11,10 @@ class PaymentSelectPage extends StatelessWidget {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 7.h),
       child: Text(
         title,
-        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -26,8 +26,8 @@ class PaymentSelectPage extends StatelessWidget {
   }) {
     return Obx(() {
       return ListTile(
-        leading: Icon(icon, size: 28.sp),
-        title: Text(title, style: TextStyle(fontSize: 16.sp)),
+        leading: Icon(icon, size: 26.sp),
+        title: Text(title, style: TextStyle(fontSize: 15.sp)),
         trailing: Radio<String>(
           value: value,
           groupValue: paymentController.selectedPaymentMethod.value,
@@ -72,21 +72,21 @@ class PaymentSelectPage extends StatelessWidget {
             icon: Icons.shopping_cart,
             value: 'Amazonpay',
           ),
-          const Divider(),
+          Divider(),
           _buildSectionTitle('Net Banking'),
           _buildPaymentTile(
             title: 'Net Banking',
             icon: Icons.account_balance,
             value: 'netbanking',
           ),
-          const Divider(),
+          Divider(),
           _buildSectionTitle('Credit/Debit Card'),
           _buildPaymentTile(
             title: 'Credit/Debit Card',
             icon: Icons.credit_card,
             value: 'card',
           ),
-          const Divider(),
+          Divider(),
           _buildSectionTitle('Cash on Delivery'),
           _buildPaymentTile(
             title: 'Cash on Delivery',
@@ -96,7 +96,7 @@ class PaymentSelectPage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(15.r),
         child: Obx(() {
           bool isSelected =
               paymentController.selectedPaymentMethod.value.isNotEmpty;
@@ -111,7 +111,7 @@ class PaymentSelectPage extends StatelessWidget {
                     Get.back();
                   }
                 : null,
-            child: Text('Continue', style: TextStyle(fontSize: 18.sp)),
+            child: Text('Continue', style: TextStyle(fontSize: 17.sp)),
           );
         }),
       ),

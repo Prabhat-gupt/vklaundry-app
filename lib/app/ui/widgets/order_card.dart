@@ -37,11 +37,11 @@ class OrderCard extends StatelessWidget {
           return GestureDetector(
             onTap: () => _showOrderDetail(context, order),
             child: Container(
-              margin: EdgeInsets.only(bottom: 12.h),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              margin: EdgeInsets.only(bottom: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 10.h),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(10.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
@@ -61,13 +61,13 @@ class OrderCard extends StatelessWidget {
                         'Booking Details',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 16.sp,
+                          fontSize: 13.sp,
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 5.h),
                       Text(
                         _formatDateTime(order['created_at']),
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -79,24 +79,24 @@ class OrderCard extends StatelessWidget {
                         '₹${order['amount']?.toString() ?? '0'}',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 16.sp,
+                          fontSize: 13.sp,
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 5.h),
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
+                          horizontal: 8.w,
+                          vertical: 5.h,
                         ),
                         decoration: BoxDecoration(
                           color: _getStatusColor(status).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20.r),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         child: Text(
                           statusText,
                           style: TextStyle(
                             color: _getStatusColor(status),
-                            fontSize: 13.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -151,7 +151,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
           return Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(14.r)),
             ),
             child: Obx(() {
               // Get updated order data from controller
@@ -166,7 +166,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
 
               return SingleChildScrollView(
                 controller: scrollController,
-                padding: EdgeInsets.all(16.r),
+                padding: EdgeInsets.all(13.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -177,18 +177,18 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         Text(
                           'Order #${currentOrder['id']?.toString() ?? ''}',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 6.h,
+                            horizontal: 10.w,
+                            vertical: 5.h,
                           ),
                           decoration: BoxDecoration(
                             color: _getStatusColor(status).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
                           child: Text(
                             statusText,
@@ -200,24 +200,24 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 5.h),
 
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.all(12.r),
+                            padding: EdgeInsets.all(10.r),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(12.r),
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Pickup Date & Time',
                                     style: TextStyle(
-                                        color: Colors.grey, fontSize: 12.sp)),
-                                SizedBox(height: 4.h),
+                                        color: Colors.grey, fontSize: 10.sp)),
+                                SizedBox(height: 5.h),
                                 Text(
                                   currentOrder['pickup_datetime'],
                                   style: TextStyle(
@@ -227,21 +227,21 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                             ),
                           ),
                         ),
-                        SizedBox(width: 16.w),
+                        SizedBox(width: 13.w),
                         Expanded(
                           child: Container(
-                            padding: EdgeInsets.all(12.r),
+                            padding: EdgeInsets.all(10.r),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(12.r),
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Delivery Date & Time',
                                     style: TextStyle(
-                                        color: Colors.grey, fontSize: 12.sp)),
-                                SizedBox(height: 4.h),
+                                        color: Colors.grey, fontSize: 10.sp)),
+                                SizedBox(height: 5.h),
                                 Text(
                                   currentOrder['delivery_datetime'],
                                   style: TextStyle(
@@ -253,14 +253,14 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16.h),
-                    const Text('Items',
+                    SizedBox(height: 13.h),
+                    Text('Items',
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     ...List.generate(currentOrder['items']?.length ?? 0, (i) {
                       final item = currentOrder['items'][i];
                       return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4.h),
+                        padding: EdgeInsets.symmetric(vertical: 5.h),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -277,7 +277,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                                   item['service_name']?.toString() ?? '',
                                   style: TextStyle(
                                     color: Colors.grey,
-                                    fontSize: 12.sp,
+                                    fontSize: 10.sp,
                                   ),
                                 ),
                               ],
@@ -289,7 +289,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                                 Text(
                                   '₹${item['price']}',
                                   style: TextStyle(
-                                    fontSize: 16.sp,
+                                    fontSize: 13.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -299,7 +299,7 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         ),
                       );
                     }),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 13.h),
                     Divider(color: Colors.grey.shade300),
 
                     // 🔹 Price Summary
@@ -315,20 +315,20 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                       isTotal: true,
                     ),
 
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 14.h),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(5.r),
                           ),
                           backgroundColor: AppTheme.primaryColor,
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
                         ),
                         icon:
                             Icon(Icons.location_on, color: Colors.white),
-                        label: const Text(
+                        label: Text(
                           'Track Order',
                           style: TextStyle(color: Colors.white),
                         ),
@@ -358,7 +358,7 @@ Widget _priceRow(
   bool isTotal = false,
 }) {
   return Padding(
-    padding: EdgeInsets.symmetric(vertical: 4.h),
+    padding: EdgeInsets.symmetric(vertical: 5.h),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

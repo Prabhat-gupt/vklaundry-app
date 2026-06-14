@@ -8,8 +8,8 @@ class OrderController extends GetxController {
   Future<int?> placeOrder({
     required List<Map<String, dynamic>> selectedItems,
     required double totalAmount,
-    required String paymentMethod,
-    required String paymentStatus,
+    required int paymentMethod,
+    required int paymentStatus,
     required int userId,
     required int addressId,
     required String deliveryDateTime,
@@ -26,8 +26,8 @@ class OrderController extends GetxController {
             'status': 0, // Assuming 1 = pending
             "transaction_id": transactionId,
             'amount': totalAmount,
-            'payment_method': 1,
-            'payment_status': 1,
+            'payment_method': paymentMethod,
+            'payment_status': paymentStatus,
             'pickup_datetime': pickupDateTime,
             'delivery_datetime': deliveryDateTime,
             'user_id': userId,

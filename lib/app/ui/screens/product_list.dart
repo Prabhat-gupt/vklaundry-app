@@ -48,22 +48,22 @@ class _ProductListScreenState extends State<ProductListScreen>
   void _initializeAnimations() {
     _pageLoadController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _categoryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
     );
 
     _gridController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 1000),
     );
 
     _cartController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: Duration(milliseconds: 400),
     );
 
     _pageOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -104,10 +104,15 @@ class _ProductListScreenState extends State<ProductListScreen>
 
       try {
         _pageLoadController.forward();
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: 200));
         if (mounted) _categoryController.forward();
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(Duration(milliseconds: 300));
         if (mounted) _gridController.forward();
+
+        // Check initial state so cart button is visible when returning
+        if (mounted && controller.getTotalCartItems() > 0) {
+          _cartController.forward();
+        }
 
         // Listen for cart changes to animate cart button
         ever(controller.cartQuantities, (_) {
@@ -141,7 +146,7 @@ class _ProductListScreenState extends State<ProductListScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F8),
+      backgroundColor: Color(0xFFF0F2F8),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
         child: Column(
@@ -152,7 +157,6 @@ class _ProductListScreenState extends State<ProductListScreen>
               padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
               child: _buildAnimatedCategories(),
             ),
-            SizedBox(height: 10.h),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -172,9 +176,9 @@ class _ProductListScreenState extends State<ProductListScreen>
       child: Container(
         padding: EdgeInsets.only(
           top: MediaQuery.of(context).padding.top + 14,
-          bottom: 22,
-          left: 16,
-          right: 16,
+          bottom: 16.w,
+          left: 12.w,
+          right: 12.w,
         ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -183,8 +187,8 @@ class _ProductListScreenState extends State<ProductListScreen>
             colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
           ),
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(28.r),
-            bottomRight: Radius.circular(28.r),
+            bottomLeft: Radius.circular(26.r),
+            bottomRight: Radius.circular(26.r),
           ),
           boxShadow: [
             BoxShadow(
@@ -199,7 +203,7 @@ class _ProductListScreenState extends State<ProductListScreen>
             GestureDetector(
               onTap: () => Navigator.of(context).maybePop(),
               child: Container(
-                padding: EdgeInsets.all(9.r),
+                padding: EdgeInsets.all(8.r),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12.r),
@@ -207,7 +211,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                       color: Colors.white.withOpacity(0.25), width: 1.w),
                 ),
                 child: Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 18.sp),
+                    color: Colors.white, size: 17.sp),
               ),
             ),
             SizedBox(width: 14.w),
@@ -220,11 +224,11 @@ class _ProductListScreenState extends State<ProductListScreen>
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontSize: 20.sp,
+                      fontSize: 18.sp,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  SizedBox(height: 3),
+                  SizedBox(height: 2.w),
                   Text(
                     'Choose your items',
                     style: TextStyle(
@@ -251,7 +255,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                 child: Row(
                   children: [
                     Icon(Icons.shopping_cart_rounded,
-                        color: Colors.white, size: 16.sp),
+                        color: Colors.white, size: 15.sp),
                     SizedBox(width: 5.w),
                     Text(
                       '$count',
@@ -275,7 +279,7 @@ class _ProductListScreenState extends State<ProductListScreen>
     return ScaleTransition(
       scale: _categoryScaleAnimation,
       child: SizedBox(
-        height: 44.h,
+        height: 42.h,
         child: Obx(
           () => Skeletonizer(
             enabled: controller.isLoading.value,
@@ -320,12 +324,13 @@ class _ProductListScreenState extends State<ProductListScreen>
           return Skeletonizer(
             enabled: controller.isLoading.value,
             child: GridView.builder(
+              padding: EdgeInsets.only(bottom: 18.h, top: 12.h),
               itemCount: controller.isLoading.value
                   ? 6
                   : controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.58,
+                childAspectRatio: 0.64, // Increased to reduce height
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -362,31 +367,31 @@ class _ProductListScreenState extends State<ProductListScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(24.r),
+              padding: EdgeInsets.all(23.r),
               decoration: BoxDecoration(
                 color: AppTheme.primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Image.network(
                 "https://cdn-icons-png.flaticon.com/512/4076/4076503.png",
-                height: 80.h,
+                height: 75.h,
                 errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.shopping_bag_outlined,
-                  size: 80.sp,
+                  size: 75.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
             ),
-            SizedBox(height: 20.h),
+            SizedBox(height: 18.h),
             Text(
               "No items available",
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 7.h),
             Text(
               "Please try selecting a different category",
               style: TextStyle(
@@ -404,17 +409,18 @@ class _ProductListScreenState extends State<ProductListScreen>
     return Obx(() => controller.getTotalCartItems() > 0
         ? SlideTransition(
             position: _cartSlideAnimation,
-            child: Container(
-              margin: EdgeInsets.fromLTRB(16, 8, 16, 20),
-              height: 60.h,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+            child: SafeArea(
+              child: Container(
+                margin: EdgeInsets.fromLTRB(16, 8, 16, 20),
+                height: 56.h,
+                decoration: BoxDecoration(
+                gradient: LinearGradient(
                   colors: [Color(0xFF4B5EAA), Color(0xFF1A2340)],
                 ),
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(18.r),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF3D52A0).withOpacity(0.5),
+                    color: Color(0xFF3D52A0).withOpacity(0.5),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
@@ -434,13 +440,13 @@ class _ProductListScreenState extends State<ProductListScreen>
                       },
                     );
                   },
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(18.r),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    padding: EdgeInsets.symmetric(horizontal: 18.w),
                     child: Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(8.r),
+                          padding: EdgeInsets.all(7.r),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(10.r),
@@ -448,7 +454,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                           child: Icon(
                             Icons.shopping_cart_checkout_rounded,
                             color: Colors.white,
-                            size: 20.sp,
+                            size: 18.sp,
                           ),
                         ),
                         SizedBox(width: 14.w),
@@ -461,7 +467,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                             letterSpacing: 0.3,
                           ),
                         ),
-                        const Spacer(),
+                        Spacer(),
                         Container(
                           padding: EdgeInsets.symmetric(
                               horizontal: 12.w, vertical: 6.h),
@@ -484,17 +490,18 @@ class _ProductListScreenState extends State<ProductListScreen>
                 ),
               ),
             ),
-          )
+          ),
+        )
         : SizedBox.shrink());
   }
 
   Widget _buildCategorySkeleton() {
     return Container(
-      margin: EdgeInsets.only(right: 8.w),
-      padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 8.h),
+      margin: EdgeInsets.only(right: 7.w),
+      padding: EdgeInsets.symmetric(horizontal: 38.w, vertical: 7.h),
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(25.r),
+        borderRadius: BorderRadius.circular(23.r),
       ),
     );
   }
@@ -503,7 +510,7 @@ class _ProductListScreenState extends State<ProductListScreen>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(17.r),
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
         ],
@@ -540,7 +547,7 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: Duration(milliseconds: 150),
     );
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
@@ -569,26 +576,26 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
             return Transform.scale(
               scale: _scaleAnimation.value,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 200),
                 padding:
                     EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                 decoration: BoxDecoration(
                   gradient: widget.isSelected
-                      ? const LinearGradient(
+                      ? LinearGradient(
                           colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
                         )
                       : null,
                   color: !widget.isSelected ? Colors.white : null,
-                  borderRadius: BorderRadius.circular(22.r),
+                  borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
                     color: widget.isSelected
-                        ? const Color(0xFF3D52A0)
+                        ? Color(0xFF3D52A0)
                         : Colors.grey.shade300,
                     width: 1.5.w,
                   ),
                   boxShadow: widget.isSelected
                       ? [
-                          const BoxShadow(
+                          BoxShadow(
                             color: Color(0x443D52A0),
                             blurRadius: 8,
                             offset: Offset(0, 4),
@@ -609,14 +616,14 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
                       ClipOval(
                         child: Image.network(
                           widget.iconUrl!,
-                          width: 20.w,
-                          height: 20.h,
+                          width: 18.w,
+                          height: 18.h,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => SizedBox.shrink(),
                         ),
                       ),
                     if (widget.iconUrl != null && widget.iconUrl!.isNotEmpty)
-                      SizedBox(width: 7.w),
+                      SizedBox(width: 6.w),
                     Text(
                       widget.label,
                       style: TextStyle(
@@ -624,7 +631,7 @@ class _EnhancedCategoryChipState extends State<_EnhancedCategoryChip>
                         fontWeight: FontWeight.w600,
                         color: widget.isSelected
                             ? Colors.white
-                            : const Color(0xFF374151),
+                            : Color(0xFF374151),
                       ),
                     ),
                   ],
@@ -670,7 +677,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     super.initState();
     _hoverController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 200),
     );
 
     _hoverAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -724,7 +731,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                       margin: EdgeInsets.only(bottom: 0.h),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(18.r),
+                        borderRadius: BorderRadius.circular(17.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black
@@ -770,18 +777,18 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(17.r)),
           child: SizedBox(
-            height: 100.h,
+            height: 94.h,
             width: double.infinity,
             child: Image.network(
               widget.item['image'] ?? '',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
-                color: const Color(0xFFEEF0F8),
+                color: Color(0xFFEEF0F8),
                 child: Icon(
                   Icons.local_laundry_service_rounded,
-                  size: 44.sp,
+                  size: 42.sp,
                   color: Color(0xFF3D52A0),
                 ),
               ),
@@ -791,13 +798,13 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
         // Discount badge
         if (discount.isNotEmpty)
           Positioned(
-            top: 8,
-            left: 8,
+            top: 6.w,
+            left: 6.w,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
               decoration: BoxDecoration(
                 color: Colors.green.shade600,
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(7.r),
               ),
               child: Text(
                 discount,
@@ -824,7 +831,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
             fontSize: 14.sp,
             color: Color(0xFF1A2340),
           ),
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: 5.h),
@@ -836,7 +843,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF3D52A0),
-                fontSize: 17.sp,
+                fontSize: 16.sp,
               ),
             ),
             SizedBox(width: 5.w),
@@ -862,7 +869,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
           padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
           decoration: BoxDecoration(
             color: Colors.green.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4.r),
+            borderRadius: BorderRadius.circular(5.r),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -880,7 +887,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
             ],
           ),
         ),
-        SizedBox(width: 4.w),
+        SizedBox(width: 5.w),
         Text(
           "(${widget.item['reviews']})",
           style: TextStyle(
@@ -897,7 +904,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
       final quantity = widget.controller.cartQuantities[widget.cartKey] ?? 0;
 
       return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         transitionBuilder: (child, animation) {
           return ScaleTransition(scale: animation, child: child);
         },
@@ -911,7 +918,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
   Widget _buildQuantitySelector(int quantity) {
     return Container(
       key: const ValueKey('quantity_selector'),
-      height: 40.h,
+      height: 38.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
@@ -934,10 +941,34 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                   bottomLeft: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 40.h,
-                  child: Icon(
-                    Icons.remove,
-                    size: 18.sp,
+                  height: 38.h,
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Icon(
+                      Icons.remove,
+                      size: 17.sp,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: 1.w,
+            height: 23.h,
+            color: AppTheme.primaryColor.withOpacity(0.3),
+          ),
+          Expanded(
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  quantity.toString(),
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor,
                   ),
                 ),
@@ -946,24 +977,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
           ),
           Container(
             width: 1.w,
-            height: 24.h,
-            color: AppTheme.primaryColor.withOpacity(0.3),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                quantity.toString(),
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
-                ),
-              ),
-            ),
-          ),
-          Container(
-            width: 1.w,
-            height: 24.h,
+            height: 23.h,
             color: AppTheme.primaryColor.withOpacity(0.3),
           ),
           Expanded(
@@ -976,11 +990,15 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                   bottomRight: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 40.h,
-                  child: Icon(
-                    Icons.add,
-                    size: 18.sp,
-                    color: AppTheme.primaryColor,
+                  height: 38.h,
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Icon(
+                      Icons.add,
+                      size: 17.sp,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
                 ),
               ),
@@ -995,7 +1013,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     return Container(
       key: const ValueKey('add_button'),
       width: double.infinity,
-      height: 40.h,
+      height: 38.h,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8)],

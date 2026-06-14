@@ -35,7 +35,7 @@ class _OtpScreenState extends State<OtpScreen> {
   void _startTimer() {
     _timer?.cancel();
     _seconds = 60;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_seconds == 0) {
         timer.cancel();
       } else {
@@ -55,10 +55,10 @@ class _OtpScreenState extends State<OtpScreen> {
         '⚠️ OTP Required',
         'Please enter the OTP sent to your phone.',
         snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFFF57C00),
+        backgroundColor: Color(0xFFF57C00),
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: EdgeInsets.all(16.r),
+        duration: Duration(seconds: 3),
+        margin: EdgeInsets.all(15.r),
         borderRadius: 12,
         icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
       );
@@ -70,10 +70,10 @@ class _OtpScreenState extends State<OtpScreen> {
         '⚠️ Incomplete OTP',
         'Please enter all 6 digits of the OTP.',
         snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFFF57C00),
+        backgroundColor: Color(0xFFF57C00),
         colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: EdgeInsets.all(16.r),
+        duration: Duration(seconds: 3),
+        margin: EdgeInsets.all(15.r),
         borderRadius: 12,
         icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
       );
@@ -132,8 +132,8 @@ class _OtpScreenState extends State<OtpScreen> {
                         children: [
                           Padding(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 24.w,
-                              vertical: 20.h,
+                              horizontal: 23.w,
+                              vertical: 18.h,
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,12 +145,12 @@ class _OtpScreenState extends State<OtpScreen> {
                                   ),
                                   onPressed: () => Get.back(),
                                 ),
-                                SizedBox(height: 40.h),
+                                SizedBox(height: 38.h),
                                 Text(
                                   'OTP\nVerification',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 25.sp,
+                                    fontSize: 23.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -159,11 +159,11 @@ class _OtpScreenState extends State<OtpScreen> {
                                   'OTP has been sent to +91 $phoneNumber',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16.sp,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
-                                SizedBox(height: 30.h),
+                                SizedBox(height: 29.h),
 
                                 // ✅ PIN CODE FIELD
                                 PinCodeTextField(
@@ -178,7 +178,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   errorAnimationDuration: 300,
                                   pinTheme: PinTheme(
                                     shape: PinCodeFieldShape.box,
-                                    borderRadius: BorderRadius.circular(8.r),
+                                    borderRadius: BorderRadius.circular(7.r),
                                     fieldHeight: 50,
                                     fieldWidth: 45,
                                     activeFillColor: Colors.white,
@@ -195,7 +195,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   onCompleted: (value) => _verifyOtp(),
                                 ),
 
-                                SizedBox(height: 20.h),
+                                SizedBox(height: 18.h),
                                 Center(
                                   child: Column(
                                     crossAxisAlignment:
@@ -205,7 +205,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                         '00:${_seconds.toString().padLeft(2, '0')}',
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 25.sp,
+                                          fontSize: 23.sp,
                                         ),
                                       ),
                                       SizedBox(height: 14.h),
@@ -213,10 +213,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                         "Didn't get it?",
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 16.sp,
+                                          fontSize: 15.sp,
                                         ),
                                       ),
-                                      SizedBox(height: 18.h),
+                                      SizedBox(height: 17.h),
                                       TextButton(
                                         onPressed: _seconds == 0
                                             ? () {
@@ -237,7 +237,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                                 146,
                                                 1,
                                               ),
-                                              size: 20.sp,
+                                              size: 18.sp,
                                             ),
                                             SizedBox(width: 6.w),
                                             Text(

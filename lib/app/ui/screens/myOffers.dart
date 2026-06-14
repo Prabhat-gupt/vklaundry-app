@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
@@ -27,7 +28,7 @@ void showOffersBottomSheet(
         // Glassmorphism effect
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.95), // Slight transparency for the effect
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(21.w)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -37,18 +38,18 @@ void showOffersBottomSheet(
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(21.w)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header
               Container(
-                height: 4,
-                width: 60,
-                margin: EdgeInsets.symmetric(vertical: 16),
+                height: 3.w,
+                width: 42.w,
+                margin: EdgeInsets.symmetric(vertical: 12.w),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade400,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(2.w),
                 ),
               ),
               Padding(
@@ -59,13 +60,13 @@ void showOffersBottomSheet(
                     Text(
                       "Available Offers",
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 17.w,
                         fontWeight: FontWeight.w900,
                         color: Color(0xFF1F2937),
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close_rounded, color: Colors.grey, size: 28),
+                      icon: Icon(Icons.close_rounded, color: Colors.grey, size: 19.w),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -75,11 +76,11 @@ void showOffersBottomSheet(
               Obx(() {
                 if (activeOffers.isEmpty) {
                   return Padding(
-                    padding: EdgeInsets.all(24.0),
+                    padding: EdgeInsets.all(17.w),
                     child: Center(
                       child: Text(
                         "No active offers available",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: TextStyle(fontSize: 12.w, color: Colors.grey),
                       ),
                     ),
                   );
@@ -88,7 +89,7 @@ void showOffersBottomSheet(
                 return Flexible(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.symmetric(horizontal: 17.w),
                     itemCount: activeOffers.length,
                     itemBuilder: (context, index) {
                       final offer = activeOffers[index];
@@ -99,20 +100,20 @@ void showOffersBottomSheet(
                       final bool isSelected = selectedIndex.value == index;
 
                       return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
+                        duration: Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        margin: EdgeInsets.only(bottom: 20),
-                        padding: EdgeInsets.all(20),
+                        margin: EdgeInsets.only(bottom: 15.w),
+                        padding: EdgeInsets.all(15.w),
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? LinearGradient(
-                            colors: [AppTheme.primaryColor, const Color(0xFF5768AB)],
+                            colors: [AppTheme.primaryColor, Color(0xFF5768AB)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
                               : null,
                           color: isSelected ? null : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(15.w),
                           border: Border.all(
                             color: isSelected
                                 ? Colors.transparent
@@ -139,9 +140,9 @@ void showOffersBottomSheet(
                                   ? Icons.check_circle_rounded
                                   : (isEligible ? Icons.local_offer_rounded : Icons.lock_rounded),
                               color: isSelected ? Colors.white : (isEligible ? Colors.green : Colors.grey),
-                              size: 32,
+                              size: 23.w,
                             ),
-                            SizedBox(width: 16),
+                            SizedBox(width: 12.w),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,29 +151,29 @@ void showOffersBottomSheet(
                                     offer['title'] ?? 'Discount Offer',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 20,
+                                      fontSize: 15.w,
                                       color: isSelected
                                           ? Colors.white
-                                          : (isEligible ? const Color(0xFF1F2937) : Colors.grey),
+                                          : (isEligible ? Color(0xFF1F2937) : Colors.grey),
                                     ),
                                   ),
-                                  SizedBox(height: 6),
+                                  SizedBox(height: 5.w),
                                   Text(
                                     discountType == 'percentage'
                                         ? "$discountValue% off on orders above ₹$minAmount"
                                         : "₹$discountValue off on orders above ₹$minAmount",
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 12.w,
                                       color: isSelected ? Colors.white70 : (isEligible ? Colors.black54 : Colors.grey),
                                     ),
                                   ),
                                   if (!isEligible && !isSelected)
                                     Padding(
-                                      padding: EdgeInsets.only(top: 8.0),
+                                      padding: EdgeInsets.only(top: 6.w),
                                       child: Text(
                                         "You are not eligible for this offer.",
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 8.w,
                                           color: Colors.red.shade400,
                                           fontStyle: FontStyle.italic,
                                         ),
@@ -181,7 +182,7 @@ void showOffersBottomSheet(
                                 ],
                               ),
                             ),
-                            SizedBox(width: 12),
+                            SizedBox(width: 8.w),
                             // Apply/Remove Button
                             ElevatedButton(
                               onPressed: isEligible
@@ -202,13 +203,13 @@ void showOffersBottomSheet(
                                     : (isEligible ? AppTheme.primaryColor : Colors.grey),
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8.w),
                                 ),
                                 elevation: isEligible ? 5 : 0,
                                 shadowColor: AppTheme.primaryColor.withOpacity(0.4),
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 14,
+                                  horizontal: 17.w,
+                                  vertical: 11.w,
                                 ),
                               ),
                               child: Text(

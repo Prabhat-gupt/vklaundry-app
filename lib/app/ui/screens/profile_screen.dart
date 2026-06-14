@@ -81,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.white,
-        shadowColor: const Color.fromARGB(255, 158, 158, 158),
+        shadowColor: Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -93,21 +93,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.r),
+        padding: EdgeInsets.all(18.r),
         child: Column(
           children: [
-            const Stack(
+            Stack(
               alignment: Alignment.bottomRight,
               children: [
                 CircleAvatar(
-                  radius: 45,
+                  radius: 32.w,
                   backgroundImage: AssetImage(
                     "assets/icons/setting_profile.png",
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 23.h),
             _buildTextField("Name*", nameController),
             _buildTextField(
               "Mobile Number*",
@@ -120,10 +120,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               hint: "Enter your email",
               keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 23.h),
             SizedBox(
               width: double.infinity,
-              height: 50.h,
+              height: 46.h,
               child: ElevatedButton(
                 onPressed: isButtonEnabled
                     ? () async {
@@ -152,14 +152,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           'Success',
                           'Profile Updated',
                           snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: const Color.fromARGB(
+                          backgroundColor: Color.fromARGB(
                             147,
                             76,
                             175,
                             79,
                           ),
                           colorText: Colors.white,
-                          duration: const Duration(seconds: 2),
+                          duration: Duration(seconds: 2),
                         );
 
                         // Disable button again
@@ -177,12 +177,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Text(
                   "Submit",
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            SizedBox(height: 40.h),
-            Divider(height: 24.h),
+            SizedBox(height: 38.h),
+            Divider(height: 23.h),
             GestureDetector(
               onTap: () {
                 Get.snackbar(
@@ -200,16 +200,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
-                        fontSize: 20.sp,
+                        fontSize: 18.sp,
                       ),
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 5.h),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "Deleting account will remove all your orders",
-                      style: TextStyle(color: Colors.black54, fontSize: 16.sp),
+                      style: TextStyle(color: Colors.black54, fontSize: 15.sp),
                     ),
                   ),
                 ],
@@ -245,14 +245,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               vertical: 14.h,
             ),
             filled: true,
-            fillColor: const Color(0xFFE2E8F0),
+            fillColor: Color(0xFFE2E8F0),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide.none,
             ),
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 15.h),
       ],
     );
   }

@@ -55,22 +55,22 @@ class _TrackOrderPageState extends State<TrackOrderPage>
   void _initializeAnimations() {
     _pageLoadController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _headerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
     );
 
     _summaryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 1000),
     );
 
     _timelineController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: Duration(milliseconds: 1200),
     );
 
     _pageOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -125,11 +125,11 @@ class _TrackOrderPageState extends State<TrackOrderPage>
 
       try {
         _pageLoadController.forward();
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: 200));
         if (mounted) _headerController.forward();
-        await Future.delayed(const Duration(milliseconds: 250));
+        await Future.delayed(Duration(milliseconds: 250));
         if (mounted) _summaryController.forward();
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(Duration(milliseconds: 300));
         if (mounted) _timelineController.forward();
       } catch (e) {
         if (mounted) {
@@ -174,16 +174,16 @@ class _TrackOrderPageState extends State<TrackOrderPage>
       final statusText = _getStatusText(status);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: _buildAnimatedAppBar(),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.r),
+          padding: EdgeInsets.all(15.r),
           child: Column(
             children: [
               _buildAnimatedOrderSummary(orderData, status, statusText),
-              SizedBox(height: 20.h),
+              SizedBox(height: 18.h),
               _buildAnimatedTimeline(status),
             ],
           ),
@@ -201,7 +201,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
         position: _headerSlideAnimation,
         child: IconButton(
           icon: Container(
-            padding: EdgeInsets.all(8.r),
+            padding: EdgeInsets.all(7.r),
             decoration: BoxDecoration(
               color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
@@ -209,7 +209,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
             child: Icon(
               Icons.arrow_back_ios,
               color: Colors.blue,
-              size: 20.sp,
+              size: 18.sp,
             ),
           ),
           onPressed: () => Get.back(),
@@ -224,7 +224,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
-              fontSize: 22.sp,
+              fontSize: 20.sp,
             ),
           ),
         ),
@@ -242,10 +242,10 @@ class _TrackOrderPageState extends State<TrackOrderPage>
       child: ScaleTransition(
         scale: _summaryScaleAnimation,
         child: Container(
-          padding: EdgeInsets.all(24.r),
+          padding: EdgeInsets.all(23.r),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(18.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.08),
@@ -262,7 +262,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
           child: Column(
             children: [
               _buildOrderHeader(orderData, status, statusText),
-              SizedBox(height: 24.h),
+              SizedBox(height: 23.h),
               _buildDeliveryInfo(orderData),
             ],
           ),
@@ -281,15 +281,15 @@ class _TrackOrderPageState extends State<TrackOrderPage>
         Row(
           children: [
             Container(
-              padding: EdgeInsets.all(8.r),
+              padding: EdgeInsets.all(7.r),
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(7.r),
               ),
               child: Icon(
                 Icons.receipt_long,
                 color: Colors.blue,
-                size: 20.sp,
+                size: 18.sp,
               ),
             ),
             SizedBox(width: 12.w),
@@ -298,7 +298,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                 'Order #${orderData['id']}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18.sp,
+                  fontSize: 17.sp,
                   color: Color(0xFF1F2937),
                 ),
               ),
@@ -319,9 +319,9 @@ class _TrackOrderPageState extends State<TrackOrderPage>
               Icon(
                 Icons.access_time,
                 color: Colors.grey,
-                size: 16.sp,
+                size: 15.sp,
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 7.w),
               Expanded(
                 child: Text(
                   'Placed on ${DateFormat('MMM dd, yyyy • HH:mm').format(DateTime.parse(orderData['created_at']).toLocal())}',
@@ -340,13 +340,13 @@ class _TrackOrderPageState extends State<TrackOrderPage>
 
   Widget _buildStatusBadge(int status, String statusText) {
     return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
       tween: Tween(begin: 0.0, end: 1.0),
       builder: (context, value, child) {
         return Transform.scale(
           scale: value,
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -354,7 +354,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                   _getStatusColor(status).withOpacity(0.8),
                 ],
               ),
-              borderRadius: BorderRadius.circular(25.r),
+              borderRadius: BorderRadius.circular(23.r),
               boxShadow: [
                 BoxShadow(
                   color: _getStatusColor(status).withOpacity(0.4),
@@ -369,9 +369,9 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                 Icon(
                   _getStatusIcon(status),
                   color: Colors.white,
-                  size: 16.sp,
+                  size: 15.sp,
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 7.w),
                 Text(
                   statusText,
                   style: TextStyle(
@@ -390,7 +390,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
 
   Widget _buildDeliveryInfo(Map<String, dynamic> orderData) {
     return Container(
-      padding: EdgeInsets.all(20.r),
+      padding: EdgeInsets.all(18.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -398,7 +398,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
             Colors.blue.withOpacity(0.05),
           ],
         ),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(15.r),
         border: Border.all(
           color: Colors.blue.withOpacity(0.2),
           width: 1.w,
@@ -422,10 +422,10 @@ class _TrackOrderPageState extends State<TrackOrderPage>
             child: Icon(
               Icons.local_shipping_rounded,
               color: Colors.blue,
-              size: 24.sp,
+              size: 23.sp,
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 15.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,12 +438,12 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                     fontSize: 14.sp,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 5.h),
                 Text(
                   orderData['delivery_datetime'] ?? 'To be confirmed',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
                     color: Color(0xFF1F2937),
                   ),
                 ),
@@ -459,10 +459,10 @@ class _TrackOrderPageState extends State<TrackOrderPage>
     return FadeTransition(
       opacity: _timelineFadeAnimation,
       child: Container(
-        padding: EdgeInsets.all(24.r),
+        padding: EdgeInsets.all(23.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(18.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -477,29 +477,29 @@ class _TrackOrderPageState extends State<TrackOrderPage>
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(8.r),
+                  padding: EdgeInsets.all(7.r),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                   child: Icon(
                     Icons.timeline,
                     color: Colors.green,
-                    size: 20.sp,
+                    size: 18.sp,
                   ),
                 ),
                 SizedBox(width: 12.w),
                 Text(
                   'Order Timeline',
                   style: TextStyle(
-                    fontSize: 20.sp,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1F2937),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 23.h),
             _buildEnhancedTimeline(status),
           ],
         ),
@@ -566,7 +566,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                   child: Transform.translate(
                     offset: Offset((1 - value) * 50, 0),
                     child: Container(
-                      padding: EdgeInsets.all(16.r),
+                      padding: EdgeInsets.all(15.r),
                       decoration: BoxDecoration(
                         color: isActive
                             ? (currentStatus == 4 && index == 3
@@ -590,7 +590,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                             step['title']!.toString(),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
+                              fontSize: 15.sp,
                               color: isActive
                                   ? (currentStatus == 4 && index == 3
                                   ? Colors.red
@@ -598,7 +598,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                                   : Colors.grey,
                             ),
                           ),
-                          SizedBox(height: 4.h),
+                          SizedBox(height: 5.h),
                           Text(
                             step['desc']!.toString(),
                             style: TextStyle(
@@ -691,8 +691,8 @@ class _TrackOrderPageState extends State<TrackOrderPage>
         return Transform.scale(
           scale: value,
           child: Container(
-            width: 32.w,
-            height: 32.h,
+            width: 30.w,
+            height: 30.h,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
@@ -707,7 +707,7 @@ class _TrackOrderPageState extends State<TrackOrderPage>
             child: Icon(
               icon,
               color: Colors.white,
-              size: 20.sp,
+              size: 18.sp,
             ),
           ),
         );

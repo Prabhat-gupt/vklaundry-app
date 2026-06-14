@@ -54,17 +54,17 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   void _initializeAnimations() {
     _pageLoadController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _headerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
     );
 
     _contentController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: Duration(milliseconds: 1000),
     );
 
     _pageOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -112,9 +112,9 @@ class _AllOrdersPageState extends State<AllOrdersPage>
 
       try {
         _pageLoadController.forward();
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: 200));
         if (mounted) _headerController.forward();
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(Duration(milliseconds: 300));
         if (mounted) _contentController.forward();
       } catch (e) {
         if (mounted) {
@@ -138,13 +138,13 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F8),
+      backgroundColor: Color(0xFFF0F2F8),
       body: FadeTransition(
         opacity: _pageOpacityAnimation,
         child: Column(
           children: [
             _buildGradientHeader(context),
-            SizedBox(height: 16.h),
+            SizedBox(height: 13.h),
             Expanded(child: _buildAnimatedContent()),
           ],
         ),
@@ -158,9 +158,9 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       child: Container(
         padding: EdgeInsets.only(
           top: MediaQuery.of(context).padding.top + 16,
-          bottom: 24,
-          left: 20,
-          right: 20,
+          bottom: 14.w,
+          left: 13.w,
+          right: 13.w,
         ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -169,8 +169,8 @@ class _AllOrdersPageState extends State<AllOrdersPage>
             colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
           ),
           borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(30.r),
-            bottomRight: Radius.circular(30.r),
+            bottomLeft: Radius.circular(23.r),
+            bottomRight: Radius.circular(23.r),
           ),
           boxShadow: [
             BoxShadow(
@@ -191,21 +191,21 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                     'My Bookings',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24.sp,
+                      fontSize: 19.sp,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.3,
                     ),
                   ),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 5.h),
                   Obx(() {
                     final count =
                         (orderTrackController.order['orders'] ?? []).length;
                     return Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 4.h),
+                          horizontal: 8.w, vertical: 5.h),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20.r),
+                        borderRadius: BorderRadius.circular(14.r),
                         border: Border.all(
                             color: Colors.white.withOpacity(0.25), width: 1.w),
                       ),
@@ -215,7 +215,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                             : '$count ${count == 1 ? 'order' : 'orders'} found',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 12.sp,
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -226,17 +226,17 @@ class _AllOrdersPageState extends State<AllOrdersPage>
             ),
             // Right: icon
             Container(
-              padding: EdgeInsets.all(14.r),
+              padding: EdgeInsets.all(12.r),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(13.r),
                 border: Border.all(
                     color: Colors.white.withOpacity(0.25), width: 1.w),
               ),
               child: Icon(
                 Icons.receipt_long_rounded,
                 color: Colors.white,
-                size: 28.sp,
+                size: 21.sp,
               ),
             ),
           ],
@@ -251,8 +251,8 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       child: ScaleTransition(
         scale: _headerScaleAnimation,
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 20.w),
-          padding: EdgeInsets.all(24.r),
+          margin: EdgeInsets.symmetric(horizontal: 14.w),
+          padding: EdgeInsets.all(19.r),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -262,7 +262,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                 AppTheme.primaryColor.withOpacity(0.05),
               ],
             ),
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(14.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -274,7 +274,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(16.r),
+                padding: EdgeInsets.all(13.r),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -282,7 +282,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                       AppTheme.primaryColor.withOpacity(0.15),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(13.r),
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.primaryColor.withOpacity(0.3),
@@ -293,11 +293,11 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                 ),
                 child: Icon(
                   Icons.history_rounded,
-                  size: 32.sp,
+                  size: 24.sp,
                   color: AppTheme.primaryColor,
                 ),
               ),
-              SizedBox(width: 20.w),
+              SizedBox(width: 14.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,12 +305,12 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                     Text(
                       'Order History',
                       style: TextStyle(
-                        fontSize: 20.sp,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,
                       ),
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 5.h),
                     Obx(() {
                       final ordersData =
                           orderTrackController.order['orders'] ?? [];
@@ -319,7 +319,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                             ? 'No orders found'
                             : '${ordersData.length} ${ordersData.length == 1 ? 'order' : 'orders'} found',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           color: Colors.grey,
                         ),
                       );
@@ -361,7 +361,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 900),
+            duration: Duration(milliseconds: 900),
             tween: Tween(begin: 0.0, end: 1.0),
             builder: (context, value, child) {
               return Opacity(
@@ -369,14 +369,14 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                 child: Transform.scale(
                   scale: 0.7 + (0.3 * value),
                   child: Container(
-                    padding: EdgeInsets.all(28.r),
+                    padding: EdgeInsets.all(21.r),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3D52A0).withOpacity(0.08),
+                      color: Color(0xFF3D52A0).withOpacity(0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.inbox_rounded,
-                      size: 72.sp,
+                      size: 55.sp,
                       color: Color(0xFF3D52A0),
                     ),
                   ),
@@ -384,9 +384,9 @@ class _AllOrdersPageState extends State<AllOrdersPage>
               );
             },
           ),
-          SizedBox(height: 28.h),
+          SizedBox(height: 21.h),
           TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 700),
+            duration: Duration(milliseconds: 700),
             tween: Tween(begin: 0.0, end: 1.0),
             builder: (context, value, child) {
               return Opacity(
@@ -398,22 +398,22 @@ class _AllOrdersPageState extends State<AllOrdersPage>
                       Text(
                         "No Orders Yet",
                         style: TextStyle(
-                          fontSize: 22.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1A2340),
                         ),
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 8.h),
                       Text(
                         "You haven't placed any orders yet.\nStart by exploring our services!",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                           color: Colors.grey,
-                          height: 1.6,
+                          height: 1.w,
                         ),
                       ),
-                      SizedBox(height: 28.h),
+                      SizedBox(height: 21.h),
                       _buildExploreServicesButton(),
                     ],
                   ),
@@ -429,13 +429,13 @@ class _AllOrdersPageState extends State<AllOrdersPage>
   Widget _buildExploreServicesButton() {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [Color(0xFF3D52A0), Color(0xFF1A2340)],
         ),
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(14.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3D52A0).withOpacity(0.4),
+            color: Color(0xFF3D52A0).withOpacity(0.4),
             blurRadius: 14,
             offset: const Offset(0, 7),
           ),
@@ -448,20 +448,20 @@ class _AllOrdersPageState extends State<AllOrdersPage>
             final homeController = Get.find<HomePageController>();
             homeController.currentNavIndex.value = 1;
           },
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(14.r),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 14.h),
+            padding: EdgeInsets.symmetric(horizontal: 21.w, vertical: 12.h),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.explore_rounded, color: Colors.white, size: 20.sp),
-                SizedBox(width: 10.w),
+                Icon(Icons.explore_rounded, color: Colors.white, size: 14.sp),
+                SizedBox(width: 8.w),
                 Text(
                   'Explore Services',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 15.sp,
+                    fontSize: 13.sp,
                   ),
                 ),
               ],
@@ -480,7 +480,7 @@ class _AllOrdersPageState extends State<AllOrdersPage>
       return dateB.compareTo(dateA);
     });
     return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 500),
       tween: Tween(begin: 0.0, end: 1.0),
       builder: (context, value, child) {
         return Opacity(

@@ -11,7 +11,7 @@ class TermsAndConditionsPage extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 18.sp,
+          fontSize: 17.sp,
           fontWeight: FontWeight.bold,
           color: AppTheme.primaryColor,
         ),
@@ -29,7 +29,7 @@ class TermsAndConditionsPage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 14.sp, height: 1.5),
+              style: TextStyle(fontSize: 14.sp, height: 1.w),
             ),
           ),
         ],
@@ -44,7 +44,7 @@ class TermsAndConditionsPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.white,
-        shadowColor: const Color.fromARGB(255, 158, 158, 158),
+        shadowColor: Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -56,19 +56,19 @@ class TermsAndConditionsPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(15.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "Terms and Conditions – VK Laundry",
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 7.h),
             Text(
               "VK Laundry Private Limited (hereinafter referred to as “Company”) provides its services subject to your (“Customer”) compliance and acceptance with the terms and conditions set forth below.\n"
               "By availing VK Laundry services, the Customer agrees to be bound by the following Terms and Conditions:",
-              style: TextStyle(fontSize: 14.sp, height: 1.5),
+              style: TextStyle(fontSize: 14.sp, height: 1.w),
             ),
 
             // Garment Handling

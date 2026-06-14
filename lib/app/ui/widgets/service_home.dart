@@ -10,7 +10,7 @@ class ServiceIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image.asset(icon, width: 24.w, height: 24.h),
+        Image.asset(icon, width: 23.w, height: 23.h),
         SizedBox(height: 6.h),
         Text(
           label,
