@@ -1906,16 +1906,44 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
                   widget.controller.update();
                   widget.onUpdate();
                 },
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(11.r),
-                  bottomRight: Radius.circular(11.r),
-                ),
+                borderRadius: BorderRadius.zero,
                 child: Container(
                   padding: EdgeInsets.all(6.r),
                   child: Icon(
                     Icons.add,
                     size: 15.sp,
                     color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 1.w,
+              height: 20.h,
+              color: Colors.white.withOpacity(0.3),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  widget.controller.addBulkToCart(widget.item['product'], 5);
+                  widget.controller.update();
+                  widget.onUpdate();
+                },
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(11.r),
+                  bottomRight: Radius.circular(11.r),
+                ),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '+5',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
