@@ -146,14 +146,11 @@ class SupportPage extends StatelessWidget {
                   color: Color(0xFF1F2937),
                 ),
               ),
-              SizedBox(height: 7.h),
-              Text(
-                "Reach out to our support team for any queries or assistance.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.grey.shade600,
-                ),
+              _buildContactTile(
+                icon: Icons.chat,
+                label: 'WhatsApp',
+                value: support['whatsapp']!,
+                onTap: () => _launchWhatsApp(phoneNumber: '917995500760'!),
               ),
               SizedBox(height: 30.h),
               Obx(() {
