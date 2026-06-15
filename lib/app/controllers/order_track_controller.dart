@@ -28,7 +28,8 @@ class TrackOrderController extends GetxController {
       print("Supabase service, start");
       final servicesResponse = await supabase
           .from('services')
-          .select('id, name');
+          .select('id, name')
+          .order('sort_order', ascending: true);
 
       for (var service in servicesResponse) {
         serviceNames[service['id']] = service['name'] ?? '';

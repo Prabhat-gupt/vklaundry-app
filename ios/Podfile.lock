@@ -1,75 +1,34 @@
 PODS:
-  - app_links (7.0.0):
-    - Flutter
-  - device_info_plus (0.0.1):
+  - app_links (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - geocoding_ios (1.0.5):
-    - Flutter
-  - package_info_plus (0.4.5):
-    - Flutter
-  - razorpay-core-pod (1.0.6)
-  - razorpay-pod (1.5.3):
-    - razorpay-core-pod (= 1.0.6)
+  - razorpay-pod (1.5.4)
   - razorpay_flutter (1.1.10):
     - Flutter
     - razorpay-pod
-  - shared_preferences_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - sms_autofill (0.0.1):
-    - Flutter
-  - url_launcher_ios (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
-  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
-  - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
-  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - razorpay_flutter (from `.symlinks/plugins/razorpay_flutter/ios`)
-  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sms_autofill (from `.symlinks/plugins/sms_autofill/ios`)
-  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
   trunk:
-    - razorpay-core-pod
     - razorpay-pod
 
 EXTERNAL SOURCES:
   app_links:
     :path: ".symlinks/plugins/app_links/ios"
-  device_info_plus:
-    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
-  geocoding_ios:
-    :path: ".symlinks/plugins/geocoding_ios/ios"
-  package_info_plus:
-    :path: ".symlinks/plugins/package_info_plus/ios"
   razorpay_flutter:
     :path: ".symlinks/plugins/razorpay_flutter/ios"
-  shared_preferences_foundation:
-    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  sms_autofill:
-    :path: ".symlinks/plugins/sms_autofill/ios"
-  url_launcher_ios:
-    :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
-  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  app_links: c5161ac5ab5383ad046884568b4b91cb52df5d91
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  geocoding_ios: 33776c9ebb98d037b5e025bb0e7537f6dd19646e
-  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  razorpay-core-pod: 6da5fb4ed280279d665507fdb50e213d793a5fe2
-  razorpay-pod: 4385cf844aa29389313b741e20c72fe668970d49
+  razorpay-pod: 3ba80419f3315352d6ffa336a194ad95ab249700
   razorpay_flutter: 0e98e4fcaae27ad50e011d85f66d85e0a008754a
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  sms_autofill: b36b2147535657fea83d7f3898d7831de70bd8e4
-  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
 PODFILE CHECKSUM: 251cb053df7158f337c0712f2ab29f4e0fa474ce
 

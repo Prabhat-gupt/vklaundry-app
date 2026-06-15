@@ -330,7 +330,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                   : controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.64, // Increased to reduce height
+                childAspectRatio: 0.75, // Increased to reduce height
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -695,6 +695,187 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     super.dispose();
   }
 
+  Future<void> _showQuantityBottomSheet() async {
+    int selectedQuantity = 1;
+    final chips = [1, 2, 5, 10, 20];
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AnimatedPadding(
+            duration: const Duration(milliseconds: 250),
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: Container(
+              height: 320.h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20.r),
+                  topRight: Radius.circular(20.r),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: Offset(0, -6),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Text(
+                    'Select Quantity',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+
+                  // Chips
+                  Wrap(
+                    spacing: 10.w,
+                    runSpacing: 10.h,
+                    children: chips.map((c) {
+                      final isSelected = selectedQuantity == c;
+                      return GestureDetector(
+                        onTap: () => setState(() => selectedQuantity = c),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppTheme.primaryColor : Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200),
+                            boxShadow: isSelected
+                                ? [BoxShadow(color: AppTheme.primaryColor.withOpacity(0.12), blurRadius: 8, offset: Offset(0, 4))]
+                                : [],
+                          ),
+                          child: Text(
+                            '$c',
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Color(0xFF374151),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  SizedBox(height: 18.h),
+
+                  // Stepper
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Material(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                            child: InkWell(
+                              onTap: () => setState(() {
+                                if (selectedQuantity > 1) selectedQuantity--;
+                              }),
+                              borderRadius: BorderRadius.circular(8.r),
+                              child: Container(
+                                width: 44.w,
+                                height: 44.h,
+                                alignment: Alignment.center,
+                                child: Icon(Icons.remove, size: 20.sp),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Text(
+                              selectedQuantity.toString(),
+                              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Material(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                            child: InkWell(
+                              onTap: () => setState(() {
+                                selectedQuantity++;
+                              }),
+                              borderRadius: BorderRadius.circular(8.r),
+                              child: Container(
+                                width: 44.w,
+                                height: 44.h,
+                                alignment: Alignment.center,
+                                child: Icon(Icons.add, size: 20.sp),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Selected qty label
+                      Text(
+                        'Selected: $selectedQuantity',
+                        style: TextStyle(fontSize: 14.sp, color: Colors.grey[700], fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+
+                  Spacer(),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        backgroundColor: AppTheme.primaryColor,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        elevation: 6,
+                        shadowColor: AppTheme.primaryColor.withOpacity(0.18),
+                      ),
+                      onPressed: () {
+                        widget.controller.addToCart(widget.item, quantity: selectedQuantity);
+                        Navigator.of(ctx).pop();
+                      },
+                      child: Text(
+                        'Add $selectedQuantity Items',
+                        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final animationValue = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -753,7 +934,6 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   _buildProductInfo(),
-                                  _buildRatingRow(),
                                   _buildActionButton(),
                                 ],
                               ),
@@ -835,69 +1015,72 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
           overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: 5.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              "\u20B9${widget.item['price']}",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3D52A0),
-                fontSize: 16.sp,
-              ),
-            ),
-            SizedBox(width: 5.w),
-            if ((widget.item['oldPrice']?.toString() ?? '').isNotEmpty)
+        Builder(builder: (context) {
+          final priceVal = (widget.item['price'] ?? 0).toDouble();
+          final mrpVal = (priceVal * 1.2);
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
               Text(
-                "\u20B9${widget.item['oldPrice']}",
+                "\u20B9${priceVal.toStringAsFixed(0)}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF3D52A0),
+                  fontSize: 16.sp,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                "MRP \u20B9${mrpVal.toStringAsFixed(0)}",
                 style: TextStyle(
                   decoration: TextDecoration.lineThrough,
                   color: Colors.grey,
                   fontSize: 11.sp,
                 ),
               ),
-          ],
-        ),
+            ],
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildRatingRow() {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(5.r),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.star, color: Colors.green, size: 14.sp),
-              SizedBox(width: 2.w),
-              Text(
-                "${widget.item['rating']}",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12.sp,
-                  color: Colors.green,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 5.w),
-        Text(
-          "(${widget.item['reviews']})",
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildRatingRow() {
+  //   return Row(
+  //     children: [
+  //       Container(
+  //         padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+  //         decoration: BoxDecoration(
+  //           color: Colors.green.withOpacity(0.1),
+  //           borderRadius: BorderRadius.circular(5.r),
+  //         ),
+  //         child: Row(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Icon(Icons.star, color: Colors.green, size: 14.sp),
+  //             SizedBox(width: 2.w),
+  //             Text(
+  //               "${widget.item['rating']}",
+  //               style: TextStyle(
+  //                 fontWeight: FontWeight.w600,
+  //                 fontSize: 12.sp,
+  //                 color: Colors.green,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       SizedBox(width: 5.w),
+  //       Text(
+  //         "(${widget.item['reviews']})",
+  //         style: TextStyle(
+  //           fontSize: 12.sp,
+  //           color: Colors.grey,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildActionButton() {
     return Obx(() {
@@ -985,6 +1168,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => widget.controller.addToCart(widget.item),
+                onLongPress: _showQuantityBottomSheet,
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(12.r),
                   bottomRight: Radius.circular(12.r),
@@ -1031,6 +1215,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
         color: Colors.transparent,
         child: InkWell(
           onTap: () => widget.controller.addToCart(widget.item),
+          onLongPress: _showQuantityBottomSheet,
           borderRadius: BorderRadius.circular(12.r),
           child: Center(
             child: Text(
