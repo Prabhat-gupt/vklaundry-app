@@ -146,29 +146,29 @@ class SupportPage extends StatelessWidget {
                   color: Color(0xFF1F2937),
                 ),
               ),
-              _buildContactTile(
-                icon: Icons.chat,
-                label: 'WhatsApp',
-                value: support['whatsapp']!,
-                onTap: () => _launchWhatsApp(phoneNumber: '917995500760'!),
-              ),
+              // _buildContactTile(
+              //   icon: Icons.chat,
+              //   label: 'WhatsApp',
+              //   value: support['whatsapp']!,
+              //   onTap: () => _launchWhatsApp(phoneNumber: '917995500760'!),
+              // ),
               SizedBox(height: 30.h),
               Obx(() {
                 final support = controller.supportDetails;
                 return Column(
                   children: [
-                    _buildContactTile(
-                      icon: Icons.person_rounded,
-                      label: 'Name',
-                      value: support['name']!,
-                      iconColor: Colors.blue,
-                    ),
-                    _buildContactTile(
-                      icon: Icons.phone_rounded,
-                      label: 'Phone',
-                      value: support['phone']!,
-                      iconColor: Colors.orange,
-                    ),
+                    // _buildContactTile(
+                    //   icon: Icons.person_rounded,
+                    //   label: 'Name',
+                    //   value: support['name']!,
+                    //   iconColor: Colors.blue,
+                    // ),
+                    // _buildContactTile(
+                    //   icon: Icons.phone_rounded,
+                    //   label: 'Phone',
+                    //   value: support['phone']!,
+                    //   iconColor: Colors.orange,
+                    // ),
                     _buildContactTile(
                       icon: Icons.email_rounded,
                       label: 'Email',
@@ -176,13 +176,13 @@ class SupportPage extends StatelessWidget {
                       onTap: () => _launchUrl("mailto:${support['email']}"),
                       iconColor: Colors.red,
                     ),
-                    _buildContactTile(
-                      icon: Icons.chat_rounded,
-                      label: 'WhatsApp',
-                      value: support['whatsapp']!,
-                      onTap: () => _launchWhatsApp(phoneNumber: support['whatsapp']!),
-                      iconColor: Colors.green,
-                    ),
+                    // _buildContactTile(
+                    //   icon: Icons.chat_rounded,
+                    //   label: 'WhatsApp',
+                    //   value: support['whatsapp']!,
+                    //   onTap: () => _launchWhatsApp(phoneNumber: support['whatsapp']!),
+                    //   iconColor: Colors.green,
+                    // ),
                   ],
                 );
               }),

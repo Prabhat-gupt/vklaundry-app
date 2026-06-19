@@ -164,7 +164,7 @@ class TermsAndConditionsPage extends StatelessWidget {
 
             // Contact
             buildSectionTitle("Contact"),
-            buildBullet("📧 support@vklaundry.com"),
+            buildBullet("📧 vklaundry18@gmail.com"),
             buildBullet("📞 +91 7995500760"),
           ],
         ),

@@ -143,35 +143,29 @@ class ProductListController extends GetxController {
             .toList();
   }
 
-  void addToCart(Map<String, dynamic> product) {
+  /// Add [quantity] of [product] to cart. Default is 1.
+  /// Merges with existing quantity so items are not duplicated.
+  void addToCart(Map<String, dynamic> product, {int quantity = 1}) {
+    if (quantity <= 0) return;
     if (isGuestMode.value) {
       _showLoginPopup();
       return;
     }
 
-    final service = product['service_id'].toString();
-    final productId = product['id'];
-    final key = '${service}_$productId';
-
-    cartQuantities[key] = (cartQuantities[key] ?? 0) + 1;
-
-    // ✅ Store full product details so cart works after service switch
-    cartProductDetails[key] = product;
-    _saveCartToStorage();
-  }
-
-  void addBulkToCart(Map<String, dynamic> product, int quantity) {
-    if (isGuestMode.value) {
-      _showLoginPopup();
-      return;
-    }
     final service = product['service_id'].toString();
     final productId = product['id'];
     final key = '${service}_$productId';
 
     cartQuantities[key] = (cartQuantities[key] ?? 0) + quantity;
+
+    // Store full product details so cart works after service switch
     cartProductDetails[key] = product;
     _saveCartToStorage();
+  }
+
+  /// Convenience for bulk add (kept for compatibility)
+  void addToCartBulk(Map<String, dynamic> product, int quantity) {
+    addToCart(product, quantity: quantity);
   }
 
   void removeFromCart(Map<String, dynamic> product) {
@@ -212,7 +206,7 @@ class ProductListController extends GetxController {
 
   Future<void> preloadServiceNames() async {
     try {
-      final response = await supabase.from('services').select('id, name');
+      final response = await supabase.from('services').select('id, name').order('sort_order', ascending: true);
       for (final row in response) {
         serviceNamesCache[row['id'].toString()] = row['name'] ?? 'Unknown';
       }

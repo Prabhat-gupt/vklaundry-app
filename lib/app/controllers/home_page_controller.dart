@@ -168,7 +168,7 @@ class HomePageController extends GetxController {
   /// ✅ Fetch services
   Future<void> fetchServices() async {
     try {
-      final response = await supabase.from('services').select('*');
+      final response = await supabase.from('services').select('*').order('sort_order', ascending: true);
       print('✅ HomePage fetchServices response: $response');
       services.value = response;
     } catch (e) {
