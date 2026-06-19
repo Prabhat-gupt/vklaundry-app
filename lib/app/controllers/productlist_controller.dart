@@ -94,13 +94,21 @@ class ProductListController extends GetxController {
           (p) => p['item_id'] == itemId,
           orElse: () => {},
         );
+        final price = priceData['price'] ?? 0;
+        final rawOldPrice = priceData['old_price'];
+        
+        // Add 20% to the actual price if old_price is 0 or null
+        final oldPrice = (rawOldPrice == null || rawOldPrice == 0)
+            ? (price * 1.2).toInt()
+            : rawOldPrice;
+
         return {
           'id': itemId,
           'name': item['name'],
           'image': item['image_url'] ??
               'https://eu-images.contentstack.com/v3/assets/blte6b9e99033a702bd/blt7e5c15dd5c6fb1a3/67cacb6c91d4b6c9af49e7e3/Top_Shape_1.jpg?width=954&height=637&format=jpg&quality=80',
-          'price': priceData['price'] ?? 0,
-          'oldPrice': priceData['old_price'] ?? 0,
+          'price': price,
+          'oldPrice': oldPrice,
           'discount': priceData['discount'] ?? '',
           'rating': item['rating'] ?? 0.0,
           'reviews': item['reviews'] ?? 0,

@@ -959,7 +959,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
         ClipRRect(
           borderRadius: BorderRadius.vertical(top: Radius.circular(17.r)),
           child: SizedBox(
-            height: 94.h,
+            height: 125.h,
             width: double.infinity,
             child: Image.network(
               widget.item['image'] ?? '',
@@ -1188,26 +1188,84 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               ),
             ),
           ),
+          Container(
+            width: 1.w,
+            height: 23.h,
+            color: AppTheme.primaryColor.withOpacity(0.3),
+          ),
+          Expanded(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => widget.controller.addBulkToCart(widget.item, 5),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12.r),
+                  bottomRight: Radius.circular(12.r),
+                ),
+                child: Container(
+                  height: 38.h,
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '+5',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildAddButton() {
-    return Container(
-      key: const ValueKey('add_button'),
-      width: double.infinity,
-      height: 38.h,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppTheme.primaryColor, AppTheme.primaryColor.withOpacity(0.8)],
-        ),
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Container(
+            key: const ValueKey('add_button'),
+            height: 38.h,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor,
+                  AppTheme.primaryColor.withOpacity(0.8)
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => widget.controller.addToCart(widget.item),
+                borderRadius: BorderRadius.circular(12.r),
+                child: Center(
+                  child: Text(
+                    'Add to Cart',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -1228,7 +1286,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
