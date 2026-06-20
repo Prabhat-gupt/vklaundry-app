@@ -10,8 +10,11 @@ const ORDER_STATUS = {
   'PENDING': 0,
   'ACCEPTED': 1,
   'PROCESSING': 2,
-  'COMPLETED': 3,
-  'REJECTED': 4,
+  'PICKEDUP': 3,
+  'IN_TRANSIT': 4,
+  'DELIVERED': 5,
+  'UNDELIVERED': 6,
+  'REJECTED': 7,
 };
 
 class TrackOrderPage extends StatefulWidget {
@@ -508,34 +511,25 @@ class _TrackOrderPageState extends State<TrackOrderPage>
   }
 
   Widget _buildEnhancedTimeline(int currentStatus) {
-    final steps = [
-      {
-        'title': 'Order Placed',
-        'desc': 'Your order has been received',
-        'icon': Icons.shopping_cart_rounded
-      },
-      {
-        'title': 'Order Confirmed',
-        'desc': 'We are preparing your order',
-        'icon': Icons.check_circle_outline
-      },
-      {
-        'title': 'In Progress',
-        'desc': 'Your items are being processed',
-        'icon': Icons.local_laundry_service
-      },
-      {
-        'title': 'Ready for Delivery',
-        'desc': 'Order completed and ready',
-        'icon': Icons.done_all
-      },
+    List<Map<String, dynamic>> steps = [
+      {'title': 'Order Placed', 'desc': 'Your order has been received', 'icon': Icons.shopping_cart_rounded},
+      {'title': 'Order Confirmed', 'desc': 'Order accepted by laundry', 'icon': Icons.check_circle_outline},
+      {'title': 'In Progress', 'desc': 'Your items are being processed', 'icon': Icons.local_laundry_service},
+      {'title': 'Picked Up', 'desc': 'Items picked up from your location', 'icon': Icons.local_shipping_outlined},
+      {'title': 'Out for Delivery', 'desc': 'Your items are on the way back', 'icon': Icons.directions_car},
+      {'title': 'Delivered', 'desc': 'Order completed successfully', 'icon': Icons.done_all},
     ];
 
-    if (currentStatus == 4) {
-      steps[3] = {
-        'title': 'Order Cancelled',
-        'desc': 'Order has been cancelled',
-        'icon': Icons.cancel_outlined
+    if (currentStatus == 7) {
+      steps = [
+        {'title': 'Order Placed', 'desc': 'Your order has been received', 'icon': Icons.shopping_cart_rounded},
+        {'title': 'Order Rejected', 'desc': 'Order has been rejected/cancelled', 'icon': Icons.cancel_outlined},
+      ];
+    } else if (currentStatus == 6) {
+      steps[5] = {
+        'title': 'Delivery Failed',
+        'desc': 'Could not deliver the items',
+        'icon': Icons.error_outline
       };
     }
 
@@ -551,9 +545,20 @@ class _TrackOrderPageState extends State<TrackOrderPage>
         nodePositionBuilder: (context, index) => 0.15,
         indicatorPositionBuilder: (context, index) => 0.15,
         contentsBuilder: (context, index) {
-          final isActive = (currentStatus != 4 && index <= currentStatus) ||
-              (currentStatus == 4 && index == 3);
+          final isRejected = currentStatus == 7;
+          final isUndelivered = currentStatus == 6;
+          
+          bool isActive = false;
+          if (isRejected) {
+            isActive = index <= 1;
+          } else if (isUndelivered) {
+            isActive = index <= 5;
+          } else {
+            isActive = index <= currentStatus;
+          }
+
           final step = steps[index];
+          final isErrorState = (isRejected && index == 1) || (isUndelivered && index == 5);
 
           return Padding(
             padding: EdgeInsets.only(left: 32.0.w, bottom: 32.0.h),
@@ -569,16 +574,16 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                       padding: EdgeInsets.all(15.r),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? (currentStatus == 4 && index == 3
-                            ? Colors.red.withOpacity(0.1)
-                            : Colors.green.withOpacity(0.1))
+                            ? (isErrorState
+                                ? Colors.red.withOpacity(0.1)
+                                : Colors.green.withOpacity(0.1))
                             : Colors.grey.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(
                           color: isActive
-                              ? (currentStatus == 4 && index == 3
-                              ? Colors.red.withOpacity(0.3)
-                              : Colors.green.withOpacity(0.3))
+                              ? (isErrorState
+                                  ? Colors.red.withOpacity(0.3)
+                                  : Colors.green.withOpacity(0.3))
                               : Colors.grey.withOpacity(0.2),
                           width: 1.w,
                         ),
@@ -592,9 +597,9 @@ class _TrackOrderPageState extends State<TrackOrderPage>
                               fontWeight: FontWeight.bold,
                               fontSize: 15.sp,
                               color: isActive
-                                  ? (currentStatus == 4 && index == 3
-                                  ? Colors.red
-                                  : Colors.green)
+                                  ? (isErrorState
+                                      ? Colors.red
+                                      : Colors.green)
                                   : Colors.grey,
                             ),
                           ),
@@ -616,64 +621,77 @@ class _TrackOrderPageState extends State<TrackOrderPage>
           );
         },
         indicatorBuilder: (context, index) {
-          final isCompleted = currentStatus == 3;
-          final isRejected = currentStatus == 4;
+          final isRejected = currentStatus == 7;
+          final isUndelivered = currentStatus == 6;
+          
+          bool isCompleted = false;
+          bool isCurrent = false;
+          
+          if (isRejected) {
+            isCompleted = index < 1;
+            isCurrent = index == 1;
+          } else if (isUndelivered) {
+            isCompleted = index < 5;
+            isCurrent = index == 5;
+          } else {
+            isCompleted = index < currentStatus;
+            isCurrent = index == currentStatus;
+          }
+
           final step = steps[index];
 
-          if (isRejected) {
-            if (index == 3) {
+          if (isCurrent) {
+            if (isRejected || isUndelivered) {
               return _buildAnimatedIndicator(
                 color: Colors.red,
                 icon: Icons.close,
                 index: index,
               );
-            } else {
-              return _buildAnimatedIndicator(
-                color: Colors.grey,
-                icon: Icons.radio_button_unchecked,
-                index: index,
-              );
             }
-          }
-
-          if (index < currentStatus) {
-            return _buildAnimatedIndicator(
-              color: Colors.green,
-              icon: Icons.check,
-              index: index,
-            );
-          } else if (index == currentStatus) {
-            if (isCompleted) {
+            if (currentStatus == 5) {
               return _buildAnimatedIndicator(
                 color: Colors.green,
                 icon: Icons.check_circle,
                 index: index,
               );
-            } else {
-              return _buildAnimatedIndicator(
-                color: Colors.blue,
-                icon: step['icon'] as IconData,
-                index: index,
-              );
             }
-          } else {
             return _buildAnimatedIndicator(
-              color: Colors.grey.shade300,
+              color: Colors.blue,
               icon: step['icon'] as IconData,
               index: index,
             );
           }
+
+          if (isCompleted) {
+            return _buildAnimatedIndicator(
+              color: Colors.green,
+              icon: Icons.check,
+              index: index,
+            );
+          }
+
+          return _buildAnimatedIndicator(
+            color: Colors.grey.shade300,
+            icon: step['icon'] as IconData,
+            index: index,
+          );
         },
         connectorBuilder: (context, index, connectorType) {
-          Color connectorColor;
-          if (currentStatus == 4) {
-            connectorColor = Colors.grey.shade300;
-          } else if (index < currentStatus) {
-            connectorColor = Colors.green;
+          final isRejected = currentStatus == 7;
+          final isUndelivered = currentStatus == 6;
+          
+          bool isCompleted = false;
+          if (isRejected) {
+            isCompleted = index < 1;
+          } else if (isUndelivered) {
+            isCompleted = index < 5;
           } else {
-            connectorColor = Colors.grey.shade300;
+            isCompleted = index < currentStatus;
           }
-          return SolidLineConnector(color: connectorColor);
+
+          return SolidLineConnector(
+            color: isCompleted ? Colors.green : Colors.grey.shade300,
+          );
         },
       ),
     );
@@ -726,8 +744,14 @@ String _getStatusText(int status) {
     case 2:
       return "Processing";
     case 3:
-      return "Completed";
+      return "Picked Up";
     case 4:
+      return "In Transit";
+    case 5:
+      return "Delivered";
+    case 6:
+      return "Undelivered";
+    case 7:
       return "Rejected";
     default:
       return "Unknown";
@@ -744,8 +768,14 @@ Color _getStatusColor(int status) {
     case 2:
       return Colors.purple;
     case 3:
-      return Colors.green;
+      return Colors.teal;
     case 4:
+      return Colors.indigo;
+    case 5:
+      return Colors.green;
+    case 6:
+      return Colors.deepOrange;
+    case 7:
       return Colors.red;
     default:
       return Colors.grey;
@@ -762,8 +792,14 @@ IconData _getStatusIcon(int status) {
     case 2:
       return Icons.autorenew;
     case 3:
-      return Icons.check_circle;
+      return Icons.local_shipping_outlined;
     case 4:
+      return Icons.directions_car;
+    case 5:
+      return Icons.check_circle;
+    case 6:
+      return Icons.warning_amber_rounded;
+    case 7:
       return Icons.cancel;
     default:
       return Icons.help_outline;
