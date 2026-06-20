@@ -81,8 +81,11 @@ class ProductListController extends GetxController {
 
       final itemIds = prices.map((e) => e['item_id']).toSet().toList();
 
-      final itemsResponse =
-          await supabase.from('items').select('*').inFilter('id', itemIds);
+      final itemsResponse = await supabase
+          .from('items')
+          .select('*')
+          .inFilter('id', itemIds)
+          .order('sort_order', ascending: true);
 
       final List<Map<String, dynamic>> items = List<Map<String, dynamic>>.from(
         itemsResponse,
