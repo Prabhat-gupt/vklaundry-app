@@ -129,18 +129,41 @@ class ProductListController extends GetxController {
     }
   }
 
+  var currentSort = 'none'.obs; // 'none', 'lowToHigh', 'highToLow'
+  var searchQuery = ''.obs;
+
+  void sortProducts(String sortOrder) {
+    currentSort.value = sortOrder;
+    filterProductsByCategory(selectedCategoryId.value, int.tryParse(currentService.value));
+  }
+
+  void searchProducts(String query) {
+    searchQuery.value = query.toLowerCase();
+    filterProductsByCategory(selectedCategoryId.value, int.tryParse(currentService.value));
+  }
+
   void filterProductsByCategory(int? categoryId, int? serviceId) {
     selectedCategoryId.value = categoryId;
     final originalList = List<Map<String, dynamic>>.from(products);
-    filteredProducts.value = categoryId == null
-        ? originalList
-        : originalList
-            .where(
-              (product) =>
-                  product['category_id'] == categoryId &&
-                  product['service_id'] == serviceId,
-            )
-            .toList();
+    
+    var filtered = originalList.where((product) {
+      final matchesCategory = categoryId == null ||
+          (product['category_id'] == categoryId &&
+              (serviceId == null || product['service_id'] == serviceId));
+      
+      final matchesSearch = searchQuery.value.isEmpty ||
+          (product['name']?.toString().toLowerCase().contains(searchQuery.value) ?? false);
+          
+      return matchesCategory && matchesSearch;
+    }).toList();
+            
+    if (currentSort.value == 'lowToHigh') {
+      filtered.sort((a, b) => (a['price'] as num? ?? 0).compareTo(b['price'] as num? ?? 0));
+    } else if (currentSort.value == 'highToLow') {
+      filtered.sort((a, b) => (b['price'] as num? ?? 0).compareTo(a['price'] as num? ?? 0));
+    }
+    
+    filteredProducts.value = filtered;
   }
 
   /// Add [quantity] of [product] to cart. Default is 1.
@@ -164,7 +187,7 @@ class ProductListController extends GetxController {
   }
 
   /// Convenience for bulk add (kept for compatibility)
-  void addToCartBulk(Map<String, dynamic> product, int quantity) {
+  void addBulkToCart(Map<String, dynamic> product, int quantity) {
     addToCart(product, quantity: quantity);
   }
 

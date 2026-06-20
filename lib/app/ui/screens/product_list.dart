@@ -153,6 +153,7 @@ class _ProductListScreenState extends State<ProductListScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildAnimatedHeader(context),
+            _buildSearchBar(),
             Padding(
               padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
               child: _buildAnimatedCategories(),
@@ -269,7 +270,88 @@ class _ProductListScreenState extends State<ProductListScreen>
                 ),
               );
             }),
+            SizedBox(width: 8.w),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.25), width: 1.w),
+              ),
+              child: PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                icon: Icon(Icons.sort_rounded, color: Colors.white, size: 18.sp),
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r)),
+                onSelected: (value) {
+                  controller.sortProducts(value);
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'none',
+                    child: Row(
+                      children: [
+                        Icon(Icons.sort, color: Colors.black54, size: 18.sp),
+                        SizedBox(width: 8.w),
+                        Text("Default", style: TextStyle(fontSize: 13.sp)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'lowToHigh',
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_upward, color: Colors.black54, size: 18.sp),
+                        SizedBox(width: 8.w),
+                        Text("Price: Low to High", style: TextStyle(fontSize: 13.sp)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'highToLow',
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_downward, color: Colors.black54, size: 18.sp),
+                        SizedBox(width: 8.w),
+                        Text("Price: High to Low", style: TextStyle(fontSize: 13.sp)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
+      child: Container(
+        height: 45.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: TextField(
+          onChanged: (value) => controller.searchProducts(value),
+          decoration: InputDecoration(
+            hintText: 'Search items...',
+            hintStyle: TextStyle(color: Colors.grey, fontSize: 13.sp),
+            prefixIcon: Icon(Icons.search, color: Colors.grey, size: 20.sp),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+          ),
         ),
       ),
     );
@@ -330,7 +412,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                   : controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.75, // Increased to reduce height
+                childAspectRatio: 0.68,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -959,7 +1041,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
         ClipRRect(
           borderRadius: BorderRadius.vertical(top: Radius.circular(17.r)),
           child: SizedBox(
-            height: 125.h,
+            height: 110.h,
             width: double.infinity,
             child: Image.network(
               widget.item['image'] ?? '',
@@ -1004,15 +1086,18 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.item['name'] ?? '',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14.sp,
-            color: Color(0xFF1A2340),
+        SizedBox(
+          height: 38.h,
+          child: Text(
+            widget.item['name'] ?? '',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14.sp,
+              color: Color(0xFF1A2340),
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
         SizedBox(height: 5.h),
         Builder(builder: (context) {
@@ -1101,7 +1186,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
   Widget _buildQuantitySelector(int quantity) {
     return Container(
       key: const ValueKey('quantity_selector'),
-      height: 38.h,
+      height: 34.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
@@ -1124,7 +1209,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                   bottomLeft: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 38.h,
+                  height: 34.h,
                   alignment: Alignment.center,
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -1174,7 +1259,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                   bottomRight: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 38.h,
+                  height: 34.h,
                   alignment: Alignment.center,
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -1203,7 +1288,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
                   bottomRight: Radius.circular(12.r),
                 ),
                 child: Container(
-                  height: 38.h,
+                  height: 34.h,
                   alignment: Alignment.center,
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -1232,7 +1317,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
           flex: 3,
           child: Container(
             key: const ValueKey('add_button'),
-            height: 38.h,
+            height: 34.h,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -1253,6 +1338,7 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => widget.controller.addToCart(widget.item),
+                onLongPress: _showQuantityBottomSheet,
                 borderRadius: BorderRadius.circular(12.r),
                 child: Center(
                   child: Text(
@@ -1267,21 +1353,32 @@ class _EnhancedProductCardState extends State<_EnhancedProductCard>
               ),
             ),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => widget.controller.addToCart(widget.item),
-          onLongPress: _showQuantityBottomSheet,
-          borderRadius: BorderRadius.circular(12.r),
-          child: Center(
-            child: Text(
-              'Add to Cart',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14.sp,
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          flex: 1,
+          child: Container(
+            height: 34.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppTheme.primaryColor),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => widget.controller.addBulkToCart(widget.item, 5),
+                borderRadius: BorderRadius.circular(12.r),
+                child: Center(
+                  child: Text(
+                    '+5',
+                    style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

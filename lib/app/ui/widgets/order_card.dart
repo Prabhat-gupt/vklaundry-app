@@ -392,8 +392,14 @@ String _getStatusText(int status) {
     case 2:
       return "Processing";
     case 3:
-      return "Completed";
+      return "Picked Up";
     case 4:
+      return "In Transit";
+    case 5:
+      return "Delivered";
+    case 6:
+      return "Undelivered";
+    case 7:
       return "Rejected";
     default:
       return "Unknown";
@@ -404,16 +410,22 @@ String _getStatusText(int status) {
 Color _getStatusColor(int status) {
   switch (status) {
     case 0:
-      return Colors.grey;
+      return Colors.orange; // Pending
     case 1:
-      return Colors.orange;
+      return Colors.blue; // Accepted
     case 2:
-      return Colors.blue;
+      return Colors.purple; // Processing
     case 3:
-      return Colors.green;
+      return Colors.teal; // Picked Up
     case 4:
-      return Colors.red;
+      return Colors.indigo; // In Transit
+    case 5:
+      return Colors.green; // Delivered
+    case 6:
+      return Colors.deepOrange; // Undelivered
+    case 7:
+      return Colors.red; // Rejected
     default:
-      return Colors.blueGrey;
+      return Colors.grey;
   }
 }
