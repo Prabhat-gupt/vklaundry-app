@@ -66,8 +66,8 @@ class OrderCard extends StatelessWidget {
                       ),
                       SizedBox(height: 5.h),
                       Text(
-                        _formatDateTime(order['created_at']),
-                        style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+                        'Placed: ${_formatDateTimeWithTime(order['created_at'])}',
+                        style: TextStyle(fontSize: 11.sp, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -93,7 +93,7 @@ class OrderCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14.r),
                         ),
                         child: Text(
-                          statusText,
+                          '$statusText • ${_formatTimeOnly(order['updated_at'] ?? order['created_at'])}',
                           style: TextStyle(
                             color: _getStatusColor(status),
                             fontSize: 11.sp,
@@ -123,12 +123,21 @@ String _formatDate(String? dateString) {
   }
 }
 
-String _formatDateTime(String? dateString) {
+String _formatDateTimeWithTime(String? dateString) {
   if (dateString == null || dateString.isEmpty) return '';
   try {
-    final date = DateTime.parse(dateString);
-    // return DateFormat('yyyy-MM-dd HH:mm').format(date);
-    return DateFormat('yyyy-MM-dd').format(date);
+    final date = DateTime.parse(dateString).toLocal();
+    return DateFormat('MMM dd, yyyy • hh:mm a').format(date);
+  } catch (e) {
+    return '';
+  }
+}
+
+String _formatTimeOnly(String? dateString) {
+  if (dateString == null || dateString.isEmpty) return '';
+  try {
+    final date = DateTime.parse(dateString).toLocal();
+    return DateFormat('hh:mm a').format(date);
   } catch (e) {
     return '';
   }
@@ -200,7 +209,65 @@ void _showOrderDetail(BuildContext context, Map<String, dynamic> order) {
                         ),
                       ],
                     ),
-                    SizedBox(height: 5.h),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Ordered on: ${_formatDateTimeWithTime(currentOrder['created_at'])}',
+                      style: TextStyle(fontSize: 12.sp, color: Colors.grey[700]),
+                    ),
+                    SizedBox(height: 13.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(10.r),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Payment Status',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 10.sp)),
+                                SizedBox(height: 5.h),
+                                Text(
+                                  _getPaymentStatusText(currentOrder['payment_status']),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: _getPaymentStatusColor(currentOrder['payment_status'])),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 13.w),
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(10.r),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Payment Mode',
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 10.sp)),
+                                SizedBox(height: 5.h),
+                                Text(
+                                  _getPaymentModeText(currentOrder['payment_mode'] ?? currentOrder['payment_method']),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 13.h),
 
                     Row(
                       children: [
@@ -404,6 +471,66 @@ String _getStatusText(int status) {
     default:
       return "Unknown";
   }
+}
+
+/// 🔹 Status Icon
+IconData _getStatusIcon(int status) {
+  switch (status) {
+    case 0:
+      return Icons.hourglass_empty;
+    case 1:
+      return Icons.check_circle_outline;
+    case 2:
+      return Icons.autorenew;
+    case 3:
+      return Icons.local_shipping_outlined;
+    case 4:
+      return Icons.directions_car;
+    case 5:
+      return Icons.check_circle;
+    case 6:
+      return Icons.warning_amber_rounded;
+    case 7:
+      return Icons.cancel;
+    default:
+      return Icons.help_outline;
+  }
+}
+
+/// 🔹 Payment Status Text
+String _getPaymentStatusText(dynamic status) {
+  if (status == null) return "PENDING";
+  if (status is int) {
+    if (status == 1) return "PAID";
+    if (status == 2) return "FAILED";
+    return "PENDING";
+  }
+  return status.toString().toUpperCase();
+}
+
+/// 🔹 Payment Status Color
+Color _getPaymentStatusColor(dynamic status) {
+  if (status == null) return Colors.orange;
+  if (status is int) {
+    if (status == 1) return Colors.green;
+    if (status == 2) return Colors.red;
+    return Colors.orange;
+  }
+  final str = status.toString().toLowerCase();
+  if (str == 'paid' || str == 'success') return Colors.green;
+  if (str == 'failed') return Colors.red;
+  return Colors.orange;
+}
+
+/// 🔹 Payment Mode Text
+String _getPaymentModeText(dynamic mode) {
+  if (mode == null) return "N/A";
+  if (mode is int) {
+    if (mode == 0) return "CASH";
+    if (mode == 1) return "ONLINE";
+    return "UNKNOWN";
+  }
+  return mode.toString().toUpperCase();
 }
 
 /// 🔹 Status color mapper
