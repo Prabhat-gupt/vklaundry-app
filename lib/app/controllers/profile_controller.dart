@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 // Removed get_storage import - using SharedPreferences instead
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -103,6 +104,9 @@ class ProfileController extends GetxController {
   // }
   int currentCount = 0;
   int? totalPreviousCount;
+  var eligibleItemIds = <int>[].obs;
+  int maxPieces = 0;
+  int get remainingQuota => maxPieces - currentCount;
 
   Future<int?> validateAndUpdateSubscription(int userId) async {
     try {
@@ -135,6 +139,28 @@ class ProfileController extends GetxController {
       final endDateStr = userSub['end_date'];
       currentCount = userSub['count'] ?? 0;
       print("i am getting my status is ::::::: ${userSub['status']}");
+
+      // Fetch the subscription details to get list_item and pieces
+      final subDetails = await supabase
+          .from('subscriptions')
+          .select('list_item, pieces')
+          .eq('id', subscriptionId)
+          .maybeSingle();
+
+      if (subDetails != null && subDetails['list_item'] != null) {
+        try {
+          String listItemStr = subDetails['list_item'];
+          List<dynamic> parsedList = jsonDecode(listItemStr);
+          eligibleItemIds.value = parsedList.map((e) => int.parse(e.toString())).toList();
+        } catch (e) {
+          print("Error parsing list_item: $e");
+          eligibleItemIds.value = [];
+        }
+        maxPieces = (subDetails['pieces'] ?? 0) as int;
+      } else {
+        eligibleItemIds.value = [];
+        maxPieces = 0;
+      }
 
       // Save to SharedPreferences instead of GetStorage
       final prefs = await SharedPreferences.getInstance();
