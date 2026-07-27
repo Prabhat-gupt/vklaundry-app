@@ -375,8 +375,8 @@ class _CheckoutPageState extends State<CheckoutPage>
         if (quantity > 0) {
           final productId = item['product']['id'];
           final price = double.tryParse(item['product']['price'].toString()) ?? 0.0;
-          
-          bool isEligible = profileController.eligibleItemIds.isEmpty || profileController.eligibleItemIds.contains(productId);
+          final categoryId = item['product']['category_id'];
+          bool isEligible = profileController.eligibleItemKeys.isEmpty || profileController.eligibleItemKeys.contains("${categoryId}_${productId}");
           
           if (isEligible) {
             if (_newEligibleItemsCount + quantity <= remainingQuota) {
@@ -570,7 +570,7 @@ class _CheckoutPageState extends State<CheckoutPage>
                   controller: controller,
                   index: index,
                   hasSubscription: hasSubscription,
-                  eligibleItemIds: profileController.eligibleItemIds,
+                  eligibleItemKeys: profileController.eligibleItemKeys,
                   onUpdate: () => setState(() {}),
                 );
               }),
@@ -907,6 +907,15 @@ class _CheckoutPageState extends State<CheckoutPage>
                       controller.activeOffer,
                       grandTotal,
                       (selectedOffer) {
+                        if (selectedOffer != null && selectedOffer['type'] == 'first_order' && profileController.isFirstApply.value) {
+                          Get.snackbar(
+                            "Not Eligible", 
+                            "You have already used the first order coupon.",
+                            backgroundColor: Colors.red.shade700,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
                         setState(() {
                           if (selectedOffer != null) {
                             controller.activeOfferselected.value =
@@ -1558,6 +1567,10 @@ class _CheckoutPageState extends State<CheckoutPage>
         colorText: Colors.white,
       );
 
+      if (controller.activeOfferselected.isNotEmpty && controller.activeOfferselected['type'] == 'first_order') {
+        await profileController.markFirstOrderDone(userIdMy);
+      }
+
       Get.offAllNamed(
         AppRoutes.SUCCESS,
         arguments: {'order_id': 58},
@@ -1593,6 +1606,10 @@ class _CheckoutPageState extends State<CheckoutPage>
               profileController.currentCount,
               newItems,
             );
+          }
+
+          if (controller.activeOfferselected.isNotEmpty && controller.activeOfferselected['type'] == 'first_order') {
+            await profileController.markFirstOrderDone(userIdMy);
           }
 
           Get.offAllNamed(
@@ -1651,6 +1668,10 @@ class _CheckoutPageState extends State<CheckoutPage>
               );
             }
 
+            if (controller.activeOfferselected.isNotEmpty && controller.activeOfferselected['type'] == 'first_order') {
+              await profileController.markFirstOrderDone(userIdMy);
+            }
+
             Get.snackbar(
               "Payment successful",
               "ID: $paymentId",
@@ -1692,7 +1713,7 @@ class _EnhancedItemRow extends StatefulWidget {
   final ProductListController controller;
   final int index;
   final int? hasSubscription;
-  final List<int> eligibleItemIds;
+  final List<String> eligibleItemKeys;
   final VoidCallback onUpdate;
 
   const _EnhancedItemRow({
@@ -1700,7 +1721,7 @@ class _EnhancedItemRow extends StatefulWidget {
     required this.controller,
     required this.index,
     required this.hasSubscription,
-    required this.eligibleItemIds,
+    required this.eligibleItemKeys,
     required this.onUpdate,
   });
 
@@ -2011,10 +2032,11 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
           0;
       final productId = widget.item['product']['id'];
       
+      final categoryId = widget.item['product']['category_id'];
       bool isEligible = false;
       if (widget.hasSubscription == 1) {
-        if (widget.eligibleItemIds.isNotEmpty) {
-          isEligible = widget.eligibleItemIds.contains(productId);
+        if (widget.eligibleItemKeys.isNotEmpty) {
+          isEligible = widget.eligibleItemKeys.contains("${categoryId}_${productId}");
         } else {
           isEligible = true; // Fallback
         }

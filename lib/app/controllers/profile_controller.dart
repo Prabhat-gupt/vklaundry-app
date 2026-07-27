@@ -15,6 +15,7 @@ class ProfileController extends GetxController {
   var name = ''.obs;
   var email = ''.obs;
   var phone = ''.obs;
+  var isFirstApply = false.obs;
   var userId = ''.obs; // Store user ID (uuid from auth)
   var dbUserId = 0.obs; // Store user ID from 'users' table
   var isLoading = false.obs;
@@ -47,6 +48,7 @@ class ProfileController extends GetxController {
           name.value = response['name'] ?? '';
           email.value = response['email'] ?? '';
           phone.value = response['phone']?.toString() ?? '';
+          isFirstApply.value = response['is_firstApply'] ?? false;
         }
       }
     } catch (e) {
@@ -86,6 +88,15 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> markFirstOrderDone(int id) async {
+    try {
+      await supabase.from('users').update({'is_firstApply': true}).eq('id', id);
+      isFirstApply.value = true;
+    } catch (e) {
+      print("Error updating first order status: $e");
+    }
+  }
+
   // Future<bool> hasActiveSubscription(int userId) async {
   //   try {
   //     final response = await supabase
@@ -104,7 +115,7 @@ class ProfileController extends GetxController {
   // }
   int currentCount = 0;
   int? totalPreviousCount;
-  var eligibleItemIds = <int>[].obs;
+  var eligibleItemKeys = <String>[].obs;
   int maxPieces = 0;
   int get remainingQuota => maxPieces - currentCount;
 
@@ -143,22 +154,30 @@ class ProfileController extends GetxController {
       // Fetch the subscription details to get list_item and pieces
       final subDetails = await supabase
           .from('subscriptions')
-          .select('list_item, pieces')
+          .select('applicable_item, pieces')
           .eq('id', subscriptionId)
           .maybeSingle();
 
-      if (subDetails != null && subDetails['list_item'] != null) {
+      if (subDetails != null && subDetails['applicable_item'] != null) {
         try {
-          String listItemStr = subDetails['list_item'];
-          List<dynamic> parsedList = jsonDecode(listItemStr);
-          eligibleItemIds.value = parsedList.map((e) => int.parse(e.toString())).toList();
+          String itemStr = subDetails['applicable_item'];
+          Map<String, dynamic> parsedMap = jsonDecode(itemStr);
+          List<String> keys = [];
+          parsedMap.forEach((serviceIdStr, productList) {
+            if (productList is List) {
+              for (var productId in productList) {
+                keys.add("${serviceIdStr}_$productId");
+              }
+            }
+          });
+          eligibleItemKeys.value = keys;
         } catch (e) {
-          print("Error parsing list_item: $e");
-          eligibleItemIds.value = [];
+          print("Error parsing applicable_item: $e");
+          eligibleItemKeys.value = [];
         }
         maxPieces = (subDetails['pieces'] ?? 0) as int;
       } else {
-        eligibleItemIds.value = [];
+        eligibleItemKeys.value = [];
         maxPieces = 0;
       }
 
