@@ -416,15 +416,7 @@ void _showSubscriptionDetail(
                     
                     // Description
                     if (sub['description'] != null && sub['description'].toString().isNotEmpty)
-                      Text(
-                        sub['description'],
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: Colors.grey[600],
-                          height: 1.w,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                      _buildParsedDescription(sub['description'].toString()),
                     SizedBox(height: 16.h),
 
                     // Price Info Box
@@ -557,6 +549,115 @@ void _showSubscriptionDetail(
         ),
       );
     },
+  );
+}
+
+Widget _buildParsedDescription(String description) {
+  if (!description.contains('Includes') && !description.contains('Eligible Garments')) {
+    return Text(
+      description,
+      style: TextStyle(
+        fontSize: 11.sp,
+        color: Colors.grey[600],
+        height: 1.5,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  List<String> lines = description.split(RegExp(r'\r?\n')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  
+  List<Widget> includeWidgets = [];
+  List<Widget> eligibleWidgets = [];
+  
+  bool isEligibleSection = false;
+  bool isIncludesSection = false;
+  
+  for (String line in lines) {
+    if (line.toLowerCase() == 'includes') {
+      isIncludesSection = true;
+      isEligibleSection = false;
+      continue;
+    } else if (line.toLowerCase() == 'eligible garments' || line.toLowerCase() == 'eligible items') {
+      isEligibleSection = true;
+      continue;
+    }
+    
+    if (isEligibleSection) {
+      eligibleWidgets.add(
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Text(
+            line,
+            style: TextStyle(fontSize: 10.sp, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
+          ),
+        )
+      );
+    } else if (isIncludesSection) {
+      includeWidgets.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: 6.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.check_circle_rounded, color: Colors.green, size: 14.sp),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  line,
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[800]),
+                ),
+              ),
+            ],
+          ),
+        )
+      );
+    } else {
+       includeWidgets.add(
+         Padding(
+           padding: EdgeInsets.only(bottom: 6.h),
+           child: Text(
+             line,
+             style: TextStyle(fontSize: 11.sp, color: Colors.grey[800]),
+           ),
+         )
+       );
+    }
+  }
+
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(horizontal: 8.w),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (includeWidgets.isNotEmpty) ...[
+          Text(
+            'Includes',
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+          ),
+          SizedBox(height: 10.h),
+          ...includeWidgets,
+          SizedBox(height: 12.h),
+        ],
+        if (eligibleWidgets.isNotEmpty) ...[
+          Text(
+            'Eligible Garments',
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+          ),
+          SizedBox(height: 10.h),
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
+            children: eligibleWidgets,
+          ),
+        ]
+      ],
+    ),
   );
 }
 

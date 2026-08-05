@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:laundry_app/app/controllers/profile_controller.dart';
 
 class ProductListController extends GetxController {
   final supabase = Supabase.instance.client;
@@ -56,7 +57,32 @@ class ProductListController extends GetxController {
     print("Fetched active offers: $response");
 
     if (response != null) {
-      activeOffer.value = List<Map<String, dynamic>>.from(response);
+      bool isFirstApply = false;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final userId = prefs.getInt('user_id');
+        if (userId != null) {
+          final userRes = await Supabase.instance.client
+              .from('users')
+              .select('is_firstApply')
+              .eq('id', userId)
+              .maybeSingle();
+          if (userRes != null) {
+            isFirstApply = userRes['is_firstApply'] ?? false;
+          }
+        }
+      } catch (e) {
+        print("Error fetching user for offer filter: $e");
+      }
+
+      var validOffers = (response as List).where((offer) {
+        if (offer['type'] == 'first_order' && isFirstApply) {
+          return false;
+        }
+        return true;
+      }).toList();
+
+      activeOffer.value = List<Map<String, dynamic>>.from(validOffers);
     }
   }
 

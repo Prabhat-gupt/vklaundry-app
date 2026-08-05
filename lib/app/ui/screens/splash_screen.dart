@@ -440,7 +440,7 @@ class _SplashScreenState extends State<SplashScreen>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'VK Laundary',
+                                  'VK Laundry',
                                   style: TextStyle(
                                     fontSize: 40.sp,
                                     color: Colors.white,

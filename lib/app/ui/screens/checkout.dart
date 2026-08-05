@@ -42,6 +42,7 @@ class _CheckoutPageState extends State<CheckoutPage>
   late RazorpayPaymentController razorpayController;
   int? hasSubscription;
   bool discountApplied = false;
+  int _newEligibleItemsCount = 0;
 
   // Animation controllers
   late final AnimationController _pageLoadController;
@@ -358,9 +359,47 @@ class _CheckoutPageState extends State<CheckoutPage>
       return SizedBox();
     }
 
-    final double itemsTotal = controller.calculateItemsTotal();
-    final double deliveryCharge = 5.0;
-    final double handlingCharge = 2.0;
+    double itemsTotal = 0.0;
+    _newEligibleItemsCount = 0;
+    double deliveryCharge = 5.0;
+    double handlingCharge = 2.0;
+
+    if (hasSubscription == 1) {
+      deliveryCharge = 0.0;
+      handlingCharge = 0.0;
+      
+      final int remainingQuota = profileController.remainingQuota;
+
+      for (var item in selectedItems) {
+        final quantity = controller.cartQuantities['${item['service']}_${item['product']['id']}'] ?? 0;
+        if (quantity > 0) {
+          final productId = item['product']['id'];
+          final price = double.tryParse(item['product']['price'].toString()) ?? 0.0;
+          final categoryId = item['product']['category_id'];
+          bool isEligible = profileController.eligibleItemKeys.isEmpty || profileController.eligibleItemKeys.contains("${categoryId}_${productId}");
+          
+          if (isEligible) {
+            if (_newEligibleItemsCount + quantity <= remainingQuota) {
+              // Fully covered by subscription
+              _newEligibleItemsCount += quantity;
+            } else {
+              // Partially or fully NOT covered
+              final int covered = remainingQuota > _newEligibleItemsCount ? remainingQuota - _newEligibleItemsCount : 0;
+              final int notCovered = quantity - covered;
+              
+              _newEligibleItemsCount += covered;
+              itemsTotal += (price * notCovered);
+            }
+          } else {
+            // Not eligible
+            itemsTotal += (price * quantity);
+          }
+        }
+      }
+    } else {
+      itemsTotal = controller.calculateItemsTotal();
+    }
+
     final double grandTotal = itemsTotal + deliveryCharge + handlingCharge;
 
     final offer = controller.activeOfferselected.isEmpty
@@ -530,6 +569,8 @@ class _CheckoutPageState extends State<CheckoutPage>
                   item: item,
                   controller: controller,
                   index: index,
+                  hasSubscription: hasSubscription,
+                  eligibleItemKeys: profileController.eligibleItemKeys,
                   onUpdate: () => setState(() {}),
                 );
               }),
@@ -840,7 +881,7 @@ class _CheckoutPageState extends State<CheckoutPage>
   Widget _buildAnimatedOffersSection(double grandTotal) {
     return FadeTransition(
       opacity: _billFadeAnimation,
-      child: hasSubscription == 1
+      child: (hasSubscription == 1 && grandTotal == 0.0)
           ? SizedBox.shrink()
           : Container(
               width: double.infinity,
@@ -866,6 +907,15 @@ class _CheckoutPageState extends State<CheckoutPage>
                       controller.activeOffer,
                       grandTotal,
                       (selectedOffer) {
+                        if (selectedOffer != null && selectedOffer['type'] == 'first_order' && profileController.isFirstApply.value) {
+                          Get.snackbar(
+                            "Not Eligible", 
+                            "You have already used the first order coupon.",
+                            backgroundColor: Colors.red.shade700,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
                         setState(() {
                           if (selectedOffer != null) {
                             controller.activeOfferselected.value =
@@ -932,12 +982,18 @@ class _CheckoutPageState extends State<CheckoutPage>
   ) {
     return FadeTransition(
       opacity: _billFadeAnimation,
-      child: hasSubscription == 1
-          ? _buildBillDetailWithoutSubscription(
+      child: Column(
+        children: [
+          if (hasSubscription == 1)
+            _buildBillDetailWithoutSubscription(
               itemsTotal,
               profileController.totalPreviousCount,
-            )
-          : _buildBillDetails(
+              _newEligibleItemsCount,
+            ),
+          if (hasSubscription == 1 && itemsTotal > 0)
+            SizedBox(height: 14.h),
+          if (hasSubscription != 1 || itemsTotal > 0)
+            _buildBillDetails(
               itemsTotal,
               deliveryCharge,
               handlingCharge,
@@ -945,6 +1001,8 @@ class _CheckoutPageState extends State<CheckoutPage>
               discount,
               discountLabel,
             ),
+        ],
+      )
     );
   }
 
@@ -1044,7 +1102,7 @@ class _CheckoutPageState extends State<CheckoutPage>
           ),
           _billRow(
             "Grand Total",
-            hasSubscription == 1
+            (hasSubscription == 1 && finalTotal == 0.0)
                 ? "Free with Subscription"
                 : "\u20B9${finalTotal.toStringAsFixed(2)}",
             isBold: true,
@@ -1057,11 +1115,12 @@ class _CheckoutPageState extends State<CheckoutPage>
   Widget _buildBillDetailWithoutSubscription(
     double itemsTotal,
     int? totalItemDelivered,
+    int newEligibleItemsCount,
   ) {
-    final int totalSubscriptionItems = 30;
+    final int totalSubscriptionItems = profileController.maxPieces;
     final int delivered = totalItemDelivered ?? 0;
-    final int newItems = controller.getTotalCartItems();
-    final int remaining = totalSubscriptionItems - (delivered + newItems);
+    final int newItems = newEligibleItemsCount;
+    final int remaining = (totalSubscriptionItems - (delivered + newItems)).clamp(0, totalSubscriptionItems);
 
     return Container(
       padding: EdgeInsets.all(15.r),
@@ -1242,7 +1301,7 @@ class _CheckoutPageState extends State<CheckoutPage>
         child: InkWell(
           onTap: canPlaceOrder
               ? () {
-                  if (hasSubscription != 1) {
+                  if (hasSubscription != 1 || finalTotal > 0) {
                     _showPaymentMethodPopup(finalTotal);
                   } else {
                     _handlePlaceOrder(finalTotal);
@@ -1255,7 +1314,7 @@ class _CheckoutPageState extends State<CheckoutPage>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (hasSubscription != 1) ...[
+                if (hasSubscription != 1 || finalTotal > 0) ...[
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1470,70 +1529,56 @@ class _CheckoutPageState extends State<CheckoutPage>
     final customerPhone = profileController.phone.value;
     final customerEmail = profileController.email.value;
 
-    final int totalSubscriptionItems = 30;
-    final int newItems = controller.getTotalCartItems();
-    final num remaining =
-        totalSubscriptionItems - (profileController.currentCount);
+    final int totalSubscriptionItems = profileController.maxPieces;
+    final int newItems = hasSubscription == 1 ? _newEligibleItemsCount : controller.getTotalCartItems();
+    final num remaining = (totalSubscriptionItems - profileController.currentCount).clamp(0, totalSubscriptionItems);
 
     final String? backendOrderId = null;
     print("my hasSubscription is ::::::: $hasSubscription");
 
-    if (hasSubscription == 1) {
+    if (hasSubscription == 1 && finalTotal == 0) {
       print(
           "my remaining is :::: ${profileController.currentCount} ad ${remaining}");
-      int total = profileController.currentCount + newItems;
 
-      print(
-          "my item toal $total and $totalSubscriptionItems is ::::: ${total == totalSubscriptionItems}");
+      await profileController.UpdateSubscription(
+        userIdMy,
+        profileController.currentCount,
+        newItems,
+      );
+      
+      // Place the order
+      await orderController.placeOrder(
+        selectedItems: controller.getSelectedCartItems(),
+        totalAmount: finalTotal,
+        paymentMethod: 1,
+        paymentStatus: 1,
+        pickupDateTime:
+            "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
+        deliveryDateTime:
+            "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(Duration(hours: 72)))}",
+        userId: userIdMy,
+        addressId: userIdMy,
+      );
 
-      if (total > totalSubscriptionItems) {
-        Get.snackbar(
-          "Place order remaining",
-          "Remanining orders $remaining",
-          backgroundColor: Colors.green.shade600,
-          colorText: Colors.white,
-        );
-      } else if (total < totalSubscriptionItems ||
-          total == totalSubscriptionItems) {
-        await orderController.placeOrder(
-          selectedItems: controller.getSelectedCartItems(),
-          totalAmount: finalTotal,
-          paymentMethod: 1,
-          paymentStatus: 1,
-          pickupDateTime:
-              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!)} : $selectedPickupSlot",
-          deliveryDateTime:
-              "${DateFormat('yyyy-MM-dd').format(selectedPickupDate!.add(Duration(hours: 72)))} : ${DateFormat('HH:mm').format(selectedPickupDate!.add(Duration(hours: 72)))}",
-          userId: userIdMy,
-          addressId: userIdMy,
-        );
+      Get.snackbar(
+        "Order Placed",
+        "Your order has been placed successfully.",
+        backgroundColor: Colors.green.shade600,
+        colorText: Colors.white,
+      );
 
-        Get.snackbar(
-          "Order Placed",
-          "Your order has been placed using your subscription.",
-          backgroundColor: Colors.green.shade600,
-          colorText: Colors.white,
-        );
-
-        // Get userId from SharedPreferences for UpdateSubscription
-        final prefsForUpdate = await SharedPreferences.getInstance();
-        final userIdForUpdate = prefsForUpdate.getInt('user_id');
-
-        if (userIdForUpdate != null) {
-          await profileController.UpdateSubscription(
-            userIdForUpdate,
-            profileController.currentCount,
-            newItems,
-          );
-        }
-
-        Get.offAllNamed(
-          AppRoutes.SUCCESS,
-          arguments: {'order_id': 58},
-        );
+      if (controller.activeOfferselected.isNotEmpty && controller.activeOfferselected['type'] == 'first_order') {
+        await profileController.markFirstOrderDone(userIdMy);
       }
-    } else if (hasSubscription == 0) {
-      if (_selectedPaymentMethod == 'COD') {
+
+      Get.offAllNamed(
+        AppRoutes.SUCCESS,
+        arguments: {'order_id': 58},
+      );
+      return;
+    }
+
+    if (_selectedPaymentMethod == 'COD') {
         try {
           final orderId = await orderController.placeOrder(
             selectedItems: controller.getSelectedCartItems(),
@@ -1554,6 +1599,18 @@ class _CheckoutPageState extends State<CheckoutPage>
             backgroundColor: Colors.green.shade600,
             colorText: Colors.white,
           );
+          
+          if (hasSubscription == 1) {
+            await profileController.UpdateSubscription(
+              userIdMy,
+              profileController.currentCount,
+              newItems,
+            );
+          }
+
+          if (controller.activeOfferselected.isNotEmpty && controller.activeOfferselected['type'] == 'first_order') {
+            await profileController.markFirstOrderDone(userIdMy);
+          }
 
           Get.offAllNamed(
             AppRoutes.SUCCESS,
@@ -1603,6 +1660,18 @@ class _CheckoutPageState extends State<CheckoutPage>
             await profileController.updateAmountTransactionTable(
                 finalTotal, paymentId);
 
+            if (hasSubscription == 1) {
+              await profileController.UpdateSubscription(
+                userIdMy,
+                profileController.currentCount,
+                newItems,
+              );
+            }
+
+            if (controller.activeOfferselected.isNotEmpty && controller.activeOfferselected['type'] == 'first_order') {
+              await profileController.markFirstOrderDone(userIdMy);
+            }
+
             Get.snackbar(
               "Payment successful",
               "ID: $paymentId",
@@ -1638,19 +1707,21 @@ class _CheckoutPageState extends State<CheckoutPage>
       }
     }
   }
-}
-
 // Enhanced Item Row with animations
 class _EnhancedItemRow extends StatefulWidget {
   final Map<String, dynamic> item;
   final ProductListController controller;
   final int index;
+  final int? hasSubscription;
+  final List<String> eligibleItemKeys;
   final VoidCallback onUpdate;
 
   const _EnhancedItemRow({
     required this.item,
     required this.controller,
     required this.index,
+    required this.hasSubscription,
+    required this.eligibleItemKeys,
     required this.onUpdate,
   });
 
@@ -1959,26 +2030,74 @@ class _EnhancedItemRowState extends State<_EnhancedItemRow>
       final quantity = widget.controller.cartQuantities[
               '${widget.item['service']}_${widget.item['product']['id']}'] ??
           0;
-      final totalPrice = quantity * widget.item['product']['price'];
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            width: 1.w,
+      final productId = widget.item['product']['id'];
+      
+      final categoryId = widget.item['product']['category_id'];
+      bool isEligible = false;
+      if (widget.hasSubscription == 1) {
+        if (widget.eligibleItemKeys.isNotEmpty) {
+          isEligible = widget.eligibleItemKeys.contains("${categoryId}_${productId}");
+        } else {
+          isEligible = true; // Fallback
+        }
+      }
+
+      if (isEligible) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(6.r),
+                border: Border.all(
+                  color: Colors.green.shade200,
+                  width: 1.w,
+                ),
+              ),
+              child: Text(
+                "FREE",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12.sp,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              "via Sub",
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.green.shade700,
+              ),
+            ),
+          ],
+        );
+      } else {
+        final totalPrice = quantity * widget.item['product']['price'];
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(6.r),
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1.w,
+            ),
           ),
-        ),
-        child: Text(
-          "\u20B9$totalPrice",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14.sp,
-            color: Color(0xFF1F2937),
+          child: Text(
+            "\u20B9$totalPrice",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14.sp,
+              color: Color(0xFF1F2937),
+            ),
           ),
-        ),
-      );
+        );
+      }
     });
   }
 }

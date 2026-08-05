@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 // Removed get_storage import - using SharedPreferences instead
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,6 +15,7 @@ class ProfileController extends GetxController {
   var name = ''.obs;
   var email = ''.obs;
   var phone = ''.obs;
+  var isFirstApply = false.obs;
   var userId = ''.obs; // Store user ID (uuid from auth)
   var dbUserId = 0.obs; // Store user ID from 'users' table
   var isLoading = false.obs;
@@ -46,6 +48,7 @@ class ProfileController extends GetxController {
           name.value = response['name'] ?? '';
           email.value = response['email'] ?? '';
           phone.value = response['phone']?.toString() ?? '';
+          isFirstApply.value = response['is_firstApply'] ?? false;
         }
       }
     } catch (e) {
@@ -85,6 +88,15 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> markFirstOrderDone(int id) async {
+    try {
+      await supabase.from('users').update({'is_firstApply': true}).eq('id', id);
+      isFirstApply.value = true;
+    } catch (e) {
+      print("Error updating first order status: $e");
+    }
+  }
+
   // Future<bool> hasActiveSubscription(int userId) async {
   //   try {
   //     final response = await supabase
@@ -103,6 +115,9 @@ class ProfileController extends GetxController {
   // }
   int currentCount = 0;
   int? totalPreviousCount;
+  var eligibleItemKeys = <String>[].obs;
+  int maxPieces = 0;
+  int get remainingQuota => maxPieces - currentCount;
 
   Future<int?> validateAndUpdateSubscription(int userId) async {
     try {
@@ -135,6 +150,36 @@ class ProfileController extends GetxController {
       final endDateStr = userSub['end_date'];
       currentCount = userSub['count'] ?? 0;
       print("i am getting my status is ::::::: ${userSub['status']}");
+
+      // Fetch the subscription details to get list_item and pieces
+      final subDetails = await supabase
+          .from('subscriptions')
+          .select('applicable_item, pieces')
+          .eq('id', subscriptionId)
+          .maybeSingle();
+
+      if (subDetails != null && subDetails['applicable_item'] != null) {
+        try {
+          String itemStr = subDetails['applicable_item'];
+          Map<String, dynamic> parsedMap = jsonDecode(itemStr);
+          List<String> keys = [];
+          parsedMap.forEach((serviceIdStr, productList) {
+            if (productList is List) {
+              for (var productId in productList) {
+                keys.add("${serviceIdStr}_$productId");
+              }
+            }
+          });
+          eligibleItemKeys.value = keys;
+        } catch (e) {
+          print("Error parsing applicable_item: $e");
+          eligibleItemKeys.value = [];
+        }
+        maxPieces = (subDetails['pieces'] ?? 0) as int;
+      } else {
+        eligibleItemKeys.value = [];
+        maxPieces = 0;
+      }
 
       // Save to SharedPreferences instead of GetStorage
       final prefs = await SharedPreferences.getInstance();
