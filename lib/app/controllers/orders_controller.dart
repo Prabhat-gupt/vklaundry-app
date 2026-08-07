@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:laundry_app/app/controllers/productlist_controller.dart';
 
 class OrderController extends GetxController {
   final supabase = Supabase.instance.client;
@@ -7,12 +8,13 @@ class OrderController extends GetxController {
   Future<int?> placeOrder({
     required List<Map<String, dynamic>> selectedItems,
     required double totalAmount,
-    required String paymentMethod,
-    required String paymentStatus,
+    required int paymentMethod,
+    required int paymentStatus,
     required int userId,
     required int addressId,
     required String deliveryDateTime,
-    required String pickupDateTime
+    required String pickupDateTime,
+    String? transactionId,
   }) async {
     print("Selected items: $selectedItems");
 
@@ -22,9 +24,10 @@ class OrderController extends GetxController {
           .from('orders')
           .insert({
             'status': 0, // Assuming 1 = pending
+            "transaction_id": transactionId,
             'amount': totalAmount,
-            'payment_method': 1,
-            'payment_status': 1,
+            'payment_method': paymentMethod,
+            'payment_status': paymentStatus,
             'pickup_datetime': pickupDateTime,
             'delivery_datetime': deliveryDateTime,
             'user_id': userId,
@@ -53,9 +56,19 @@ class OrderController extends GetxController {
       await supabase.from('notifications').insert({
         'type': 4,
         'title': 'Order Placed',
-        'message': 'Your order has been placed successfully. Order ID: $orderId',
+        'message':
+            'Your order has been placed successfully. Order ID: $orderId',
         'user_id': userId,
       });
+
+      // Clear cart after successful order
+      try {
+        final productListController = Get.find<ProductListController>();
+        await productListController.clearCart();
+      } catch (e) {
+        print('Could not clear cart: $e');
+      }
+
       print('Order placed successfully');
       return orderId; // Return order ID on success
     } catch (e) {

@@ -1,34 +1,46 @@
 // profile_controller.dart
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+// Removed get_storage import - using SharedPreferences instead
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileController extends GetxController {
   final SupabaseClient supabase = Supabase.instance.client;
+  // final ProductListController controller = Get.find<ProductListController>();
+
+  // Removed GetStorage - using SharedPreferences throughout
 
   var name = ''.obs;
   var email = ''.obs;
   var phone = ''.obs;
+  var isFirstApply = false.obs;
   var userId = ''.obs; // Store user ID (uuid from auth)
   var dbUserId = 0.obs; // Store user ID from 'users' table
   var isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchUserProfile();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   fetchUserProfile();
+  // }
 
-  Future<void> fetchUserProfile() async {
+  Future<void> fetchUserProfile(user) async {
+    print("fsaifafoighsghshhd $user");
     try {
       isLoading.value = true;
-      final user = supabase.auth.currentUser;
+      // final user = supabase.auth.currentUser;
+      // dynamic user = storages.read('userId');
+      // print("my profile userid is :::::: $userId");
       if (user != null) {
-        userId.value = user.id;
+        // userId.value = user.id;
+        // userId.value = user.toString();
 
         final response = await supabase
             .from('users')
             .select('*')
-            .eq('uuid', user.id)
+            .eq('id', user)
             .maybeSingle();
         print("Response from the user $response");
         if (response != null) {
@@ -36,6 +48,7 @@ class ProfileController extends GetxController {
           name.value = response['name'] ?? '';
           email.value = response['email'] ?? '';
           phone.value = response['phone']?.toString() ?? '';
+          isFirstApply.value = response['is_firstApply'] ?? false;
         }
       }
     } catch (e) {
@@ -46,15 +59,21 @@ class ProfileController extends GetxController {
   }
 
   Future<void> updateProfile(
-      String newName, String newEmail, int newNumber) async {
+    String newName,
+    String newEmail,
+    int newNumber,
+  ) async {
+    print("my dbuservcaielues is :::::: ${dbUserId.value}");
     try {
       isLoading.value = true;
-      final user = supabase.auth.currentUser;
-      if (user != null && dbUserId.value > 0) {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId != null && dbUserId.value > 0) {
         await supabase.from('users').update({
           'name': newName,
           'email': newEmail,
-          'phone': newNumber,
+          'phone': newNumber
         }).eq('id', dbUserId.value);
 
         name.value = newName;
@@ -66,6 +85,15 @@ class ProfileController extends GetxController {
       Get.snackbar('Error', 'Failed to update profile. Please try again.');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> markFirstOrderDone(int id) async {
+    try {
+      await supabase.from('users').update({'is_firstApply': true}).eq('id', id);
+      isFirstApply.value = true;
+    } catch (e) {
+      print("Error updating first order status: $e");
     }
   }
 
@@ -85,11 +113,17 @@ class ProfileController extends GetxController {
   //     return false;
   //   }
   // }
-  Future<int> validateAndUpdateSubscription(int userId, int itemsCount) async {
+  int currentCount = 0;
+  int? totalPreviousCount;
+  var eligibleItemKeys = <String>[].obs;
+  int maxPieces = 0;
+  int get remainingQuota => maxPieces - currentCount;
+
+  Future<int?> validateAndUpdateSubscription(int userId) async {
     try {
-      print(
-          "Validating subscription for user $userId with item count $itemsCount");
-      // 1. Get active subscription for user
+      print("Validating subscription for user $userId with item count ");
+
+      // 1. Get active subscription for user (status = 1)
       final userSub = await supabase
           .from('user_subscriptions')
           .select()
@@ -97,15 +131,102 @@ class ProfileController extends GetxController {
           .eq('status', 1)
           .maybeSingle();
 
+      totalPreviousCount = userSub?['count'];
+
       if (userSub == null) {
-        Get.snackbar(
-            "No Subscription", "You do not have an active subscription.");
-        return 0;
+        // storages.write('subscriptionCheck', 0);
+
+        // print(
+        //   "getting my status is ::::::: ${storages.read('subscriptionCheck')}",
+        // );
+        // Get.snackbar(
+        //   "No Subscription",
+        //   "You do not have an active subscription.",
+        // );
+        return 0; // no subscription
       }
 
       final subscriptionId = userSub['subscription_id'];
       final endDateStr = userSub['end_date'];
-      final currentCount = userSub['count'] ?? 0;
+      currentCount = userSub['count'] ?? 0;
+      print("i am getting my status is ::::::: ${userSub['status']}");
+
+      // Fetch the subscription details to get list_item and pieces
+      final subDetails = await supabase
+          .from('subscriptions')
+          .select('applicable_item, pieces')
+          .eq('id', subscriptionId)
+          .maybeSingle();
+
+      if (subDetails != null && subDetails['applicable_item'] != null) {
+        try {
+          String itemStr = subDetails['applicable_item'];
+          Map<String, dynamic> parsedMap = jsonDecode(itemStr);
+          List<String> keys = [];
+          parsedMap.forEach((serviceIdStr, productList) {
+            if (productList is List) {
+              for (var productId in productList) {
+                keys.add("${serviceIdStr}_$productId");
+              }
+            }
+          });
+          eligibleItemKeys.value = keys;
+        } catch (e) {
+          print("Error parsing applicable_item: $e");
+          eligibleItemKeys.value = [];
+        }
+        maxPieces = (subDetails['pieces'] ?? 0) as int;
+      } else {
+        eligibleItemKeys.value = [];
+        maxPieces = 0;
+      }
+
+      // Save to SharedPreferences instead of GetStorage
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('subscriptionCheck', userSub['status'] ?? 0);
+      await prefs.setInt('currentCount', currentCount);
+
+      return userSub['status'] as int?;
+    } catch (e) {
+      print("Error validating/updating subscription: $e");
+      Get.snackbar("Error", "Could not validate subscription.");
+      return null;
+    }
+  }
+
+  Future<int?> UpdateSubscription(int userId, count, newitem) async {
+    try {
+      print("Validating subscription for user $userId with item count ");
+
+      // 1. Get active subscription for user (status = 1)
+      final userSub = await supabase
+          .from('user_subscriptions')
+          .select()
+          .eq('user_id', userId)
+          .eq('status', 1)
+          .maybeSingle();
+
+      totalPreviousCount = userSub?['count'];
+
+      if (userSub == null) {
+        // storages.write('subscriptionCheck', 0);
+
+        // print(
+        //   "getting my status is ::::::: ${storages.read('subscriptionCheck')}",
+        // );
+        // Get.snackbar(
+        //   "No Subscription",
+        //   "You do not have an active subscription.",
+        // );
+        return 0; // no subscription
+      }
+
+      final subscriptionId = userSub['subscription_id'];
+      final endDateStr = userSub['end_date'];
+      // currentCount = userSub['count'] ?? 0;
+      print("i am getting my status is ::::::: ${userSub['status']}");
+      // storages.write('subscriptionCheck', userSub['status']);
+      // storages.write('currentCount', currentCount);
 
       // 2. Get subscription details
       final subDetails = await supabase
@@ -115,38 +236,141 @@ class ProfileController extends GetxController {
           .maybeSingle();
 
       if (subDetails == null) {
-        Get.snackbar("Error", "Subscription details not found.");
+        // Get.snackbar("Error", "Subscription details not found.");
         return 0;
       }
 
-      final maxPieces = subDetails['pieces'] ?? 0;
+      // final maxPieces = subDetails['pieces'] ?? 0;
 
       // 3. Check date and count
       final endDate = DateTime.parse(endDateStr);
       final today = DateTime.now();
 
-      if (today.isAfter(endDate)) {
-        Get.snackbar("Subscription Ended", "Your subscription has expired.");
-        return 0;
+      currentCount = (userSub['count'] ?? 0) as int;
+      final int newItem = (newitem ?? 0) as int;
+      final int maxPieces = (subDetails['pieces'] ?? 0) as int;
+
+      print(
+        "Debug => today: $today, endDate: $endDate, currentCount: $currentCount, newitem: $newitem, maxPieces: $maxPieces",
+      );
+
+      if (today.isAfter(endDate) || (currentCount + newItem) >= maxPieces) {
+        print(
+          "Blocking order: count=$currentCount, new=$newItem, max=$maxPieces",
+        );
+
+        final updateResponse = await supabase
+            .from('user_subscriptions')
+            .update({'status': 0, "count": 0})
+            .eq('id', userSub['id'])
+            .select();
+
+        print("Update response: $updateResponse");
+
+        final updatedSub = await supabase
+            .from('user_subscriptions')
+            .select('status')
+            .eq('id', userSub['id'])
+            .maybeSingle();
+
+        return updatedSub?['status'] as int?;
       }
 
-      if ((currentCount + itemsCount) > maxPieces) {
-        Get.snackbar(
-            "Limit Exceeded", "You have exceeded your subscription limit.");
-        return 2;
-      }
+      // if (today.isAfter(endDate) || (currentCount + newitem) == maxPieces) {
+      //   // Expired OR limit exceeded → set status = 0
+      //   await supabase
+      //       .from('user_subscriptions')
+      //       .update({'status': 0, "count": 0})
+      //       .eq('id', userSub['id']);
+
+      //   final updatedSub = await supabase
+      //       .from('user_subscriptions')
+      //       .select('status')
+      //       .eq('id', userSub['id'])
+      //       .maybeSingle();
+
+      //   return updatedSub?['status'] as int?;
+      // }
 
       // 4. Update count
-      final newCount = currentCount + itemsCount;
+      final newCount = currentCount + newitem;
+      print("my new count is displaying ::::::: $newitem");
       await supabase
           .from('user_subscriptions')
           .update({'count': newCount}).eq('id', userSub['id']);
 
-      return 1;
+      final updatedSub = await supabase
+          .from('user_subscriptions')
+          .select('status')
+          .eq('id', userSub['id'])
+          .maybeSingle();
+
+      return updatedSub?['status'] as int?;
     } catch (e) {
       print("Error validating/updating subscription: $e");
       Get.snackbar("Error", "Could not validate subscription.");
-      return 0;
+      return null;
+    }
+  }
+
+  // get the addres details
+  Future<bool> checkUserPincode(int userId) async {
+    try {
+      final result = await supabase
+          .from('addresses')
+          .select('landmark_pincode')
+          .eq('id', userId)
+          .maybeSingle();
+
+      print("my result is ::::::: $result");
+
+      if (result == null) {
+        print("No address found for user $userId");
+        return false;
+      }
+
+      final landmarkPincode = result['landmark_pincode'] ?? '';
+      print("my lanfmarkpincode is :::::::: $landmarkPincode");
+      if (landmarkPincode.toString().trim().isEmpty) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (e) {
+      print("Error fetching pincode: $e");
+      return false;
+    }
+  }
+
+  // update the data in the table transaction
+  updateAmountTransactionTable(amount, transactionId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      final subscriptionData = {
+        'user_id': "$userId",
+        'payment_method': 0,
+        'amount': amount,
+        'transaction_id': transactionId,
+        'created_at': DateTime.now().toIso8601String(),
+        "order_id": "0",
+        "status": 0,
+      };
+
+      // Insert subscription into Supabase
+      await supabase.from('transactions').insert(subscriptionData).select();
+
+      debugPrint("Subscription saved successfully:");
+    } catch (e, st) {
+      debugPrint("Payment Success Handling Error: $e\n$st");
+      Get.snackbar(
+        "Error",
+        "Something went wrong while subscribing",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

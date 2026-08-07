@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:laundry_app/app/controllers/login_controller.dart';
 import 'package:laundry_app/app/ui/widgets/terms_conditions.dart';
 
@@ -14,6 +15,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController phoneController = TextEditingController();
   final LoginController loginController = Get.put(LoginController());
+  final FocusNode phoneFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -24,6 +26,18 @@ class _LoginPageState extends State<LoginPage> {
       loginController.isPhoneValid.value =
           phoneController.text.trim().length == 10;
     });
+
+    // Auto-focus on phone field to open keyboard
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      phoneFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    phoneFocusNode.dispose();
+    phoneController.dispose();
+    super.dispose();
   }
 
   @override
@@ -31,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -49,59 +63,69 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 40),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 17.w,
+                        vertical: 29.w,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 40),
-                          const CircleAvatar(
+                          SizedBox(height: 29.w),
+                          CircleAvatar(
                             backgroundColor: Colors.white,
-                            radius: 28,
-                            backgroundImage:
-                                AssetImage('assets/icons/app_logo.png'),
+                            radius: 19.w,
+                            backgroundImage: AssetImage(
+                              'assets/icons/app_logo.png',
+                            ),
                           ),
-                          const SizedBox(height: 30),
-                          const Text(
+                          SizedBox(height: 21.w),
+                          Text(
                             'Professional\nLaundry Service\nat Your Doorstep',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 17.w,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          SizedBox(height: 21.w),
 
                           // phone input
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(21.w),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 3.w,
+                            ),
                             child: Row(
                               children: [
-                                const Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 8.0),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                  ),
                                   child: Text(
                                     '+91',
                                     style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
+                                      fontSize: 12.w,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                                 const VerticalDivider(color: Colors.black54),
                                 Expanded(
                                   child: TextField(
                                     controller: phoneController,
+                                    focusNode: phoneFocusNode,
+                                    autofocus: true,
                                     keyboardType: TextInputType.phone,
                                     inputFormatters: [
                                       LengthLimitingTextInputFormatter(10),
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
                                     decoration: const InputDecoration(
+                                      fillColor: Colors.white,
                                       hintText: 'Enter Phone Number',
                                       border: InputBorder.none,
                                     ),
@@ -110,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 15.w),
 
                           // ✅ Continue button with loader
                           Obx(() {
@@ -127,41 +151,43 @@ class _LoginPageState extends State<LoginPage> {
                                       : null,
                               child: Container(
                                 width: double.infinity,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12.w,
+                                ),
                                 decoration: BoxDecoration(
                                   gradient: isEnabled
-                                      ? const LinearGradient(
+                                      ? LinearGradient(
                                           colors: [
                                             Color.fromRGBO(89, 168, 146, 1),
                                             Color.fromRGBO(60, 113, 98, 1),
-                                            Color.fromRGBO(35, 66, 57, 1)
+                                            Color.fromRGBO(35, 66, 57, 1),
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         )
-                                      : const LinearGradient(
+                                      : LinearGradient(
                                           colors: [Colors.grey, Colors.grey],
                                         ),
-                                  borderRadius: BorderRadius.circular(30),
+                                  borderRadius: BorderRadius.circular(21.w),
                                 ),
                                 child: Center(
                                   child: loginController.isLoading.value
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
+                                      ? SizedBox(
+                                          height: 15.w,
+                                          width: 15.w,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                    Colors.white),
+                                              Colors.white,
+                                            ),
                                           ),
                                         )
-                                      : const Text(
+                                      : Text(
                                           'Continue',
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 16,
+                                            fontSize: 12.w,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -173,13 +199,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     Container(
-                      height: 200,
+                      height: 141.w,
                       width: double.infinity,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Image.asset('assets/icons/iron.png'),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 6.w),
                           Image.asset('assets/icons/hanger.png'),
                         ],
                       ),
@@ -192,23 +218,23 @@ class _LoginPageState extends State<LoginPage> {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
+                  padding: EdgeInsets.only(bottom: 12.w),
                   child: GestureDetector(
                     onTap: () {
                       Get.to(() => const TermsAndConditionsPage());
                     },
                     child: RichText(
                       textAlign: TextAlign.center,
-                      text: const TextSpan(
+                      text: TextSpan(
                         text: 'By continuing, you agree to our \n',
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(color: Colors.white, fontSize: 11.w),
                         children: [
                           TextSpan(
                             text: 'Terms of Use',
                             style: TextStyle(
                               color: Color.fromRGBO(89, 168, 146, 1),
                               decoration: TextDecoration.underline,
-                              fontSize: 14,
+                              fontSize: 11.w,
                             ),
                           ),
                           TextSpan(text: ' & '),
@@ -217,11 +243,28 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(
                               color: Color.fromRGBO(89, 168, 146, 1),
                               decoration: TextDecoration.underline,
-                              fontSize: 14,
+                              fontSize: 11.w,
                             ),
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 15.w,
+                child: TextButton(
+                  onPressed: () {
+                    loginController.continueAsGuest();
+                  },
+                  child: Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

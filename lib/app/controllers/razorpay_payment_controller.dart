@@ -63,7 +63,7 @@ class RazorpayPaymentController extends GetxController {
     final int amountInPaise = (amount * 100).round();
 
     final options = {
-      'key': 'rzp_test_R5aav0MP84trbb',
+      'key': razorpayKeyId,
       'amount': amountInPaise,
       'currency': 'INR',
       if (orderId != null) 'order_id': orderId,
@@ -101,6 +101,7 @@ class RazorpayPaymentController extends GetxController {
   void Function(int code, String message)? _pendingFailure;
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    print("my success callback is LLLLLLl $response");
     isPaying.value = false;
     lastPaymentId.value = response.paymentId;
     lastOrderId.value = response.orderId;

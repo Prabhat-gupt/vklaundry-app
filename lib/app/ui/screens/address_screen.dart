@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
@@ -12,12 +13,14 @@ class AddressScreen extends StatelessWidget {
     final HomePageController controller = Get.find<HomePageController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: AppBar(
         title: Text(
           'Addresses',
           style: TextStyle(
-              fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -26,11 +29,11 @@ class AddressScreen extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.userAddress.isEmpty) {
-          return const Center(child: Text("No address found"));
+          return Center(child: Text("No address found"));
         }
 
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(15.r),
           children: [
             ...controller.userAddress.map((addr) {
               String fullAddress =
@@ -47,32 +50,38 @@ class AddressScreen extends StatelessWidget {
               );
             }).toList(),
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+              padding: EdgeInsets.only(top: 8.0.h),
               child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () {
                     _showAddressEditDialog(
-                        context, controller.userAddress.first, controller);
+                      context,
+                      controller.userAddress.first,
+                      controller,
+                    );
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.add_location_alt_outlined,
                     color: Colors.white,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Update Address',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: BorderSide(color: AppTheme.primaryColor),
-                      foregroundColor: AppTheme.primaryColor,
-                      textStyle: const TextStyle(fontSize: 16),
-                      backgroundColor: AppTheme.primaryColor),
+                    padding: EdgeInsets.symmetric(vertical: 15.h),
+                    side: BorderSide(color: AppTheme.primaryColor),
+                    foregroundColor: AppTheme.primaryColor,
+                    textStyle: TextStyle(fontSize: 15.sp),
+                    backgroundColor: AppTheme.primaryColor,
+                  ),
                 ),
               ),
-            )
+            ),
           ],
         );
       }),
@@ -80,22 +89,27 @@ class AddressScreen extends StatelessWidget {
   }
 
   /// Popup Dialog for Editing Address
-  void _showAddressEditDialog(BuildContext context, Map<String, dynamic> addr,
-      HomePageController controller) {
-    final houseController =
-        TextEditingController(text: addr['address_line'] ?? '');
+  void _showAddressEditDialog(
+    BuildContext context,
+    Map<String, dynamic> addr,
+    HomePageController controller,
+  ) {
+    final houseController = TextEditingController(
+      text: addr['address_line'] ?? '',
+    );
     // final buildingController = TextEditingController(
     //     text: addr['address_line']?.split(",").skip(1).join(",").trim() ?? '');
     final cityController = TextEditingController(text: addr['city'] ?? '');
     final stateController = TextEditingController(text: addr['state'] ?? '');
-    final landmarkController =
-        TextEditingController(text: addr['landmark_pincode']?.toString() ?? '');
+    final landmarkController = TextEditingController(
+      text: addr['landmark_pincode']?.toString() ?? '',
+    );
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text("Update Address"),
+        title: Text("Update Address"),
         content: SingleChildScrollView(
           child: Column(
             children: [
@@ -104,37 +118,37 @@ class AddressScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: "Address Line",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextField(
                 controller: cityController,
                 decoration: InputDecoration(
                   labelText: "City",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextField(
                 controller: stateController,
                 decoration: InputDecoration(
                   labelText: "State",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               TextField(
                 controller: landmarkController,
                 decoration: InputDecoration(
                   labelText: "Landmark / Pincode",
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(7.r),
                   ),
                 ),
               ),
@@ -144,11 +158,12 @@ class AddressScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text("Cancel"),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor),
+              backgroundColor: AppTheme.primaryColor,
+            ),
             onPressed: () async {
               try {
                 await Supabase.instance.client.from('addresses').upsert({
@@ -162,14 +177,20 @@ class AddressScreen extends StatelessWidget {
                 controller.fetchUserAddress();
 
                 Get.back();
-                Get.snackbar("Success", "Address updated successfully",
-                    backgroundColor: Colors.green.shade100);
+                Get.snackbar(
+                  "Success",
+                  "Address updated successfully",
+                  backgroundColor: Colors.green.shade100,
+                );
               } catch (e) {
-                Get.snackbar("Error", e.toString(),
-                    backgroundColor: Colors.red.shade100);
+                Get.snackbar(
+                  "Error",
+                  e.toString(),
+                  backgroundColor: Colors.red.shade100,
+                );
               }
             },
-            child: const Text("Save"),
+            child: Text("Save"),
           ),
         ],
       ),
@@ -194,39 +215,44 @@ class AddressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 15.h),
+      padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(Icons.location_on_outlined, color: AppTheme.primaryColor),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: AppTheme.primaryColor)),
-                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17.sp,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+                SizedBox(height: 5.h),
                 Text(
                   address,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 14, color: Color.fromRGBO(148, 152, 155, 1)),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Color.fromRGBO(148, 152, 155, 1),
+                  ),
                 ),
               ],
             ),
           ),
           // IconButton(
-          //   icon: const Icon(Icons.edit),
+          //   icon: Icon(Icons.edit),
           //   onPressed: onEdit,
           //   color: AppTheme.primaryColor,
           // )

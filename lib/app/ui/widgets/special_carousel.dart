@@ -1,10 +1,15 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+// Removed get_storage import - using SharedPreferences instead
 import 'package:laundry_app/app/constants/app_theme.dart';
 import 'package:laundry_app/app/controllers/home_page_controller.dart';
+import 'package:laundry_app/app/controllers/profile_controller.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math' show sin, cos, pi;
 
 class SpecialCarousel extends StatefulWidget {
   const SpecialCarousel({super.key});
@@ -13,48 +18,123 @@ class SpecialCarousel extends StatefulWidget {
   State<SpecialCarousel> createState() => _SpecialCarouselState();
 }
 
-class _SpecialCarouselState extends State<SpecialCarousel> {
+class _SpecialCarouselState extends State<SpecialCarousel>
+    with TickerProviderStateMixin {
   final HomePageController controller = Get.find<HomePageController>();
-  int _current = 0;
+  final ProfileController profileController = Get.find<ProfileController>();
   final PageController _pageController = PageController(viewportFraction: 0.88);
+
   late final Razorpay _razorpay;
-  bool _processingPayment = false; // local loading flag
+  int _current = 0;
+  // Removed GetStorage - using SharedPreferences instead
+  final RxBool _isProcessingPayment =
+      false.obs; // Made this an RxBool to be passed to other widgets
+
+  late final AnimationController _cardAnimationController;
+  
+  // Add loading state for subscription status
+  final RxBool _isLoadingStatus = true.obs;
 
   @override
   void initState() {
     super.initState();
+    _razorpay = Razorpay()
+      ..on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess)
+      ..on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError)
+      ..on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
 
-    _razorpay = Razorpay();
-    // Register listeners
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _cardAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 600),
+    );
 
-    // Example: preload subscribed status when controller.subscriptions changes
-    ever(controller.subscriptions, (_) async {
-      try {
-        int userId = await controller.fetchUserDetails();
-        await controller.preloadSubscribedStatus(userId);
-      } catch (e) {
-        debugPrint("Error preloading subscription status: $e");
+    // Load subscription status on widget initialization
+    _loadSubscriptionStatus();
+  }
+
+  Future<void> _loadSubscriptionStatus() async {
+    try {
+      _isLoadingStatus.value = true;
+      
+      // Wait for subscriptions to be loaded if not already
+      if (controller.subscriptions.isEmpty) {
+        await Future.delayed(Duration(milliseconds: 500));
       }
-    });
+      
+      int userId = await controller.fetchUserDetails();
+      await controller.preloadSubscribedStatus(userId);
+    } catch (e) {
+      debugPrint("Error loading subscription status: $e");
+    } finally {
+      _isLoadingStatus.value = false;
+    }
   }
 
   @override
   void dispose() {
-    // remove listeners & clear
-    try {
-      _razorpay.clear();
-    } catch (e) {
-      debugPrint("Error clearing Razorpay: $e");
-    }
+    _razorpay.clear();
     _pageController.dispose();
+    _cardAnimationController.dispose();
     super.dispose();
   }
 
-  /// Open Razorpay checkout (safe option building + error handling)
   void _openCheckout(Map sub) {
+    if (controller.isGuestMode.value) {
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(13.r)),
+          title: Row(
+            children: [
+              Icon(Icons.lock_rounded, color: Color(0xFF3D52A0)),
+              SizedBox(width: 7.w),
+              Text('Login Required'),
+            ],
+          ),
+          content: Text(
+              'Please login or create an account to purchase a subscription.'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF3D52A0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              onPressed: () {
+                Get.back();
+                Get.toNamed('/login');
+              },
+              child: Text('Login',
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (_isProcessingPayment.value) return;
+
+    // Check if user already has any active subscription (force reactive read)
+    final hasActiveSubscription =
+        controller.subscribedStatus.value.values.any((status) => status == true);
+
+    if (hasActiveSubscription) {
+      Get.snackbar(
+        "Already Subscribed",
+        "You already have an active subscription. Please complete or cancel it before subscribing to another plan.",
+        backgroundColor: Colors.transparent,
+        colorText: Colors.black,
+        duration: Duration(seconds: 2),
+      );
+      return;
+    }
+
     try {
       final price = num.tryParse(sub['discounted_price'].toString()) ?? 0;
       final amountInPaise = (price * 100).round();
@@ -65,143 +145,103 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
       }
 
       final options = {
-        'key': 'rzp_test_R5aav0MP84trbb', // replace with your key (test/live)
-        'amount': amountInPaise, // in paise
+        'key': dotenv.env['RAZORPAY_KEY_ID'] ?? '',
+        'amount': amountInPaise,
         'name': "Laundry App",
         'description': sub['name'] ?? 'Subscription',
-        // optional prefill
-        // 'prefill': {
-        //   'contact': controller.userPhone ?? '',
-        //   'email': controller.userEmail ?? '',
-        // },
-        // optional: pass a receipt/order id if you created an order on server
-        // 'order_id': '<order_id_from_backend>',
       };
 
+      _isProcessingPayment.value = true;
       _razorpay.open(options);
     } catch (e) {
       debugPrint("Razorpay open error: $e");
+      _isProcessingPayment.value = false;
       Get.snackbar("Payment Error", "Could not start payment. Try again.");
     }
   }
 
-  /// Listener wrapper (Razorpay's listener expects a void function, so we call an async worker)
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     try {
       final sub = controller.subscriptions[_current];
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
 
-      bool success = await controller.subscribeUser(sub);
+      if (userId == null) {
+        Get.snackbar('Error', 'User not logged in');
+        _isProcessingPayment.value = false;
+        return;
+      }
+
+      final subscriptionData = {
+        'user_id': '$userId',
+        'payment_method': 0,
+        'amount': sub['discounted_price'],
+        'transaction_id': response.paymentId,
+        'created_at': DateTime.now().toIso8601String(),
+        "order_id": "0",
+        "status": 1,
+      };
+
+      await controller.supabase.from('transactions').insert(subscriptionData);
+      final success = await controller.subscribeUser(sub);
 
       if (success) {
-        // Update GetX state
-        controller.subscribedStatus[sub['id']] = true;
-        controller.subscribedStatus.refresh();
+        // Refresh subscription status from database after successful subscription
+        int userId = await controller.fetchUserDetails();
+        await controller.preloadSubscribedStatus(userId);
+        
+        final updatedSubscriptions = List<Map<String, dynamic>>.from(
+          controller.subscriptions,
+        );
+        final index = updatedSubscriptions.indexWhere(
+          (s) => s['id'] == sub['id'],
+        );
 
-        // Local UI state (optional)
-        setState(() {
-          sub['isSubscribed'] = true;
-        });
+        if (index != -1) {
+          updatedSubscriptions[index] = {
+            ...updatedSubscriptions[index],
+            'isSubscribed': true,
+          };
+          controller.subscriptions.value = updatedSubscriptions;
+        }
 
-        Get.snackbar("Success", "Subscription activated!",
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.green,
-            colorText: Colors.white);
+        Get.snackbar(
+          "Success",
+          "Subscription activated!",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       } else {
-        Get.snackbar("Error", "Failed to activate subscription",
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
+        Get.snackbar(
+          "Error",
+          "Failed to activate subscription",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e, st) {
       debugPrint("Payment Success Handling Error: $e\n$st");
-      Get.snackbar("Error", "Something went wrong while subscribing");
+      Get.snackbar(
+        "Error",
+        "Something went wrong while subscribing",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      _isProcessingPayment.value = false;
     }
   }
 
-  /// Async processing: verify on backend, insert subscription, update UI
-  // Future<void> _processPaymentSuccess(PaymentSuccessResponse response) async {
-  //   if (_processingPayment) return; // prevent double processing
-  //   _processingPayment = true;
-
-  //   final sub = controller.subscriptions[_current];
-  //   try {
-  //     // show non-dismissible loading dialog
-  //     Get.dialog(
-  //       Center(child: CircularProgressIndicator()),
-  //       barrierDismissible: false,
-  //     );
-
-  //     // IMPORTANT: Verify payment on your server using razorpay signature (send paymentId, orderId, signature)
-  //     // controller.subscribeUser should call your backend which:
-  //     // 1) verifies the signature with Razorpay's secret
-  //     // 2) inserts user_subscriptions record (start/end)
-  //     // 3) returns success/failure
-  //     //
-  //     // We'll pass payment details to controller.subscribeUser for server verification
-  //     final paymentPayload = {
-  //       'payment_id': response.paymentId,
-  //       'order_id': response.orderId,
-  //       'signature': response.signature,
-  //       'subscription_id': sub['id'],
-  //       'amount': sub['discounted_price'],
-  //     };
-
-  //     // controller.subscribeUser should return bool or throw on failure.
-  //     final subscribeResult = await controller.subscribeUser(
-  //       sub,
-  //       paymentPayload: paymentPayload,
-  //     ).timeout(
-  //       const Duration(seconds: 20),
-  //       onTimeout: () => throw Exception('Server timed out while verifying payment'),
-  //     );
-
-  //     // subscribeResult may be bool or Map depending on your implementation
-  //     final success = (subscribeResult is bool && subscribeResult == true) ||
-  //         (subscribeResult is Map && subscribeResult['success'] == true);
-
-  //     if (!success) {
-  //       // backend reported failure
-  //       Get.back(); // close loading dialog
-  //       Get.snackbar("Subscription Failed",
-  //           "Payment succeeded but activation failed. Contact support.");
-  //       return;
-  //     }
-
-  //     // Update reactive states so UI refreshes properly
-  //     controller.subscribedStatus[sub['id']] = true;
-  //     controller.subscribedStatus.refresh();
-
-  //     // If subscriptions is an RxList of Maps, update element and refresh list
-  //     try {
-  //       controller.subscriptions[_current]['isSubscribed'] = true;
-  //       controller.subscriptions.refresh();
-  //     } catch (_) {
-  //       // ignore if structure different
-  //     }
-
-  //     Get.back(); // close loading dialog
-  //     Get.snackbar("Success", "Subscription activated!", snackPosition: SnackPosition.TOP);
-  //   } catch (e, st) {
-  //     debugPrint("Payment success processing error: $e\n$st");
-  //     // Close any loading dialog if open
-  //     try {
-  //       if (Get.isDialogOpen ?? false) Get.back();
-  //     } catch (_) {}
-
-  //     Get.snackbar("Error", "There was a problem processing the payment: $e");
-  //   } finally {
-  //     _processingPayment = false;
-  //   }
-  // }
-
   void _handlePaymentError(PaymentFailureResponse response) {
-    debugPrint(
-        "Razorpay payment error: ${response.code} - ${response.message}");
+    _isProcessingPayment.value = false;
     Get.snackbar("Payment Failed", response.message ?? "Something went wrong");
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    debugPrint("Razorpay external wallet: ${response.walletName}");
+    _isProcessingPayment.value = false;
     Get.snackbar("External Wallet", response.walletName ?? "");
   }
 
@@ -209,61 +249,87 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
   Widget build(BuildContext context) {
     return Obx(() {
       if (controller.subscriptions.isEmpty) {
-        return const Center(child: Text("No subscriptions available"));
+        return Center(
+          child: Text(
+            "No special offers available",
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
+      }
+
+      // Show loading while subscription status is being fetched
+      if (_isLoadingStatus.value) {
+        return SizedBox(
+          height: 165.h,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
       }
 
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            height: 180,
+            height: 165.h,
             child: PageView.builder(
               controller: _pageController,
               itemCount: controller.subscriptions.length,
-              onPageChanged: (index) {
-                if (mounted) setState(() => _current = index);
-              },
+              onPageChanged: (index) => setState(() => _current = index),
               itemBuilder: (context, index) {
                 final sub = controller.subscriptions[index];
-                final isSubscribed =
-                    controller.subscribedStatus[sub['id']] ?? false;
 
                 return GestureDetector(
-                  onTap: () =>
-                      _showSubscriptionDetail(context, sub, isSubscribed),
-                  child: AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (context, child) {
-                      double value = 1.0;
-                      if (_pageController.position.haveDimensions) {
-                        value = (_pageController.page! - index).abs();
-                        value = (1 - (value * 0.2)).clamp(0.8, 1.0);
-                      }
-                      return Transform.scale(scale: value, child: child);
-                    },
-                    child: _buildCard(sub, isSubscribed),
+                  onTap: () {
+                    final isSubscribed = controller.subscribedStatus.value[sub['id']] ?? false;
+                    _showSubscriptionDetail(context, sub, isSubscribed, _openCheckout, _isProcessingPayment);
+                  },
+                  child: Hero(
+                    tag: 'subscription-card-${sub['id']}',
+                    child: AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, child) {
+                        double value = 1.0;
+                        if (_pageController.position.haveDimensions) {
+                          value = (_pageController.page! - index).abs();
+                          value = (1 - (value * 0.2)).clamp(0.8, 1.0);
+                        }
+                        return Transform.scale(scale: value, child: child);
+                      },
+                      child: Obx(() {
+                        // Reactive read of subscription status for this specific card
+                        final isSubscribed = controller.subscribedStatus.value[sub['id']] ?? false;
+                        
+                        return SubscriptionCard(
+                          sub: sub,
+                          isSubscribed: isSubscribed,
+                          onSubscribe: _isProcessingPayment.value
+                              ? null
+                              : () => _openCheckout(sub),
+                        );
+                      }),
+                    ),
                   ),
                 );
               },
             ),
           ),
+          SizedBox(height: 7.h),
 
-          const SizedBox(height: 10),
-
-          // Dots Indicator
+          // Dots indicator with dynamic animation
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(controller.subscriptions.length, (index) {
               return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                height: 8,
+                duration: Duration(milliseconds: 300),
+                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                height: 5.h,
                 width: _current == index ? 22 : 8,
                 decoration: BoxDecoration(
                   color: _current == index
                       ? AppTheme.primaryColor
                       : Colors.grey[400],
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(7.r),
                 ),
               );
             }),
@@ -272,72 +338,495 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
       );
     });
   }
+}
 
-  Widget _buildCard(Map sub, bool isSubscribed) {
+// Global function and widgets must be defined outside the class
+void _showSubscriptionDetail(
+  BuildContext context,
+  Map sub,
+  bool isSubscribed,
+  Function(Map) openCheckout,
+  RxBool isProcessingPayment,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Draggable handle
+              Container(
+                height: 4.h,
+                width: 32.w,
+                margin: EdgeInsets.symmetric(vertical: 11.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Icon / Illustration
+                    Container(
+                      padding: EdgeInsets.all(13.r),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.star_rounded,
+                        color: AppTheme.primaryColor,
+                        size: 31.sp,
+                      ),
+                    ),
+                    SizedBox(height: 11.h),
+                    
+                    // Title
+                    Text(
+                      sub['name'] ?? 'Subscription Plan',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A2340),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 5.h),
+                    
+                    // Description
+                    if (sub['description'] != null && sub['description'].toString().isNotEmpty)
+                      _buildParsedDescription(sub['description'].toString()),
+                    SizedBox(height: 16.h),
+
+                    // Price Info Box
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 13.w),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(11.r),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "₹${sub['discounted_price']}",
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                              if (sub['original_price'] != null)
+                                Text(
+                                  "₹${sub['original_price']}",
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: Colors.grey,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          SizedBox(width: 13.w),
+                          Container(
+                            width: 1.w,
+                            height: 27.h,
+                            color: Colors.grey.shade300,
+                          ),
+                          SizedBox(width: 13.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.checkroom_rounded, size: 11.sp, color: Colors.grey[600]),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    "${sub['pieces']} pieces",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A2340),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 4.h),
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today_rounded, size: 11.sp, color: Colors.grey[600]),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    "${sub['validity_days']} days",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A2340),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 21.h),
+
+                    // Subscribe Button
+                    SafeArea(
+                      top: false,
+                      child: Obx(
+                        () => SizedBox(
+                          width: double.infinity,
+                          height: 36.h,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isSubscribed ? Colors.grey[400] : AppTheme.primaryColor,
+                              foregroundColor: Colors.white,
+                              elevation: isSubscribed ? 0 : 4,
+                              shadowColor: AppTheme.primaryColor.withOpacity(0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(11.r),
+                              ),
+                            ),
+                            onPressed: isSubscribed
+                                ? () => Get.snackbar('Subscribed', 'Already Subscribed')
+                                : (isProcessingPayment.value
+                                    ? null
+                                    : () => openCheckout(sub)),
+                            child: isProcessingPayment.value
+                                ? SizedBox(
+                                    width: 16.w,
+                                    height: 16.w,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
+                                : Text(
+                                    isSubscribed ? "Subscribed" : "Subscribe Now",
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 11.h), // Extra padding above the safe area bottom
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _buildParsedDescription(String description) {
+  if (!description.contains('Includes') && !description.contains('Eligible Garments')) {
+    return Text(
+      description,
+      style: TextStyle(
+        fontSize: 11.sp,
+        color: Colors.grey[600],
+        height: 1.5,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  List<String> lines = description.split(RegExp(r'\r?\n')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  
+  List<Widget> includeWidgets = [];
+  List<Widget> eligibleWidgets = [];
+  
+  bool isEligibleSection = false;
+  bool isIncludesSection = false;
+  
+  for (String line in lines) {
+    if (line.toLowerCase() == 'includes') {
+      isIncludesSection = true;
+      isEligibleSection = false;
+      continue;
+    } else if (line.toLowerCase() == 'eligible garments' || line.toLowerCase() == 'eligible items') {
+      isEligibleSection = true;
+      continue;
+    }
+    
+    if (isEligibleSection) {
+      eligibleWidgets.add(
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Text(
+            line,
+            style: TextStyle(fontSize: 10.sp, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
+          ),
+        )
+      );
+    } else if (isIncludesSection) {
+      includeWidgets.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: 6.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.check_circle_rounded, color: Colors.green, size: 14.sp),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  line,
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[800]),
+                ),
+              ),
+            ],
+          ),
+        )
+      );
+    } else {
+       includeWidgets.add(
+         Padding(
+           padding: EdgeInsets.only(bottom: 6.h),
+           child: Text(
+             line,
+             style: TextStyle(fontSize: 11.sp, color: Colors.grey[800]),
+           ),
+         )
+       );
+    }
+  }
+
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(horizontal: 8.w),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (includeWidgets.isNotEmpty) ...[
+          Text(
+            'Includes',
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+          ),
+          SizedBox(height: 10.h),
+          ...includeWidgets,
+          SizedBox(height: 12.h),
+        ],
+        if (eligibleWidgets.isNotEmpty) ...[
+          Text(
+            'Eligible Garments',
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+          ),
+          SizedBox(height: 10.h),
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
+            children: eligibleWidgets,
+          ),
+        ]
+      ],
+    ),
+  );
+}
+
+// Custom widget for the animated background
+class _AnimatedBackground extends StatefulWidget {
+  const _AnimatedBackground();
+
+  @override
+  _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
+}
+
+class _AnimatedBackgroundState extends State<_AnimatedBackground>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 15),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _WavyDotsPainter(
+            animationValue: _controller.value,
+          ),
+          child: Container(),
+        );
+      },
+    );
+  }
+}
+
+class _WavyDotsPainter extends CustomPainter {
+  final double animationValue;
+
+  _WavyDotsPainter({required this.animationValue});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppTheme.primaryColor.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    for (double i = 0; i <= size.width; i += 40) {
+      for (double j = 0; j <= size.height; j += 40) {
+        final xOffset = i + 10 * sin(animationValue * 2 * pi + j / 100);
+        final yOffset = j + 10 * cos(animationValue * 2 * pi + i / 100);
+
+        canvas.drawCircle(Offset(xOffset, yOffset), 2.0, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    final old = oldDelegate as _WavyDotsPainter;
+    return old.animationValue != animationValue;
+  }
+}
+
+class SubscriptionCard extends StatelessWidget {
+  final Map sub;
+  final bool isSubscribed;
+  final VoidCallback? onSubscribe;
+
+  const SubscriptionCard({
+    super.key,
+    required this.sub,
+    required this.isSubscribed,
+    required this.onSubscribe,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 30, right: 10),
+      margin: EdgeInsets.only(bottom: 20.h, right: 11.w, left: 4.w),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Background Card
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                image: const DecorationImage(
-                  image: AssetImage("assets/icons/special.png"),
-                  fit: BoxFit.cover,
-                ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.r),
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor.withOpacity(0.9),
+                  Color(0xFF232F46).withOpacity(0.9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                      child: Container(color: Colors.black.withOpacity(0.25)),
+                    child: Transform.scale(
+                      scale: 1.2,
+                      child: Image.asset(
+                        "assets/icons/special.png",
+                        fit: BoxFit.cover,
+                        opacity: const AlwaysStoppedAnimation(0.2),
+                      ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(18),
+                    padding: EdgeInsets.all(16.r),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           sub['name'] ?? '',
-                          style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                        const Spacer(),
+                        Spacer(),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
                               "₹${sub['discounted_price']}",
-                              style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 17.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFB5FFC8),
+                              ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8.w),
                             Text(
                               "₹${sub['original_price']}",
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
-                                  decoration: TextDecoration.lineThrough),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.white70,
+                                decoration: TextDecoration.lineThrough,
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 4.h),
                         Text(
                           "${sub['pieces']} pcs • ${sub['validity_days']} days",
-                          style: const TextStyle(
-                              fontSize: 14,
-                              color: Color.fromARGB(223, 255, 255, 255)),
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: Color.fromARGB(223, 255, 255, 255),
+                          ),
                         ),
                       ],
                     ),
@@ -346,115 +835,106 @@ class _SpecialCarouselState extends State<SpecialCarousel> {
               ),
             ),
           ),
-
-          // Floating Subscribe Button
           Positioned(
-            right: 20,
-            bottom: -18,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isSubscribed ? Colors.white70 : Colors.white,
-                foregroundColor: AppTheme.primaryColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                elevation: 6,
-              ),
-              onPressed: isSubscribed
-                  ? () {
-                      Get.snackbar('Subscribed', 'Already Subscribed');
-                    }
-                  : () async {
-                      try {
-                        final alreadyHasSub =
-                            await controller.hasAnyActiveSubscription();
-                        if (alreadyHasSub) {
-                          Get.snackbar("Not Allowed",
-                              "You already have an active subscription.",
-                              snackPosition: SnackPosition.TOP);
-                          return;
-                        }
-                        _openCheckout(sub);
-                      } catch (e) {
-                        Get.snackbar(
-                            "Error", "Could not start subscription: $e");
-                      }
-                    },
-              child: Text(isSubscribed ? "Subscribed" : "Subscribe",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14)),
+            right: 12.w,
+            bottom: -13.w,
+            child: SubscribeButton(
+              isSubscribed: isSubscribed,
+              onSubscribe: onSubscribe,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  void _showSubscriptionDetail(
-      BuildContext context, Map sub, bool isSubscribed) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(sub['name'] ?? '',
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                if (sub['description'] != null)
-                  Text(sub['description'],
-                      style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 18),
-                Row(children: [
-                  Text("₹${sub['discounted_price']}",
-                      style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green)),
-                  const SizedBox(width: 8),
-                  Text("₹${sub['original_price']}",
-                      style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                          decoration: TextDecoration.lineThrough)),
-                ]),
-                const SizedBox(height: 10),
-                Text("${sub['pieces']} pcs • ${sub['validity_days']} days",
-                    style: const TextStyle(fontSize: 15)),
-                const SizedBox(height: 18),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 14)),
-                  onPressed: isSubscribed
-                      ? null
-                      : () async {
-                          final alreadyHasSub =
-                              await controller.hasAnyActiveSubscription();
-                          if (alreadyHasSub) {
-                            Get.snackbar("Not Allowed",
-                                "You already have an active subscription.",
-                                snackPosition: SnackPosition.TOP);
-                            return;
-                          }
-                          _openCheckout(sub);
-                        },
-                  child: Text(isSubscribed ? "Subscribed" : "Subscribe"),
-                ),
-              ]),
-        );
+class SubscribeButton extends StatefulWidget {
+  final bool isSubscribed;
+  final VoidCallback? onSubscribe;
+
+  const SubscribeButton({
+    super.key,
+    required this.isSubscribed,
+    required this.onSubscribe,
+  });
+
+  @override
+  State<SubscribeButton> createState() => _SubscribeButtonState();
+}
+
+class _SubscribeButtonState extends State<SubscribeButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 150),
+      lowerBound: 0.9,
+      upperBound: 1.0,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) {
+        if (!widget.isSubscribed) _controller.forward();
       },
+      onTapUp: (_) {
+        if (!widget.isSubscribed) _controller.reverse();
+      },
+      onTapCancel: () {
+        if (!widget.isSubscribed) _controller.reverse();
+      },
+      onTap: widget.isSubscribed
+          ? () => Get.snackbar('Subscribed', 'Already Subscribed')
+          : widget.onSubscribe,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.w),
+          decoration: BoxDecoration(
+            color: widget.isSubscribed ? Colors.grey[400] : Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Text(
+            widget.isSubscribed ? "Subscribed" : "Subscribe",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12.sp,
+              color: widget.isSubscribed ? Colors.white : AppTheme.primaryColor,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

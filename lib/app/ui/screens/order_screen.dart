@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:laundry_app/app/ui/screens/order_details.dart';
 
@@ -16,9 +17,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.yellow.shade100
+        "bg": Colors.yellow.shade100,
       },
       {
         "status": "Processing",
@@ -28,9 +29,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.white
+        "bg": Colors.white,
       },
       {
         "status": "Order Confirmed",
@@ -40,9 +41,9 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.white
+        "bg": Colors.white,
       },
       {
         "status": "Delivered",
@@ -52,58 +53,61 @@ class OrdersScreen extends StatelessWidget {
         "images": [
           "assets/icons/shirt_checkout.png",
           "assets/icons/children_checkout.png",
-          "assets/icons/double_checkout.png"
+          "assets/icons/double_checkout.png",
         ],
-        "bg": Colors.white
+        "bg": Colors.white,
       },
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F5),
+      backgroundColor: Color(0xFFF1F2F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
         foregroundColor: Colors.white,
         shadowColor: Color.fromARGB(255, 158, 158, 158),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Orders",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(
+          "Orders",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(15.r),
         itemCount: orders.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        separatorBuilder: (_, __) => SizedBox(height: 15.h),
         itemBuilder: (context, index) {
           final order = orders[index];
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(15.r),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(15.r),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image row
                 SizedBox(
-                  height: 50,
+                  height: 46.h,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: (order["images"] as List).length,
                     itemBuilder: (context, imgIndex) {
                       return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        width: 50,
-                        height: 50,
+                        margin: EdgeInsets.only(right: 7.w),
+                        width: 46.w,
+                        height: 46.h,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(7.r),
                           image: DecorationImage(
                             image: AssetImage(
-                                (order["images"] as List<String>)[imgIndex]),
+                              (order["images"] as List<String>)[imgIndex],
+                            ),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -111,7 +115,7 @@ class OrdersScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // Status + Amount Row
                 Row(
@@ -121,13 +125,21 @@ class OrdersScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(order["status"]! as String,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(height: 2),
-                        Text(order["date"]! as String,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey)),
+                        Text(
+                          order["status"]! as String,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                        SizedBox(height: 2.w),
+                        Text(
+                          order["date"]! as String,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ],
                     ),
 
@@ -138,21 +150,26 @@ class OrdersScreen extends StatelessWidget {
                           Get.context!,
                           // MaterialPageRoute(builder: (context) => const ProfileScreen()),
                           MaterialPageRoute(
-                              builder: (context) => const OrderDetailsPage()),
+                            builder: (context) => const OrderDetailsPage(),
+                          ),
                         );
                       },
                       child: Row(
                         children: [
-                          Text(order["amount"]! as String,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
-                          const Icon(Icons.chevron_right),
+                          Text(
+                            order["amount"]! as String,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          Icon(Icons.chevron_right),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Divider(color: Colors.grey.shade300),
                 Center(
                   child: InkWell(
@@ -168,7 +185,7 @@ class OrdersScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           );
